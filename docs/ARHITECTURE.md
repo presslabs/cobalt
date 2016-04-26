@@ -28,6 +28,7 @@ tasks.
     - binpack
     - First Fit Decreasing Binpack
     - Harmonic algorithm
+    - http://stackoverflow.com/a/28874577
     - other
 
 
