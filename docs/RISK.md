@@ -44,6 +44,8 @@ Once a task is set in by the API in ETCD it should be processed no mater the cir
 
 - Agent goes away: If an agent has some tasks to do and it fails to do them in X amount of time or his heartbeat stops
                    then the task is rescheduled.
+- Agent goes away and comes back up: If the agent doesn't respond in X amount of time but the job is carried on, task 
+                   has been rescheduled and agent recovers. The same job is performed in two places.
 - Agent fails and scheduling engine fails : New leader should notice tasks ordered by the old leader and reschedule.
 
 
