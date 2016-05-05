@@ -20,16 +20,16 @@ This architecture assigns the API-engine nodes two main roles:
 The client (be it a web application, or a cli) will send BTRFS volume requests towards the API-engine nodes. Each of them will compete for acquiring the lease for being master. The master node at that given moment will process the request and prepare it for getting assigned to a storage box. This way we can avoid multiple nodes processing the same request.
 
 ##### Decision making
-After the request has been processed, the engine will check which storage box would be ideal for doing the work. Criteria for making this decision could be free space available, task queue and, of course, being up at the moment. This information will all be available for both API-engine nodes and storage box nodes in the etcd cluster. The engine will then delegate the job to a storage box by writing it inside the etcd cluster.
+After the request has been processed, the engine will check which storage box would be ideal for doing the work. Criteria for making this decision could be optimal criteria (free space available, task queue size) and required criteria (node availability). This information will all be available for both API-engine nodes and storage box nodes in the etcd cluster. The engine will then delegate the job to a storage box by writing it inside the etcd cluster.
 
 ---
 
-The storage boxes will give away their state to the etcd cluster through heartbeats performed by the agent. When the agent sees that its previous state is different from the state found in etcd, it will check for the difference (which will consist of the new volume request) and place the new job as a task in its queue.
+The storage boxes will share their state with the etcd cluster through heartbeats performed by the agent. When the agent sees that its current state is different from the state found in etcd, it will check for the difference (which will consist of the new volume request) and place the new job as a task in its queue.
 
-![API engine schema](/home/ionut/work/git/github/cobalt/docs/planning/assets/api-as-engine.png  "API Engine Schema")
+![API engine schema](assets/api-as-engine.png  "API Engine Schema")
 
 #### Pros
-- The only role of the API is to process requests. It has no need to communicate with an external service (`etcd`)
+- The only role of the API is to process requests. It has no need to communicate with an external service (etcd)
 - Decision making relies exclusively on the engine, which conceptually is correct
 - The storage boxes have only one responsibility beside data storage, that being volume management itself, which is the main purpose of Cobalt
 
@@ -51,10 +51,10 @@ The engine component will compete for acquiring the master lease and will delega
 #### Agent
 The agent will give away its node's state to etcd and notice differences when new requests are placed there. It will then retrieve them to the engine, which will try and bring the node from its current state (e.g. `n` created volumes) to the desired state (e.g. `n+1` created volumes)
 
-![API & engine schema](/home/ionut/work/git/github/cobalt/docs/planning/assets/api-and-engine.png  "API & Engine Schema")
+![API & engine schema](assets/api-and-engine.png  "API & Engine Schema")
 
 #### Pros
-- The `etcd` cluster is internal to the storage box cluster. There is no need for any other node types to communicate with it
+- The etcd cluster is internal to the storage box cluster. There is no need for any other node types to communicate with it
 - One less layer of complexity: if a problem occurs, the entire logic resides in one place. Network connectivity issues are less likely to be the problem.
 #### Cons
 - Full failure: if the node is down for some reason, none of its components will do their job
