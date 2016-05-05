@@ -1,0 +1,3 @@
+# Planning
+
+- [Architecture](architecture.md)
