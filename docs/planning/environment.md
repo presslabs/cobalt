@@ -16,7 +16,7 @@ the quorum nor does it care of its size.
 It expects that this information is given as a list of participating servers at
 the start of the daemon / main process.
 
-All connections to ETCD will be done though a DNS an it will know which servers are down and route accordingly.
+All connections to ETCD will be done though a DNS and it will know which servers are down and route accordingly.
 Possibilities: AWS Route 53, HA Proxy at a known address.
 
 #### Daemon
