@@ -32,6 +32,7 @@ The storage boxes will share their state with the etcd cluster through heartbeat
 - The only role of the API is to process requests. It has no need to communicate with an external service (etcd)
 - Decision making relies exclusively on the engine, which conceptually is correct
 - The storage boxes have only one responsibility beside data storage, that being volume management itself, which is the main purpose of Cobalt
+- Storage node downtime does not imply inaccessibility to the API. Requests can still be made and will be resolved later
 
 #### Cons
 - Increased number of nodes
@@ -58,7 +59,7 @@ The agent will share its node's state to etcd and notice differences when new jo
 - One less layer of complexity: if a problem occurs, the entire logic resides in one place. Network connectivity issues are less likely to be the problem.
 
 #### Cons
-- Full failure: if the node is down for some reason, none of its components will do their job
+- Full failure: if the node is down for some reason, none of its components will do their job. Unlike in the first architecture implementation, this one does not permit sending requests to be processed by the API and scheduled later, when the storage node is restored to a functional state
 
 ---
 
