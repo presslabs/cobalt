@@ -108,5 +108,9 @@ The project should fix these issues as storage nodes no longer require a static 
 and no longer need to be maintained or provisioned manually with the added benefit of
 a new and growing in popularity file system, namely BTRFS.
 
+File details regarding what can get stored on a Wordpress install are mostly under 6MB in size for images
+and significantly larger for videos, well withing BTRFS capability of 16 EiB. None of the storage nodes even
+come close to the file limit cap at 2^64 files.
+
 
 
