@@ -28,10 +28,12 @@ at the system call's exit but totally independent of its parent. The snapshot in
 and cpu registers.
 
 After creation it is scheduled by the OS like any other program. Each time the OS considers that the allocated time slice
-for the current process has been reached it then switches to another process, picking it based on several criteria.
-Available data in FD's or time waited in the queue, defined priorities etc.
+for the current process has been reached it then switches to another process that is waiting.
+The choice of whom to go next is based on several criteria:
+available data in FD's or time waited in the queue, defined priorities etc.
+
 Each such context switch will have to backup file descriptors and cpu registers and possible disk dumps of data and load
-the new processes' snapshot. As one could imagine this take a lot of time and due to the way memory is managed can easily
+the new processes' snapshot. As one could imagine this takes a lot of time and due to the way memory is managed and can easily
 fill disks.
 
 ##### Communication
@@ -47,7 +49,7 @@ __Data transfer - Pipes__
 
 Pipes are a one way shared communication channel allowing 2 processes to communicate to each other.
 Like any other communication protocol it has to be well defined, in case of linux commands this protocol is simple text.
-While transferring data is now straight forward, marshaling and unmarshalling is not as it takes a lot of time if not done
+While transferring data is now straight forward, marshalling and unmarshalling is not as it takes a lot of time if not done
 properly / frequently.
 
 ##### Conclusions
@@ -60,13 +62,13 @@ Their number should be also kept as low as possible due to all the context switc
 
 #### Threads
 
-Threads are the parallel work horses of processes, and ar bound to one in particular.
+Threads are the parallel work horses of processes, and are bound to one in particular.
 
 ##### Memory
 
 Their memory regime is shared between all threads of the same process. Exception being the stack of called functions,
 these are unique for each and every one of them.
-Since memory is shared litle to no context needs to be switched. Although the sharing of data directly can pose serious issues
+Since memory is shared little to no context needs to be switched. Although the sharing of data directly can pose serious issues
 regarding concurrent execution without proper locking mechanisms.
 
 Threads can be ran in 2 different modes -> joinable or detached (an obvious difference is the time at which data will be gc-ed)
@@ -131,5 +133,5 @@ Processes in our case for each component would place to much unwanted strain on 
 only headaches regarding communication between the components. As Cobalt should only run on storage nodes it must only be bound
 by I/O operations and not frequent context switches, as a result the entire app will be within 1 process.
 
-Threads could be a feasible but coroutines can be used just as well. In case we choose to opt for Go this difference is
+Threads could be feasible but coroutines can be used just as well. In case we choose to opt for Go this difference is
 even more amplified.
