@@ -46,16 +46,17 @@ This architecture has all three components residing on each storage box. All thr
 The API component is once again responsible for receiving client requests and placing them in the etcd cluster.
 
 #### Engine
-The engine component will compete for acquiring the master lease and will delegate jobs for itself and for the other nodes as well. Like in the previous architecture schema, only one node can be master at any point in time and only that node will make decisions for the whole cluster.
+The engine component will compete for acquiring the master lease and will delegate jobs for itself and for the other nodes as well by comparing their current states with the desired states on the etcd cluster. Like in the previous architecture schema, only one engine can be master at any point in time and only that node will make decisions for the whole cluster.
 
 #### Agent
-The agent will give away its node's state to etcd and notice differences when new requests are placed there. It will then retrieve them to the engine, which will try and bring the node from its current state (e.g. `n` created volumes) to the desired state (e.g. `n+1` created volumes)
+The agent will share its node's state to etcd and notice differences when new jobs are placed there. It will then try to bring the node from its current state (e.g. `n` created volumes) to the desired state (e.g. `n+1` created volumes) by accomplishing the jobs assigned to it.
 
 ![API & engine schema](assets/api-and-engine.png  "API & Engine Schema")
 
 #### Pros
 - The etcd cluster is internal to the storage box cluster. There is no need for any other node types to communicate with it
 - One less layer of complexity: if a problem occurs, the entire logic resides in one place. Network connectivity issues are less likely to be the problem.
+
 #### Cons
 - Full failure: if the node is down for some reason, none of its components will do their job
 
