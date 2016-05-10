@@ -35,9 +35,13 @@ Goroutines run on a few threads allocated to the runtime. They are multiplexed a
 
 #### Language perks
 ##### Python
+
 - **Simplicity**
+
 Python is easy to learn and fast to start with. You can spend less time on getting used to the tools used for the project and more time on getting the project done.
+
 - **Short effective code**
+
 Operations that would take up many lines of code in other languages can simply be written in Python even on one line.
 Example:
 ```
@@ -50,7 +54,9 @@ versus
 ```
 list = [i**2 for i in range(1, 10) if i % 2 == 0]
 ```
+
 - **Data type restrictions**
+
 Unlike other dynamically typed languages, Python treats operations between different data types carefully and does not rely on intuition, ratherly throwing an error.
 Example:
 ```
@@ -70,7 +76,9 @@ TypeError: can only concatenate list (not "dict") to list
 ```
 
 ##### Go
+
 - **Different error handling**
+
 In Go the is no `try-catch-finally` idiom and there are no exceptions. A quote from the [offical golang website](https://golang.org/doc/faq) says that this common way of handling exceptions "results in convoluted code" and that "It also tends to encourage programmers to label too many ordinary errors, such as failing to open a file, as exceptional". As an alternative, Go uses multi-value returns for this.
 Example:
 ```
@@ -80,9 +88,13 @@ if err != nil {
 }
 // do something with the open *File f
 ```
+
 - **No type inheritance**
+
 Unlike other programming languages where the relation between two types has to be declared ahead of time, Go uses automatic deriving of these relations by the following rule: in Go a type automatically satisfies any interface that specifies a subset of its methods. This brings a level of simplicity even when compared to Python, where multiple inheritance requires typing all parent classes in the class header.
+
 - **Pointers**
+
 Go is a modern language that still gives the possibility to control memory at a low level. As a result, complex projects can be developed in something fairly easier to learn & use than C. These projects can also be considerably optimised in regard to speed, compared to the degree of optimisation that can be done using a dynamic language like Python.
 
 #### Popularity among other related projects
