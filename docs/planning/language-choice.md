@@ -111,13 +111,22 @@ Go is both a language for developing high-level software and a good system progr
 Both languages have attracted a great community of contributors. Go has managed to develop a great community in its 7 years of existence, but given the long time Python has been around (25 years) you are more prone to finding answers when working with Python rather than when working with Go.
 
 #### Testability
-TODO
+##### Python
+Writing tests in Python can be done by using [pytest](http://pytest.org/), which is a great testing tool with many features. Setting up a baseline for running your tests can be done using `pytest` fixtures. They can be set to take effect at function level, module level or for the whole project.
+`Pytest` also has support for `unittest` style tests, which are tests written using the classic Python module for testing. It does so by collecting `unittest.TestCase` subclasses and making their tests run using `pytest`.
+
+##### Go
+Go provides a package for testing which only requires knowing a few simple rules in order to start. All test functions must be of the form `func TestXxxx(*testing.T)` where Xxxx can be any alphanumeric string with a capital first letter. Go tests must also be written in files ending with `_test.go` in order for them to be recognized and ran when running the `go test` command.
+The package also offers a way of optionally running benchmarks, which are quite similar, except their functions must have a name of the form `BenchmarkXxxx` and receive a `*testing.B` type parameter. Benchmarks are only ran if the `-bench` flag is specified alongside the `go test` command.
 
 #### Libraries
-TODO
+##### Python
+As far as our interest in libraries for this project goes, Python offers the gevent library that has been discussed above. Pytest as a testing tool and library is also recommended and they are both backed up by a large community.
+##### Go
+The Go package for testing along with the built-in goroutines for concurrency represent most of what is helpful for cobalt development.
 
 #### Prototyping ease
-TODO
+As mentioned in different sections above, Python stands out when it comes to writing programs fast and easy and the road from start to a working prototype or even a first version of the project can be increasingly shorter in time compared to what it would take to do the same thing in Go.
 
 ### Conclusions
-TODO
+For the sake of saving time and considering our current knowledge base, Python proves to be a better choice. The large community and multitude of libraries offered by the language contributors also makes this decision incline towards Python rather than Go.
