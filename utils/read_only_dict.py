@@ -2,7 +2,7 @@
 
 class ReadOnlyDict(dict):
     def __readonly__(self, *args, **kwargs):
-        raise RuntimeError("Cannot modify ReadOnlyDict")
+        raise RuntimeError('Cannot modify ReadOnlyDict')
 
     __setitem__ = __readonly__
     __delitem__ = __readonly__
