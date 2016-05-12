@@ -30,4 +30,8 @@ _defaults = {
     'mount_point': None
 }
 
-context = ReadOnlyDict(ChainMap(config, _defaults))
+
+def generate_context(defaults, user):
+    return ReadOnlyDict(ChainMap(user, defaults))
+
+context = generate_context(_defaults, config)
