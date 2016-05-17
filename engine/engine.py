@@ -34,6 +34,7 @@ class Engine(Service):
 
         self.lease.quit = True
         self.quit = True
+        self._started = False
 
     def _run(self):
         while not self.quit:

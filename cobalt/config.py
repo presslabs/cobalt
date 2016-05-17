@@ -26,6 +26,10 @@ _defaults = {
         'lease_ttl': 60,
         'refresh_ttl': 40
     },
+    'api': {
+        'host': '',
+        'port': 5000
+    },
     'services': ['engine', 'api', 'agent'],
     'mount_point': None
 }
