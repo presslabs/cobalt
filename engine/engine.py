@@ -11,9 +11,8 @@ class Engine(Service):
     def __init__(self, lease: Lease):
         self.lease = lease
 
-        self.leaser_loop = None
-        self.runner_loop = None
-        self.should_stop = False
+        self._leaser_loop = None
+        self._runner_loop = None
 
         self._started = False
         self.quit = False
@@ -22,11 +21,13 @@ class Engine(Service):
         if self._started:
             return
 
-        self.leaser_loop = gevent.spawn(self.lease.acquire)
-        self.runner_loop = gevent.spawn(self._run)
-
         self._started = True
-        return [self.runner_loop, self.leaser_loop]
+        self.quit = False
+
+        self._leaser_loop = gevent.spawn(self.lease.acquire)
+        self._runner_loop = gevent.spawn(self._run)
+
+        return [self._runner_loop, self._leaser_loop]
 
     def stop(self):
         if not self._started:

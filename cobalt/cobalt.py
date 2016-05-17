@@ -19,7 +19,7 @@ class Cobalt(Service):
         engine_leaser = Lease(engine_lock, **context['engine'])
 
         service_map = {
-            # 'engine': Engine(engine_leaser),
+            'engine': Engine(engine_leaser),
             'api': Api(Volume(self.etcd), host=context['api']['host'], port=context['api']['port'])
             # TODO add api / agent here
             # 'api', 'agent'
