@@ -1,16 +1,17 @@
 from gevent.pywsgi import WSGIServer
-from flask import Flask
+from flask import request_started
 
 from utils.service import Service
-from api.volume import volume_blueprint
+
+from api.app import app
 
 
 class Api(Service):
+    def __init__(self, volume_manager, host='', port=5000):
+        self.api_server = WSGIServer((host, port), app)
+        app.volume_manager = volume_manager
 
-    # TODO: check and define the volume manager
-    def __init__(self, host='', port=5000, volume_manager=None):
-        self.volume_manager = volume_manager
-        self.api_server = WSGIServer((host, port), self._create_api_server())
+        request_started.connect(Api._new_request, app)
 
     def start(self):
         self.api_server.serve_forever()
@@ -20,11 +21,7 @@ class Api(Service):
     def stop(self):
         self.api_server.stop()
 
-    def _create_api_server(self):
-        app = Flask(__name__)
-        app.register_blueprint(volume_blueprint, url_prefix='/volumes')
-        app.volume_manager = self.volume_manager
+    @staticmethod
+    def _new_request(sender, **extra):
+        sender.volume_manager.reset_cache()
 
-        print(app.url_map)
-
-        return app

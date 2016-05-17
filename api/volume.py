@@ -1,24 +1,32 @@
-from flask import Blueprint, jsonify
+from flask import current_app
+from flask_restful import Resource, fields, marshal_with
 
-volume_blueprint = Blueprint('volume', __name__)
+from utils.marshaller import PrefixRemovedString
+from models.volume import Volume as VolumeModel
 
-
-@volume_blueprint.route('/')
-@volume_blueprint.route('/<volume_id>')
-def get(volume_id=None):
-    return jsonify(**{'error': 'volume_id {}'.format(volume_id)})
-
-
-@volume_blueprint.route('/', methods=['POST'])
-def create():
-    pass
+volume_marshaller = {
+    'id': PrefixRemovedString(attribute='key', prefix='/{}/'.format(VolumeModel.KEY)),
+    'name': fields.String(attribute=lambda x: x.value['name'], default='')
+}
 
 
-@volume_blueprint.route('/<volume_id>', methods=['DELETE'])
-def delete(volume_id=None):
-    pass
+class Volume(Resource):
+    def get(self, volume_id):
+        pass
+
+    def put(self, volume_id):
+        pass
+
+    def delete(self, volume_id):
+        pass
 
 
-@volume_blueprint.route('/<volume_id>', methods=['PUT'])
-def update(volume_id=None):
-    pass
+class VolumeList(Resource):
+    @marshal_with(volume_marshaller)
+    def get(self):
+        volume_manager = current_app.volume_manager
+
+        return volume_manager.all(), 200
+
+    def post(self):
+        pass
