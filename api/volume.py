@@ -1,5 +1,5 @@
 from flask import current_app
-from flask_restful import Resource, fields, marshal_with
+from flask_restful import Resource, fields, marshal_with, marshal
 
 from utils.marshaller import PrefixRemovedString
 from models.volume import Volume as VolumeModel
@@ -12,7 +12,13 @@ volume_marshaller = {
 
 class Volume(Resource):
     def get(self, volume_id):
-        pass
+        volume_manager = current_app.volume_manager
+        volume = volume_manager.by_id(volume_id)
+
+        if volume:
+            return marshal(volume, volume_marshaller), 200
+
+        return {'message': 'Not Found'}, 404
 
     def put(self, volume_id):
         pass
@@ -26,7 +32,7 @@ class VolumeList(Resource):
     def get(self):
         volume_manager = current_app.volume_manager
 
-        return volume_manager.all(), 200
+        return volume_manager.all()
 
     def post(self):
         pass

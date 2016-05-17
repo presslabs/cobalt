@@ -27,7 +27,7 @@ class Volume(object):
     def by_id(self, id):
         volumes = self.all()
         for entry in volumes:
-            if entry.key == id:
+            if entry.key == '/{}/{}'.format(Volume.KEY, id):
                 return entry
 
         return None
