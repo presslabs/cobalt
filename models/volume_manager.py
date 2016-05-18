@@ -86,8 +86,8 @@ class VolumeSchema(Schema):
 
     meta = fields.Dict(default={})
 
-    actual = fields.Nested(VolumeAttributeSchema)
-    requested = fields.Nested(VolumeAttributeSchema)
+    actual = fields.Nested(VolumeAttributeSchema, default=[])
+    requested = fields.Nested(VolumeAttributeSchema, default=[])
 
     def get_attribute(self, attr, obj, default):
         if attr != 'id':
