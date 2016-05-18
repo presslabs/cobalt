@@ -5,7 +5,7 @@ from etcd import Client, Lock
 from api.api import Api
 from engine.engine import Engine
 from engine.lease import Lease
-from models.volume import Volume
+from models.volume_manager import Volume
 from utils.service import Service
 from cobalt.config import context
 
