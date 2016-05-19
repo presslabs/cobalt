@@ -8,29 +8,22 @@ class Volume(object):
 
     def __init__(self, etcd_client):
         self.client = etcd_client
-        self.volumes = []
 
     def all(self):
-        if self.volumes:
-            return self.volumes
-
         try:
-            self.volumes = [volume for volume in self.client.get(Volume.KEY).leaves if not volume.dir]
-        except etcd.EtcdKeyNotFound:
-            self.volumes = []
+            volumes = [volume for volume in self.client.get(Volume.KEY).leaves if not volume.dir]
+        except:
+            volumes = []
 
-        for volume in self.volumes:
-            volume.unpacked_value, _ = volume_schema.loads(volume.value)
-
-        return self.volumes
+        return self._unpack(volumes)
 
     def by_id(self, id):
-        volumes = self.all()
-        for entry in volumes:
-            if entry.key == '/{}/{}'.format(Volume.KEY, id):
-                return entry
+        try:
+            volume = self.client.get('/{}/{}'.format(Volume.KEY, id))
+        except:
+            return None
 
-        return None
+        return self._unpack([volume])[0]
 
     def by_machine(self, machine_id):
         pass
@@ -56,14 +49,11 @@ class Volume(object):
         #
         # self.client.write()
 
-    def dump(self, volumes, schema: Schema):
-        data = []
+    def _unpack(self, volumes):
         for volume in volumes:
-            data.append(schema.dump(volume.unpacked_value).data)
-        return data
+            volume.unpacked_value, _ = volume_schema.loads(volume.value)
 
-    def reset_cache(self):
-        self.volumes = []
+        return volumes
 
 
 class VolumeAttributeSchema(Schema):
