@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, abort
 from flask_restful import Resource
 
 from models.volume_manager import volume_schema
@@ -9,11 +9,11 @@ class Volume(Resource):
         volume_manager = current_app.volume_manager
         volume = volume_manager.by_id(volume_id)
 
-        if volume:
-            result, _ = volume_schema.dump(volume)
-            return result, 200
+        if volume is None:
+            abort(404)
 
-        return {'message': 'Not Found'}, 404
+        result, _ = volume_schema.dump(volume)
+        return result, 200
 
     def put(self, volume_id):
         pass

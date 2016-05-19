@@ -12,7 +12,7 @@ class Volume(object):
     def all(self):
         try:
             volumes = [volume for volume in self.client.get(Volume.KEY).leaves if not volume.dir]
-        except:
+        except etcd.EtcdKeyNotFound:
             volumes = []
 
         return self._unpack(volumes)
@@ -20,7 +20,7 @@ class Volume(object):
     def by_id(self, id):
         try:
             volume = self.client.get('/{}/{}'.format(Volume.KEY, id))
-        except:
+        except etcd.EtcdKeyNotFound:
             return None
 
         return self._unpack([volume])[0]

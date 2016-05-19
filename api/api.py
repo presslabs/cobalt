@@ -1,6 +1,7 @@
 import gevent
 
 from gevent.pywsgi import WSGIServer
+from werkzeug.debug import DebuggedApplication
 
 from utils.service import Service
 from api.app import app
@@ -8,7 +9,7 @@ from api.app import app
 
 class Api(Service):
     def __init__(self, volume_manager, host='', port=5000):
-        self._api_server = WSGIServer((host, port), app)
+        self._api_server = WSGIServer((host, port), DebuggedApplication(app))
         app.volume_manager = volume_manager
 
         self._api_loop = None
