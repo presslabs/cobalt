@@ -37,7 +37,7 @@ class Volume(object):
                 data.append(entry)
         return data
 
-    def create(self, volume=None):
+    def create(self, volume):
         pass
         # if volume is None:
         #     volume = {}
@@ -49,11 +49,29 @@ class Volume(object):
         #
         # self.client.write()
 
+    def update(self, volume):
+        volume.value, _ = PackerSchema().dumps(volume.unpacked_value)
+
+        try:
+            volume = self.client.update(volume)
+        except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
+            return False
+
+        volume = self._unpack([volume])[0]
+        # add id manually as it is ignored on load from json
+        volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
+
+        return volume
+
     def _unpack(self, volumes):
         for volume in volumes:
             volume.unpacked_value, _ = volume_schema.loads(volume.value)
 
         return volumes
+
+    @staticmethod
+    def get_id_from_key(key):
+        return key[len(Volume.KEY) + 2:]
 
 
 class VolumeAttributeSchema(Schema):
@@ -64,11 +82,10 @@ class VolumeAttributeSchema(Schema):
     constraints = fields.List(fields.String(required=False))
 
 
-class VolumeSchema(Schema):
+class PackerSchema(Schema):
     class Meta:
         ordered = True
 
-    id = fields.String(required=True, dump_only=True)
     state = fields.String(default='registered')
     name = fields.String(default='')
     error = fields.String(default='')
@@ -79,13 +96,20 @@ class VolumeSchema(Schema):
     actual = fields.Nested(VolumeAttributeSchema, default=[])
     requested = fields.Nested(VolumeAttributeSchema, default=[])
 
+
+class VolumeSchema(PackerSchema):
+    class Meta:
+        ordered = True
+
+    id = fields.String(required=True, dump_only=True)
+
     def get_attribute(self, attr, obj, default):
         if attr != 'id':
             return utils.get_value(attr, obj.unpacked_value, default)
 
         etcd_key = super(VolumeSchema, self).get_attribute('key', obj, default)
-        etcd_key = etcd_key[len(Volume.KEY) + 2:]
+        id = Volume.get_id_from_key(etcd_key)
 
-        return etcd_key
+        return id
 
 volume_schema = VolumeSchema()

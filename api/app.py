@@ -1,8 +1,6 @@
 from flask import Flask
 from flask_restful import Api as RestApi
 
-from api.volume import Volume, VolumeList
-
 errors = {
     'EtcdConnectionFailed': {
         'message': "The ETCD cluster is not responding.",
@@ -19,9 +17,6 @@ app.config['RESTFUL_JSON'] = {
     'indent': 2,
     'sort_keys': False
 }
-
-api.add_resource(VolumeList, '/volumes')
-api.add_resource(Volume, '/volumes/<volume_id>')
 
 # Disable this for error handling to take effect
 app.debug = True
