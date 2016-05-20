@@ -72,13 +72,11 @@ class VolumeList(Resource):
     def post(self):
         volume_manager = current_app.volume_manager
 
-        print(request.json)
         # as per their docks it should ignore any other fields not in partial
         # https://github.com/marshmallow-code/marshmallow/issues/456
         fields = ('name', 'meta', 'requested',)
         data, errors = packer_schema.load(request.json, partial=fields)
-        print(data)
-        print(errors)
+
         if errors:
             return {'message': errors}, 400
 

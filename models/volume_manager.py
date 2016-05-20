@@ -11,7 +11,7 @@ class Volume(object):
 
     def all(self):
         try:
-            volumes = [volume for volume in self.client.get(Volume.KEY).leaves if not volume.dir]
+            volumes = [volume for volume in self.client.read(Volume.KEY).leaves if not volume.dir]
         except etcd.EtcdKeyNotFound:
             volumes = []
 
@@ -19,7 +19,7 @@ class Volume(object):
 
     def by_id(self, id):
         try:
-            volume = self.client.get('/{}/{}'.format(Volume.KEY, id))
+            volume = self.client.read('/{}/{}'.format(Volume.KEY, id))
         except etcd.EtcdKeyNotFound:
             return None
 
@@ -28,7 +28,7 @@ class Volume(object):
     def by_machine(self, machine_id):
         pass
 
-    def by_status(self, status):
+    def by_state(self, status):
         data = []
 
         volumes = self.all()
@@ -38,7 +38,7 @@ class Volume(object):
         return data
 
     def create(self, volume: dict):
-        volume = packer_schema.dumps(volume).data
+        volume, _ = packer_schema.dumps(volume)
         volume = self.client.write(Volume.KEY, volume, append=True)
         volume = self._unpack([volume])[0]
 
@@ -59,13 +59,14 @@ class Volume(object):
         return volume
 
     def _unpack(self, volumes):
+        # we trust that etcd data is valid
         for volume in volumes:
             volume.unpacked_value, _ = volume_schema.loads(volume.value)
 
         return volumes
 
-    @staticmethod
-    def get_id_from_key(key):
+    @classmethod
+    def get_id_from_key(cls, key):
         return key[len(Volume.KEY) + 2:]
 
 
