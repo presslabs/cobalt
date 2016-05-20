@@ -37,17 +37,12 @@ class Volume(object):
                 data.append(entry)
         return data
 
-    def create(self, volume):
-        pass
-        # if volume is None:
-        #     volume = {}
-        #
-        # volume['state'] = 'registered'
-        # volume['labels'] = {}
-        # volume['requested'] = {}
-        # volume['actual'] = {}
-        #
-        # self.client.write()
+    def create(self, volume: dict):
+        volume = packer_schema.dumps(volume).data
+        volume = self.client.write(Volume.KEY, volume, append=True)
+        volume = self._unpack([volume])[0]
+
+        return volume
 
     def update(self, volume):
         volume.value, _ = PackerSchema().dumps(volume.unpacked_value)
@@ -79,29 +74,29 @@ class VolumeAttributeSchema(Schema):
         ordered = True
 
     reserved_size = fields.Integer(required=True)
-    constraints = fields.List(fields.String(required=False))
+    constraints = fields.List(fields.String(), missing=[], default=[])
 
 
 class PackerSchema(Schema):
     class Meta:
         ordered = True
 
-    state = fields.String(default='registered')
-    name = fields.String(default='')
-    error = fields.String(default='')
-    error_count = fields.Integer(default=0)
+    state = fields.String(default='registered', missing='registered')
+    name = fields.String(default='', missing='registered')
+    error = fields.String(default='', missing='')
+    error_count = fields.Integer(default=0, missing=0)
 
-    meta = fields.Dict(default={})
+    meta = fields.Dict(default={}, missing={})
 
-    actual = fields.Nested(VolumeAttributeSchema, default=[])
-    requested = fields.Nested(VolumeAttributeSchema, default=[])
+    actual = fields.Nested(VolumeAttributeSchema, default={}, missing={})
+    requested = fields.Nested(VolumeAttributeSchema, default={}, missing={})
 
 
 class VolumeSchema(PackerSchema):
     class Meta:
         ordered = True
 
-    id = fields.String(required=True, dump_only=True)
+    id = fields.String(required=True)
 
     def get_attribute(self, attr, obj, default):
         if attr != 'id':
@@ -113,3 +108,4 @@ class VolumeSchema(PackerSchema):
         return id
 
 volume_schema = VolumeSchema()
+packer_schema = PackerSchema()
