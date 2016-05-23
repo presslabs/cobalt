@@ -2,7 +2,7 @@ from flask import current_app, request
 from flask_restful import Resource
 
 from api.app import api
-from models.volume_manager import volume_schema, packer_schema
+from models.volume_manager import volume_attribute_schema, volume_schema, VolumeSchema
 
 
 class Volume(Resource):
@@ -13,7 +13,7 @@ class Volume(Resource):
         if volume is None:
             return {'message': 'Not Found'}, 404
 
-        result, _ = volume_schema.dump(volume)
+        result, _ = VolumeSchema().dump(volume)
         return result, 200
 
     def put(self, volume_id):
@@ -26,14 +26,11 @@ class Volume(Resource):
         if volume.unpacked_value.get('state', 'undefined') != 'ready':
             return {'message': 'Resource not in ready state, can\'t update.'}, 409
 
-        fields = ('name', 'meta', 'requested',)
-        # TODO need to fix as soon as the issue is addressed
-        new_volume, errors = packer_schema.load(request.json, partial=fields)
+        new_volume, errors = volume_attribute_schema.load(request.json)
         if errors:
             return {'message': errors}, 400
 
-        for field in fields:
-            volume.unpacked_value.set(field, new_volume.get(field))
+        volume.unpacked_value.set('requested', new_volume)
 
         volume = volume_manager.update(volume)
         if not volume:
@@ -72,10 +69,8 @@ class VolumeList(Resource):
     def post(self):
         volume_manager = current_app.volume_manager
 
-        # as per their docks it should ignore any other fields not in partial
-        # https://github.com/marshmallow-code/marshmallow/issues/456
         fields = ('name', 'meta', 'requested',)
-        data, errors = packer_schema.load(request.json, partial=fields)
+        data, errors = VolumeSchema(only=fields).load(request.json)
 
         if errors:
             return {'message': errors}, 400

@@ -1,6 +1,6 @@
 import etcd
 
-from marshmallow import fields, Schema, utils
+from marshmallow import fields, Schema, utils, validate
 
 
 class Volume(object):
@@ -45,7 +45,7 @@ class Volume(object):
         return volume
 
     def update(self, volume):
-        volume.value, _ = PackerSchema().dumps(volume.unpacked_value)
+        volume.value, _ = packer_schema.dumps(volume.unpacked_value)
 
         try:
             volume = self.client.update(volume)
@@ -54,8 +54,10 @@ class Volume(object):
 
         volume = self._unpack([volume])[0]
         # add id manually as it is ignored on load from json
+        print(volume.key)
         volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
 
+        print(volume.unpacked_value)
         return volume
 
     def _unpack(self, volumes):
@@ -74,8 +76,8 @@ class VolumeAttributeSchema(Schema):
     class Meta:
         ordered = True
 
-    reserved_size = fields.Integer(required=True)
-    constraints = fields.List(fields.String(), missing=[], default=[])
+    reserved_size = fields.Integer(required=True, validate=[validate.Range(min=0)])
+    constraints = fields.List(fields.String(validate=[validate.Length(min=1)]), required=True)
 
 
 class PackerSchema(Schema):
@@ -89,8 +91,8 @@ class PackerSchema(Schema):
 
     meta = fields.Dict(default={}, missing={})
 
-    actual = fields.Nested(VolumeAttributeSchema, default={}, missing={})
-    requested = fields.Nested(VolumeAttributeSchema, default={}, missing={})
+    actual = fields.Nested(VolumeAttributeSchema, required=True)
+    requested = fields.Nested(VolumeAttributeSchema, required=True)
 
 
 class VolumeSchema(PackerSchema):
@@ -110,3 +112,4 @@ class VolumeSchema(PackerSchema):
 
 volume_schema = VolumeSchema()
 packer_schema = PackerSchema()
+volume_attribute_schema = VolumeAttributeSchema()

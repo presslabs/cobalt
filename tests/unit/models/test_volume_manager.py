@@ -1,4 +1,5 @@
 import etcd
+import pytest
 
 from pytest_mock import mock_module
 
@@ -152,17 +153,52 @@ class TestVolumeManager:
         unpacker.assert_called_with([etcd_result_mock])
         assert result == etcd_result_mock
 
-    # TODO
-    def test_volume_update_etcd_compare_failed(self, mocker):
-        pass
+    @pytest.mark.parametrize('error', [etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound])
+    def test_volume_update_etcd_errors(self, error, mocker):
+        etcd_mock = mocker.MagicMock()
+        volume_manager = Volume(etcd_mock)
 
-    # TODO
-    def test_volume_update_etcd_key_not_found(self, mocker):
-        pass
+        dumps_mock = mocker.patch.object(packer_schema, 'dumps')
+        dumps_mock.return_value = ({'name': 'test'}, {})
 
-    # TODO
+        etcd_mock.update.side_effect = error
+
+        volume = mocker.MagicMock()
+        unpacked_value = mocker.PropertyMock(return_value={})
+        type(volume).unpacked_value = unpacked_value
+
+        output_volume = volume_manager.update(volume)
+
+        assert not output_volume
+        assert etcd_mock.update.called
+
     def test_volume_update_etcd(self, mocker):
-        pass
+        class DummyVolume:
+            def __init__(self, value, unpacked_value):
+                self.value = value
+                self.unpacked_value = unpacked_value
+                self.key = '/volumes/1'
+
+        etcd_mock = mocker.MagicMock()
+        volume_manager = Volume(etcd_mock)
+
+        dumps_mock = mocker.patch.object(packer_schema, 'dumps')
+        dumps_mock.return_value = ({'name': 'test'}, {})
+
+        volume = DummyVolume(value='{"name": "test"}', unpacked_value={'name': 'test'})
+        etcd_mock.update.return_value = volume
+
+        unpacker = mocker.patch.object(volume_manager, '_unpack')
+        unpacker.return_value = [volume]
+
+        key_getter = mocker.patch.object(volume_manager, 'get_id_from_key')
+        key_getter.return_value = '1'
+
+        output_volume = volume_manager.update(volume)
+
+        assert output_volume
+        assert output_volume.unpacked_value['id'] == '1'
+        key_getter.assert_called_once_with('/volumes/1')
 
     def test_volume_unpack(self, mocker):
         etcd_mock = mocker.MagicMock()
