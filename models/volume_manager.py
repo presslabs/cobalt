@@ -54,10 +54,8 @@ class Volume(object):
 
         volume = self._unpack([volume])[0]
         # add id manually as it is ignored on load from json
-        print(volume.key)
         volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
 
-        print(volume.unpacked_value)
         return volume
 
     def _unpack(self, volumes):
