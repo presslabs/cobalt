@@ -1,0 +1,111 @@
+import pytest
+import etcd
+
+from flask import Flask
+from flask_restful import Api
+
+from api.app import errors, config
+from api.volume import register_resources
+from models.volume_manager import Volume
+from cobalt.config import context
+from models.volume_manager import PackerSchema, VolumeSchema
+
+
+class ClientVolumeSchema(VolumeSchema):
+    """
+        Created just to check the output of the api and easily compare it with the generated one from etcd_result
+    """
+    class Meta:
+        ordered = True
+
+    def get_attribute(self, attr, obj, default):
+        super(PackerSchema, self).get_attribute(attr, obj, default)
+
+
+@pytest.fixture
+def flask_app(etcd_client):
+    app = Flask(__name__)
+    api = Api(app, errors=errors, catch_all_404s=True)
+
+    app.volume_manager = Volume(etcd_client)
+    app.config.update(**config)
+
+    app.config['TESTING'] = True
+    register_resources(api)
+
+    return app
+
+
+@pytest.fixture
+def etcd_client(request):
+    client = etcd.Client(**context['etcd'])
+
+    def fin():
+        entrypoints = [Volume.KEY, '_locks', 'machines']
+
+        for entry in entrypoints:
+            try:
+                client.delete(entry, recursive=True)
+            except etcd.EtcdException:
+                pass
+
+    request.addfinalizer(fin)
+    return client
+
+
+@pytest.fixture(scope='module')
+def volume_raw_ok():
+    return '''{
+        "name": "ok",
+        "requested": {
+            "reserved_size": 10,
+            "constraints": []
+        },
+        "actual": {
+            "reserved_size": 2,
+            "constraints": []
+        },
+        "meta": {
+            "instance.name": "test_instance"
+        }
+    }'''
+
+
+@pytest.fixture(scope='module')
+def volume_raw_empty():
+    return ''
+
+
+@pytest.fixture(scope='module')
+def volume_raw_minimal():
+    return '''
+        {
+            "requested": {
+                "reserved_size": 1,
+                "constraints": []
+            }
+        }
+    '''
+
+
+@pytest.fixture(scope='module')
+def volume_raw_read_only_extra():
+    return '''{
+        "id": "random",
+        "name": "ok",
+        "requested": {
+            "reserved_size": 10,
+            "constraints": []
+        },
+        "state": "rambo",
+        "actual": {
+            "reserved_size": 2,
+            "constraints": []
+        },
+        "meta": {
+            "instance.name": "test_instance"
+        },
+        "undefined": 1,
+        "error": "random",
+        "error_count": 1
+    }'''

@@ -26,7 +26,7 @@ class Volume(Resource):
         if volume.unpacked_value.get('state', 'undefined') != 'ready':
             return {'message': 'Resource not in ready state, can\'t update.'}, 409
 
-        new_volume, errors = volume_attribute_schema.load(request.json)
+        new_volume, errors = volume_attribute_schema.load(request.get_json(force=True))
         if errors:
             return {'message': errors}, 400
 
@@ -56,7 +56,7 @@ class Volume(Resource):
             return {'message': 'Resource changed during transition.'}, 409
 
         result, _ = volume_schema.dump(volume)
-        return result, 202, {'Location': api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
+        return result, 202, {'Location': api.url_for(Volume, volume_id=result['id'])}
 
 
 class VolumeList(Resource):
@@ -70,8 +70,7 @@ class VolumeList(Resource):
         volume_manager = current_app.volume_manager
 
         fields = ('name', 'meta', 'requested',)
-        data, errors = VolumeSchema(only=fields).load(request.json)
-
+        data, errors = VolumeSchema(only=fields).load(request.get_json(force=True))
         if errors:
             return {'message': errors}, 400
 
@@ -82,8 +81,8 @@ class VolumeList(Resource):
 
         volume = volume_manager.create(data)
 
-        result, _ = volume_schema.dump(volume)
-        return result, 202, {'Location': api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
+        result, errors = volume_schema.dump(volume)
+        return result, 202, {'Location': api.url_for(Volume, volume_id=result['id'])}
 
 
 def register_resources(flask_restful):

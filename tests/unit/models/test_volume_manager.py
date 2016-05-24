@@ -17,7 +17,7 @@ class TestVolumeManager:
         volumes = volume_manager.all()
 
         assert volumes == []
-        etcd_client.read.assert_called_with(volume_manager.KEY)
+        etcd_client.read.assert_called_with(volume_manager.KEY, sorted=True)
 
     def test_volume_all_keys_except_the_dir(self, etcd_dir_result, etcd_client, unpacker, volume_manager, mocker):
         dir_mock, entry_mock = etcd_dir_result
@@ -32,7 +32,7 @@ class TestVolumeManager:
         # make the needed assertions
         unpacker.assert_called_with([entry_mock])
         assert volumes == [entry_mock]
-        etcd_client.read.assert_called_with(volume_manager.KEY)
+        etcd_client.read.assert_called_with(volume_manager.KEY, sorted=True)
 
     def test_volume_by_id_key_not_found(self, etcd_client, volume_manager, mocker):
         etcd_client.read = mocker.MagicMock(side_effect=etcd.EtcdKeyNotFound)

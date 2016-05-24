@@ -11,7 +11,7 @@ class Volume(object):
 
     def all(self):
         try:
-            volumes = [volume for volume in self.client.read(Volume.KEY).leaves if not volume.dir]
+            volumes = [volume for volume in self.client.read(Volume.KEY, sorted=True).leaves if not volume.dir]
         except etcd.EtcdKeyNotFound:
             volumes = []
 
@@ -83,13 +83,13 @@ class PackerSchema(Schema):
         ordered = True
 
     state = fields.String(default='registered', missing='registered')
-    name = fields.String(default='', missing='registered')
+    name = fields.String(default='', missing='')
     error = fields.String(default='', missing='')
     error_count = fields.Integer(default=0, missing=0)
 
     meta = fields.Dict(default={}, missing={})
 
-    actual = fields.Nested(VolumeAttributeSchema, required=True)
+    actual = fields.Nested(VolumeAttributeSchema, missing={}, default={})
     requested = fields.Nested(VolumeAttributeSchema, required=True)
 
 
