@@ -1,11 +1,6 @@
 import pytest
 import etcd
 
-from flask import Flask
-from flask_restful import Api
-
-from api.app import errors, config
-from api.volume import register_resources
 from models.volume_manager import Volume
 from cobalt.config import context
 from models.volume_manager import PackerSchema, VolumeSchema
@@ -20,20 +15,6 @@ class ClientVolumeSchema(VolumeSchema):
 
     def get_attribute(self, attr, obj, default):
         super(PackerSchema, self).get_attribute(attr, obj, default)
-
-
-@pytest.fixture
-def flask_app(etcd_client):
-    app = Flask(__name__)
-    api = Api(app, errors=errors, catch_all_404s=True)
-
-    app.volume_manager = Volume(etcd_client)
-    app.config.update(**config)
-
-    app.config['TESTING'] = True
-    register_resources(api)
-
-    return app
 
 
 @pytest.fixture
@@ -54,9 +35,29 @@ def etcd_client(request):
 
 
 @pytest.fixture(scope='module')
-def volume_raw_ok():
+def volume_raw_ok_ready():
     return '''{
         "name": "ok",
+        "state": "ready",
+        "requested": {
+            "reserved_size": 10,
+            "constraints": []
+        },
+        "actual": {
+            "reserved_size": 2,
+            "constraints": []
+        },
+        "meta": {
+            "instance.name": "test_instance"
+        }
+    }'''
+
+
+@pytest.fixture(scope='module')
+def volume_raw_ok_deleting():
+    return '''{
+        "name": "ok",
+        "state": "deleting",
         "requested": {
             "reserved_size": 10,
             "constraints": []

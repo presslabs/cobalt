@@ -1,5 +1,11 @@
 import pytest
 
+from flask import Flask
+from flask_restful import Api
+
+from api.app import errors, config
+from api.volume import register_resources
+
 from models.volume_manager import Volume, volume_schema, packer_schema
 
 
@@ -67,6 +73,20 @@ def packer_schema_loads(mocker):
 @pytest.fixture
 def packer_schema_dumps(mocker):
     return mocker.patch.object(packer_schema, 'dumps')
+
+
+@pytest.fixture
+def flask_app(etcd_client):
+    app = Flask(__name__)
+    api = Api(app, errors=errors, catch_all_404s=True)
+
+    app.volume_manager = Volume(etcd_client)
+    app.config.update(**config)
+
+    app.config['TESTING'] = True
+    register_resources(api)
+
+    return app
 
 
 class DummyVolume:

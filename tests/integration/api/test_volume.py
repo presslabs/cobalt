@@ -5,8 +5,8 @@ from tests.integration.conftest import ClientVolumeSchema
 
 
 class TestVolume:
-    def test_volume_list_get(self, etcd_client, volume_raw_ok, flask_app):
-        generators = [volume_raw_ok, volume_raw_ok]
+    def test_volume_list_get(self, etcd_client, volume_raw_ok_ready, flask_app):
+        generators = [volume_raw_ok_ready, volume_raw_ok_ready]
 
         volume_writes = []
         for generator in generators:
@@ -65,7 +65,7 @@ class TestVolume:
             assert expected_result == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
 
-    def test_volume_list_post_read_only_extra_body(self, volume_raw_read_only_extra, flask_app):
+    def test_volume_list_post_read_only_and_extra_body(self, volume_raw_read_only_extra, flask_app):
         expected_result = {'error': '',
                            'error_count': 0,
                            'meta': {"instance.name": "test_instance"},
@@ -88,3 +88,71 @@ class TestVolume:
             assert id != 'random'
             assert expected_result == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
+
+    def test_volume_delete_wrong_id(self, flask_app):
+        expected_result = {'message': 'Not Found'}
+        expected_code = 404
+
+        with flask_app.test_client() as c:
+            response = c.get('/volumes/0')
+
+            result = json.loads(response.data.decode())
+
+            assert response.status_code == expected_code
+            assert expected_result == result
+
+    def test_volume_delete_illeagal_state(self, etcd_client, volume_raw_ok_deleting, flask_app):
+        expected_result = {'message': 'Resource not in ready state, can\'t delete.'}
+        expected_code = 409
+
+        to_delete = etcd_client.write('volumes', volume_raw_ok_deleting, append=True)
+        id = flask_app.volume_manager.get_id_from_key(to_delete.key)
+
+        with flask_app.test_client() as c:
+            response = c.delete('/volumes/{}'.format(id))
+
+            result = json.loads(response.data.decode())
+
+            assert response.status_code == expected_code
+            assert expected_result == result
+
+    def test_volume_delete(self, etcd_client, volume_raw_ok_ready, flask_app):
+        to_delete = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(to_delete.key)
+
+        with flask_app.test_client() as c:
+            response = c.delete('/volumes/{}'.format(id))
+
+            result = json.loads(response.data.decode())
+
+            assert result['id'] == id
+            assert result['state'] == 'deleting'
+            assert response.status_code == 202
+            assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
+
+    def test_volume_get(self, etcd_client, volume_raw_ok_ready, flask_app):
+        to_delete = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(to_delete.key)
+
+        volume = flask_app.volume_manager._unpack([to_delete])[0]
+        expected, errors = volume_schema.dump(volume)
+        assert errors == {}
+
+        with flask_app.test_client() as c:
+            response = c.get('/volumes/{}'.format(id))
+
+            actual, errors = ClientVolumeSchema().loads(response.data.decode())
+
+            assert actual == expected
+            assert response.status_code == 200
+
+    def test_volume_get_not_found(self, flask_app):
+        with flask_app.test_client() as c:
+            response = c.get('/volumes/0')
+
+            result = json.loads(response.data.decode())
+
+            assert result == {'message': 'Not Found'}
+            assert response.status_code == 404
+
+    # TODO test put on client

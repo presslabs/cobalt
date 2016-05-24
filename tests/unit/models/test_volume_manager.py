@@ -55,7 +55,7 @@ class TestVolumeManager:
     @pytest.mark.parametrize('query,state_filter,result', [
         # all() return value, state to query, result
         ([], 'NONE', []),
-        ([dummy_ready_volume], 'NONE', []),
+        ([dummy_invalid_state_volume], 'ready', []),
         ([dummy_invalid_state_volume, dummy_ready_volume, dummy_invalid_state_volume], 'ready', [dummy_ready_volume])
     ])
     def test_volume_by_state_no_data(self, query, state_filter, result, volume_manager, volume_manager_all):
