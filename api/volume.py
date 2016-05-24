@@ -6,7 +6,8 @@ from models.volume_manager import volume_attribute_schema, volume_schema, Volume
 
 
 class Volume(Resource):
-    def get(self, volume_id):
+    @staticmethod
+    def get(volume_id):
         volume_manager = current_app.volume_manager
         volume = volume_manager.by_id(volume_id)
 
@@ -16,14 +17,15 @@ class Volume(Resource):
         result, _ = VolumeSchema().dump(volume)
         return result, 200
 
-    def put(self, volume_id):
+    @staticmethod
+    def put(volume_id):
         volume_manager = current_app.volume_manager
 
         volume = volume_manager.by_id(volume_id)
         if volume is None:
             return {'message': 'Not Found'}, 404
 
-        if volume.unpacked_value.get('state', 'undefined') != 'ready':
+        if volume.unpacked_value.get('state') != 'ready':
             return {'message': 'Resource not in ready state, can\'t update.'}, 409
 
         new_volume, errors = volume_attribute_schema.load(request.get_json(force=True))
@@ -39,14 +41,15 @@ class Volume(Resource):
         result, _ = volume_schema.dump(volume)
         return result, 202, {'Location': api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
 
-    def delete(self, volume_id):
+    @staticmethod
+    def delete(volume_id):
         volume_manager = current_app.volume_manager
 
         volume = volume_manager.by_id(volume_id)
         if volume is None:
             return {'message': 'Not Found'}, 404
 
-        if volume.unpacked_value.get('state', 'undefined') != 'ready':
+        if volume.unpacked_value.get('state') != 'ready':
             return {'message': 'Resource not in ready state, can\'t delete.'}, 409
 
         volume.unpacked_value['state'] = 'deleting'
@@ -60,13 +63,15 @@ class Volume(Resource):
 
 
 class VolumeList(Resource):
-    def get(self):
+    @staticmethod
+    def get():
         volume_manager = current_app.volume_manager
 
         result, _ = volume_schema.dump(volume_manager.all(), many=True)
         return result
 
-    def post(self):
+    @staticmethod
+    def post():
         volume_manager = current_app.volume_manager
 
         fields = ('name', 'meta', 'requested',)
