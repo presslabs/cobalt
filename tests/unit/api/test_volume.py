@@ -1,6 +1,8 @@
 from copy import deepcopy
 
-from api.volume import Volume
+from pytest_mock import mock_module
+
+from api.volume import Volume, register_resources, VolumeList
 from tests.conftest import dummy_ready_volume
 
 
@@ -21,3 +23,12 @@ class TestVolume:
 
             volume_manager_by_id.assert_called_with('1')
             assert result == ({'message': 'Resource changed during transition.'}, 409)
+
+    def test_register_resources(self, mocker):
+        api = mocker.MagicMock()
+
+        register_resources(api)
+
+        call = mock_module.call
+        api.add_resource.assert_has_calls([call(VolumeList, '/volumes'),
+                                          call(Volume, '/volumes/<volume_id>')])
