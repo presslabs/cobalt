@@ -2,7 +2,7 @@ import gevent
 import time
 
 from engine.lease import Lease
-from utils.service import Service
+from utils import Service
 
 
 class Engine(Service):
@@ -48,3 +48,4 @@ class Engine(Service):
             time.sleep(10)
 
     # http://stackoverflow.com/a/13602029
+    # TODO Unit test this

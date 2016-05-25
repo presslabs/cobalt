@@ -3,6 +3,8 @@ import gevent
 from etcd import Client, Lock
 
 from api.api import Api
+from api.app import api, app
+from api.volume import register_resources
 from engine.engine import Engine
 from engine.lease import Lease
 from models.volume_manager import Volume
@@ -13,14 +15,21 @@ from cobalt.config import context
 class Cobalt(Service):
 
     def __init__(self):
+        # TODO apply dependency injection here
+        # TODO cleanup import paths
         self.etcd = Client(**context['etcd'])
 
         engine_lock = Lock(self.etcd, 'leader-election')
         engine_leaser = Lease(engine_lock, **context['engine'])
+        engine_service = Engine(engine_leaser)
+
+        app.volume_manager = Volume(self.etcd)
+        register_resources(api)
+        api_service = Api(app, (context['api']['host'], context['api']['port']))
 
         service_map = {
-            'engine': Engine(engine_leaser),
-            'api': Api(Volume(self.etcd), host=context['api']['host'], port=context['api']['port'])
+            'engine': engine_service,
+            'api': api_service
             # TODO add api / agent here
             # 'api', 'agent'
         }
@@ -42,3 +51,5 @@ class Cobalt(Service):
             routines += service.start()
 
         gevent.joinall(routines)
+
+    # TODO Unit test this
