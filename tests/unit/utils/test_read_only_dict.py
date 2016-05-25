@@ -1,6 +1,6 @@
 import pytest
 
-from utils.read_only_dict import ReadOnlyDict
+from utils import ReadOnlyDict
 
 
 @pytest.fixture

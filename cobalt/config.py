@@ -1,7 +1,7 @@
 from collections import ChainMap
 
 from config import config
-from utils.read_only_dict import ReadOnlyDict
+from utils import ReadOnlyDict
 
 _defaults = {
     'etcd': {

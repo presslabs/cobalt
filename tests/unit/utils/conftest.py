@@ -1,6 +1,6 @@
 import pytest
 
-from utils.service import Service
+from utils import Service
 
 
 @pytest.fixture(scope='module')
