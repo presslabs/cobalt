@@ -3,10 +3,9 @@ import pytest
 from flask import Flask
 from flask_restful import Api
 
+from api import register_resources
 from api.app import errors, config
-from api.volume import register_resources
-
-from models.volume_manager import Volume, volume_schema, packer_schema, volume_attribute_schema
+from models import Volume, volume_schema, packer_schema, volume_attribute_schema
 
 
 @pytest.fixture

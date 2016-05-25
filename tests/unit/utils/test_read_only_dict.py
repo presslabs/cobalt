@@ -1,12 +1,5 @@
 import pytest
 
-from utils import ReadOnlyDict
-
-
-@pytest.fixture
-def ro_dictionary():
-    return ReadOnlyDict({'test': [1, 2, 3], 'foo': 'bar'})
-
 
 class TestReadOnlyDict:
     def test_pop(self, ro_dictionary):

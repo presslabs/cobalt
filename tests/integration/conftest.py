@@ -1,9 +1,8 @@
 import pytest
 import etcd
 
-from models.volume_manager import Volume
-from cobalt.config import context
-from models.volume_manager import PackerSchema, VolumeSchema
+from models import Volume, PackerSchema, VolumeSchema
+from cobalt import context
 
 
 class ClientVolumeSchema(VolumeSchema):

@@ -2,7 +2,7 @@ import pytest
 
 from flask import json
 
-from models.volume_manager import volume_schema
+from models import volume_schema
 from tests.integration.conftest import ClientVolumeSchema
 
 

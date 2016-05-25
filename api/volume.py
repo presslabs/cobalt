@@ -1,8 +1,8 @@
 from flask import current_app, request
 from flask_restful import Resource
 
-from api.app import api
-from models.volume_manager import volume_attribute_schema, volume_schema, VolumeSchema
+from api import api_restful as api
+from models import volume_attribute_schema, volume_schema, VolumeSchema
 
 
 class Volume(Resource):

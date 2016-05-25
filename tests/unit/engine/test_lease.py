@@ -1,6 +1,6 @@
 import pytest
 
-from engine.lease import Lease
+from engine import Lease
 
 
 class TestLease:

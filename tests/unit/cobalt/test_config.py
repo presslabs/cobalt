@@ -1,6 +1,6 @@
 import pytest
 
-from cobalt.config import generate_context
+from cobalt import generate_context
 
 
 @pytest.fixture

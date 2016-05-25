@@ -3,7 +3,7 @@ import pytest
 
 from pytest_mock import mock_module
 
-from models.volume_manager import Volume
+from models import Volume
 from tests.conftest import dummy_invalid_state_volume, dummy_ready_volume
 
 

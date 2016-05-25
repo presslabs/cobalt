@@ -1,7 +1,7 @@
 import gevent
 import time
 
-from engine.lease import Lease
+from engine import Lease
 from utils import Service
 
 

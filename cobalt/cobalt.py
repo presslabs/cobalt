@@ -2,14 +2,11 @@ import gevent
 
 from etcd import Client, Lock
 
-from api.api import Api
-from api.app import api, app
-from api.volume import register_resources
-from engine.engine import Engine
-from engine.lease import Lease
-from models.volume_manager import Volume
+from api import Api, app, register_resources, api_restful as api
+from engine import Engine, Lease
+from models import Volume
 from utils import Service
-from cobalt.config import context
+from cobalt import context
 
 
 class Cobalt(Service):

@@ -3,7 +3,7 @@ monkey.patch_all()
 
 import signal
 
-from cobalt.cobalt import Cobalt
+from cobalt import Cobalt
 
 
 cobalt = Cobalt()

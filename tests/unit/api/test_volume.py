@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from pytest_mock import mock_module
 
-from api.volume import Volume, register_resources, VolumeList
+from api import Volume, register_resources, VolumeList
 from tests.conftest import dummy_ready_volume
 
 
