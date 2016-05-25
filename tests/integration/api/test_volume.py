@@ -137,8 +137,8 @@ class TestVolume:
         ['delete', {'message': 'Resource not in ready state, can\'t delete.'}]
     ])
     def test_volume_invalid_state(self, method, expected_message, etcd_client, volume_raw_ok_deleting, flask_app):
-        to_delete = etcd_client.write('volumes', volume_raw_ok_deleting, append=True)
-        id = flask_app.volume_manager.get_id_from_key(to_delete.key)
+        volume = etcd_client.write('volumes', volume_raw_ok_deleting, append=True)
+        id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         with flask_app.test_client() as c:
             func = getattr(c, method)
@@ -149,5 +149,83 @@ class TestVolume:
             assert response.status_code == 409
             assert expected_message == result
 
-    # TODO test put on client after unpack
+    def test_volume_put_empty_body_no_json(self, etcd_client, volume_raw_ok_ready, volume_raw_empty, flask_app):
+        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(volume.key)
 
+        with flask_app.test_client() as c:
+            response = c.put('/volumes/{}'.format(id), data=volume_raw_empty)
+            assert response.status_code == 400
+
+    def test_volume_put_empty_body(self, etcd_client, volume_raw_ok_ready, flask_app):
+        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(volume.key)
+
+        expected_result = {'message': {'constraints': ['Missing data for required field.'],
+                                       'reserved_size': ['Missing data for required field.']}}
+
+        expected_code = 400
+
+        with flask_app.test_client() as c:
+            response = c.put('/volumes/{}'.format(id), data='{}', content_type='application/json')
+
+            result = json.loads(response.data.decode())
+
+            assert response.status_code == expected_code
+            assert expected_result == result
+
+    def test_volume_put_not_modified(self, etcd_client, volume_raw_ok_ready, flask_app):
+        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(volume.key)
+
+        data = json.loads(volume_raw_ok_ready)
+        requested = json.dumps(data['requested'])
+
+        with flask_app.test_client() as c:
+            response = c.put('/volumes/{}'.format(id), data=requested, content_type='application/json')
+
+            assert response.status_code == 304
+
+    def test_volume_put_minimal_body(self, etcd_client, volume_raw_ok_ready,
+                                     volume_raw_requested_ok, flask_app):
+        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(volume.key)
+
+        volume = flask_app.volume_manager._unpack([volume])[0]
+        expected, errors = volume_schema.dump(volume)
+        assert errors == {}
+
+        expected = dict(expected)
+        expected['requested'] = json.loads(volume_raw_requested_ok)
+
+        with flask_app.test_client() as c:
+            response = c.put('/volumes/{}'.format(id), data=volume_raw_requested_ok,
+                             content_type='application/json')
+
+            result = json.loads(response.data.decode())
+
+            assert response.status_code == 202
+            assert expected == result
+            assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
+
+    def test_volume_put_extra_body(self, etcd_client, volume_raw_ok_ready, volume_raw_requested_extra, flask_app):
+        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        id = flask_app.volume_manager.get_id_from_key(volume.key)
+
+        volume = flask_app.volume_manager._unpack([volume])[0]
+        expected, errors = volume_schema.dump(volume)
+        assert errors == {}
+
+        expected = dict(expected)
+        expected['requested'] = json.loads(volume_raw_requested_extra)
+        expected['requested'].pop('extra')
+
+        with flask_app.test_client() as c:
+            response = c.put('/volumes/{}'.format(id), data=volume_raw_requested_extra,
+                             content_type='application/json')
+
+            result = json.loads(response.data.decode())
+
+            assert response.status_code == 202
+            assert expected == result
+            assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)

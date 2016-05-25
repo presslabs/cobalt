@@ -73,6 +73,23 @@ def volume_raw_ok_deleting():
 
 
 @pytest.fixture(scope='module')
+def volume_raw_requested_ok():
+    return '''{
+        "reserved_size": 100,
+        "constraints": []
+    }'''
+
+
+@pytest.fixture(scope='module')
+def volume_raw_requested_extra():
+    return '''{
+        "reserved_size": 100,
+        "constraints": [],
+        "extra": false
+    }'''
+
+
+@pytest.fixture(scope='module')
 def volume_raw_empty():
     return ''
 
