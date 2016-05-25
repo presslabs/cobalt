@@ -32,7 +32,10 @@ class Volume(Resource):
         if errors:
             return {'message': errors}, 400
 
-        volume.unpacked_value.set('requested', new_volume)
+        if volume.unpacked_value['requested'] == new_volume:
+            return '', 304
+
+        volume.unpacked_value['requested'] = new_volume
 
         volume = volume_manager.update(volume)
         if not volume:
