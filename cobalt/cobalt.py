@@ -3,10 +3,10 @@ import gevent
 from etcd import Client, Lock
 
 from api import Api, app, register_resources, api_restful as api
-from engine import Engine, Lease
+from engine import Lease, Engine
 from models import Volume
 from utils import Service
-from cobalt import context
+from .config import context
 
 
 class Cobalt(Service):

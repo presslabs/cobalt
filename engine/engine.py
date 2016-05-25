@@ -1,8 +1,8 @@
 import gevent
 import time
 
-from engine import Lease
 from utils import Service
+from .lease import Lease
 
 
 class Engine(Service):
