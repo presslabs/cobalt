@@ -4,7 +4,7 @@ from flask import Flask
 from flask_restful import Api
 
 from api import register_resources
-from api.app import errors, config
+from api.app import unhandled_exception_errors, config
 from models import Volume, volume_schema, packer_schema, volume_attribute_schema
 
 
@@ -92,7 +92,7 @@ def packer_schema_dumps(mocker):
 @pytest.fixture
 def flask_app(etcd_client):
     app = Flask(__name__)
-    api = Api(app, errors=errors, catch_all_404s=True)
+    api = Api(app, errors=unhandled_exception_errors, catch_all_404s=True)
 
     app.volume_manager = Volume(etcd_client)
     app.config.update(**config)
