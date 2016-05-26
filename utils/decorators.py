@@ -1,9 +1,9 @@
 from functools import wraps
 
-from models import Volume
+from flask import current_app
 
 
-def state_or_409(volume: Volume, state: str='ready'):
+def state_or_409(volume, state):
     def decorator(f):
         decorator.__name__ = f.__name__
         decorator.__doc__ = f.__doc__
@@ -22,7 +22,7 @@ def state_or_409(volume: Volume, state: str='ready'):
     return decorator
 
 
-def get_volume_or_404(manager: Volume, volume_id: str):
+def get_volume_or_404(manager, volume_id='0'):
     def decorator(f):
         decorator.__name__ = f.__name__
         decorator.__doc__ = f.__doc__
@@ -54,3 +54,11 @@ def inject_var(key, value):
             return f(*args, **kwargs)
         return inner_dec
     return decorator
+
+
+def inject_volume_manager(f):
+    @wraps(f)
+    def inner_dec(*args, **kwargs):
+        kwargs['volume_manager'] = current_app.volume_manager
+        return f(*args, **kwargs)
+    return inner_dec

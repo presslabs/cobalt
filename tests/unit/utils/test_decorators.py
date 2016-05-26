@@ -1,6 +1,6 @@
 import pytest
 
-from utils import inject_var, get_volume_or_404, state_or_409
+from utils import inject_var, get_volume_or_404, state_or_409, inject_volume_manager
 from tests.conftest import dummy_ready_volume
 
 class TestDecorators:
@@ -36,6 +36,19 @@ class TestDecorators:
         assert test.__doc__ == 'Testing'
         assert test.__name__ == 'test'
         volume_manager_by_id.assert_called_with(volume_id)
+
+    def test_inject_volume_manager(self, flask_app):
+
+        @inject_volume_manager
+        def test(volume_manager):
+            """Testing"""
+            assert volume_manager == flask_app.volume_manager
+
+        with flask_app.app_context():
+            test()
+
+        assert test.__doc__ == 'Testing'
+        assert test.__name__ == 'test'
 
     @pytest.mark.parametrize('state', ['ready', 'invalid'])
     def state_or_409(self, state):
