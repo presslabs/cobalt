@@ -1,11 +1,12 @@
 import gevent
 
 from etcd import Client, Lock
+from werkzeug.debug import DebuggedApplication
 
 from api import Api, app, register_resources, api_restful as api
-from engine import Lease, Engine
+from engine import Lease, Engine, Executor
 from models import Volume
-from utils import Service
+from utils import Service, Connection
 from .config import context
 
 
@@ -15,18 +16,23 @@ class Cobalt(Service):
         # TODO apply dependency injection here
         # TODO cleanup import paths
         self.etcd = Client(**context['etcd'])
+        self.volume_manager = Volume(self.etcd)
 
         engine_lock = Lock(self.etcd, 'leader-election')
         engine_leaser = Lease(engine_lock, **context['engine'])
-        engine_service = Engine(engine_leaser)
+        executor = Executor(volume_manager=self.volume_manager, timeout=context['engine_executor']['timeout'])
 
+        api_server_context = Connection(context['api']['host'], context['api']['port'])
         app.volume_manager = Volume(self.etcd)
         register_resources(api)
-        api_service = Api(app, (context['api']['host'], context['api']['port']))
+
+        _app = app
+        if app.debug:
+            _app = DebuggedApplication(app)
 
         service_map = {
-            'engine': engine_service,
-            'api': api_service
+            'engine': Engine(engine_leaser, executor),
+            'api': Api(_app, api_server_context)
             # TODO add api / agent here
             # 'api', 'agent'
         }

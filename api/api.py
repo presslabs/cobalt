@@ -9,7 +9,7 @@ from utils import Service, Connection
 
 class Api(Service):
     def __init__(self, app: Flask, connection: Connection=Connection('', 5000)) -> None:
-        self._api_server = WSGIServer(connection, DebuggedApplication(app))
+        self._api_server = WSGIServer(connection, app)
 
         self._api_loop = None
         self._started = False
