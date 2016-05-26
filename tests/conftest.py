@@ -24,6 +24,11 @@ def volume_manager_all(mocker, volume_manager):
 
 
 @pytest.fixture
+def volume_manager_by_id(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'by_id')
+
+
+@pytest.fixture
 def volume_manager_update(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'update')
 
