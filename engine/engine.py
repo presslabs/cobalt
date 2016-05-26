@@ -6,7 +6,7 @@ from .executor import Executor
 
 
 class Engine(Service):
-    def __init__(self, lease: Lease, executor: Executor):
+    def __init__(self, lease: Lease, executor: Executor) -> None:
         self.lease = lease
         self.executor = executor
 
@@ -15,9 +15,9 @@ class Engine(Service):
 
         self._started = False
 
-    def start(self):
+    def start(self) -> [gevent.Greenlet]:
         if self._started:
-            return False
+            return []
 
         self._started = True
 
@@ -26,7 +26,7 @@ class Engine(Service):
 
         return [self._runner_loop, self._leaser_loop]
 
-    def stop(self):
+    def stop(self) -> bool:
         if not self._started:
             return False
 
@@ -36,10 +36,10 @@ class Engine(Service):
         return True
 
     @property
-    def _quit(self):
+    def _quit(self) -> bool:
         return not self._started
 
-    def _run(self):
+    def _run(self) -> None:
         while not self._quit:
             if not self.lease.is_held:
                 self.executor.timeout()

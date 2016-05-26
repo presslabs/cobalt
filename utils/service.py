@@ -1,5 +1,8 @@
+from gevent import Greenlet
+
+
 class Service(object):
-    def start(self):
+    def start(self) -> [Greenlet]:
         raise NotImplementedError()
 
     def stop(self):
