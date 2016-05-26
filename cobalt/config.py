@@ -24,7 +24,10 @@ _defaults = {
     },
     'engine': {
         'lease_ttl': 60,
-        'refresh_ttl': 40
+        'refresh_ttl': 40,
+    },
+    'engine_executor': {
+        'timeout': 10
     },
     'api': {
         'host': '',

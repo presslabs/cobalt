@@ -2,7 +2,7 @@ from pytest import fixture
 
 from flask import Flask
 
-from api.api import Api
+from api import Api
 
 
 @fixture
@@ -18,8 +18,3 @@ def api_app(mocker):
 @fixture
 def api_server(mocker, api_service):
     return mocker.patch.object(api_service, '_api_server')
-
-
-@fixture
-def gevent_spawn(mocker):
-    return mocker.patch('gevent.spawn')

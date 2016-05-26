@@ -1,6 +1,6 @@
 import pytest
 
-from api.api import Api
+from api import Api
 from utils import Service
 
 
