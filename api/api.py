@@ -43,7 +43,7 @@ class Api(Service):
         return True
 
     @staticmethod
-    def _create_app(volume_manager):
+    def _create_app(volume_manager, debug=False):
         unhandled_exception_errors = {
             'EtcdConnectionFailed': {
                 'message': "The ETCD cluster is not responding.",
@@ -69,7 +69,7 @@ class Api(Service):
         app.api = api
 
         # TODO Disable this for error handling to take effect
-        app.debug = True
+        app.debug = debug
         if app.debug:
             app = DebuggedApplication(app)
 

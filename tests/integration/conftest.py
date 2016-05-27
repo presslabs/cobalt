@@ -1,6 +1,8 @@
-import pytest
 import etcd
 
+from pytest import fixture
+
+from api import Api
 from models import VolumeManager, PackerSchema, VolumeSchema
 from config import config as context
 
@@ -16,7 +18,17 @@ class ClientVolumeSchema(VolumeSchema):
         super(PackerSchema, self).get_attribute(attr, obj, default)
 
 
-@pytest.fixture
+@fixture
+def flask_app(volume_manager):
+    return Api._create_app(volume_manager)
+
+
+@fixture
+def volume_manager(etcd_client):
+    return VolumeManager(etcd_client)
+
+
+@fixture
 def etcd_client(request):
     client = etcd.Client(**context['etcd'])
 
@@ -33,7 +45,7 @@ def etcd_client(request):
     return client
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_ok_ready():
     return '''{
         "name": "ok",
@@ -52,7 +64,7 @@ def volume_raw_ok_ready():
     }'''
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_ok_deleting():
     return '''{
         "name": "ok",
@@ -71,7 +83,7 @@ def volume_raw_ok_deleting():
     }'''
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_requested_ok():
     return '''{
         "reserved_size": 100,
@@ -79,7 +91,7 @@ def volume_raw_requested_ok():
     }'''
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_requested_extra():
     return '''{
         "reserved_size": 100,
@@ -88,12 +100,12 @@ def volume_raw_requested_extra():
     }'''
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_empty():
     return ''
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_minimal():
     return '''
         {
@@ -105,7 +117,7 @@ def volume_raw_minimal():
     '''
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def volume_raw_read_only_extra():
     return '''{
         "id": "random",
