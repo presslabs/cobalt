@@ -33,12 +33,12 @@ class Cobalt(Service):
                 self.services[service] = services.get(service)
 
     def stop(self):
-        for service in self.services:
+        for _, service in self.services.items():
             service.stop()
 
     def start(self):
         routines = []
-        for service in self.services:
+        for _, service in self.services.items():
             routines += service.start()
 
         gevent.joinall(routines)
