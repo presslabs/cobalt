@@ -3,7 +3,7 @@ from functools import wraps
 from flask import current_app
 
 
-def state_or_409(volume, state='ready'):
+def have_state_or_409(volume, state='ready'):
     def decorator(f):
         decorator.__name__ = f.__name__
         decorator.__doc__ = f.__doc__

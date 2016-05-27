@@ -20,17 +20,17 @@ class Cobalt(Service):
 
         services = {
             'engine': Engine(self.etcd, self.volume_manager, self.config['engine']),
-            'api': Api(self.volume_manager, config['api'])
+            'api': Api(self.volume_manager, self.config['api'])
             # TODO add api / agent here
             # 'api', 'agent'
         }
 
-        self.services = []
+        self.services = {}
 
         context_services = self.config['services'] if isinstance(self.config['services'], list) else [self.config['services']]
         for service in context_services:
             if service in services:
-                self.services.append(services.get(service))
+                self.services[service] = services.get(service)
 
     def stop(self):
         for service in self.services:

@@ -1,6 +1,6 @@
 from pytest import mark
 
-from utils import inject_var, get_volume_or_404, state_or_409, inject_volume_manager
+from utils import inject_var, get_volume_or_404, have_state_or_409, inject_volume_manager
 from tests.conftest import dummy_ready_volume
 
 
@@ -53,10 +53,10 @@ class TestDecorators:
         assert test.__name__ == 'test'
 
     @mark.parametrize('state', ['ready', 'invalid'])
-    def state_or_409(self, state):
+    def have_state_or_409(self, state):
         expected_state = 'ready'
 
-        @state_or_409(dummy_ready_volume, expected_state)
+        @have_state_or_409(dummy_ready_volume, expected_state)
         def test():
             """Testing"""
 
