@@ -1,20 +1,30 @@
 import gevent
 
 from flask import Flask
+from flask_restful import Api as RestApi
 from gevent.pywsgi import WSGIServer
+from werkzeug.debug import DebuggedApplication
 
-from utils import Service, Connection
+from utils import Service
+from .volume import VolumeList, Volume
 
 
 class Api(Service):
-    # TODO drop namedtuple and validate
-    def __init__(self, app: Flask, connection: Connection=Connection('', 5000)) -> None:
-        self._api_server = WSGIServer(connection, app)
-
+    def __init__(self, volume_manager, context):
         self._api_loop = None
+        self._api_server = None
         self._started = False
 
-    def start(self) -> [gevent.Greenlet]:
+        self._connection = ('', 5000)
+        try:
+            self._connection = (context['host'], int(context['port']))
+        except (KeyError, ValueError) as e:
+            print('Context provided to api erroneous: {}, defaulting: {}\n{}'.format(context, self._connection, e))
+
+        self.flask_app = self._create_app(volume_manager)
+        self._api_server = WSGIServer(self._connection, self.flask_app)
+
+    def start(self):
         if self._started:
             return []
 
@@ -23,7 +33,7 @@ class Api(Service):
 
         return [self._api_loop]
 
-    def stop(self) -> bool:
+    def stop(self):
         if not self._started:
             return False
 
@@ -31,3 +41,41 @@ class Api(Service):
         self._api_server.stop()
 
         return True
+
+    @staticmethod
+    def _create_app(volume_manager):
+        unhandled_exception_errors = {
+            'EtcdConnectionFailed': {
+                'message': "The ETCD cluster is not responding.",
+                'status': 503,
+            }
+        }
+
+        config = {
+            'RESTFUL_JSON': {
+                'separators': (', ', ': '),
+                'indent': 2,
+                'sort_keys': False
+            }
+        }
+
+        app = Flask(__name__)
+        app.config.update(**config)
+
+        api = RestApi(app, errors=unhandled_exception_errors, catch_all_404s=True)
+        Api._register_resources(api)
+
+        app.volume_manager = volume_manager
+        app.api = api
+
+        # TODO Disable this for error handling to take effect
+        app.debug = True
+        if app.debug:
+            app = DebuggedApplication(app)
+
+        return app
+
+    @staticmethod
+    def _register_resources(api):
+        api.add_resource(VolumeList, '/volumes')
+        api.add_resource(Volume, '/volumes/<volume_id>')

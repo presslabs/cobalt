@@ -3,7 +3,7 @@ import etcd
 from marshmallow import fields, Schema, utils, validate
 
 
-class Volume(object):
+class VolumeManager(object):
     KEY = 'volumes'
 
     def __init__(self, etcd_client):
@@ -11,7 +11,7 @@ class Volume(object):
 
     def all(self):
         try:
-            volumes = [volume for volume in self.client.read(Volume.KEY, sorted=True).leaves if not volume.dir]
+            volumes = [volume for volume in self.client.read(VolumeManager.KEY, sorted=True).leaves if not volume.dir]
         except etcd.EtcdKeyNotFound:
             volumes = []
 
@@ -19,7 +19,7 @@ class Volume(object):
 
     def by_id(self, id):
         try:
-            volume = self.client.read('/{}/{}'.format(Volume.KEY, id))
+            volume = self.client.read('/{}/{}'.format(VolumeManager.KEY, id))
         except etcd.EtcdKeyNotFound:
             return None
 
@@ -39,7 +39,7 @@ class Volume(object):
 
     def create(self, volume: dict):
         volume, _ = packer_schema.dumps(volume)
-        volume = self.client.write(Volume.KEY, volume, append=True)
+        volume = self.client.write(VolumeManager.KEY, volume, append=True)
         volume = self._unpack([volume])[0]
 
         return volume
@@ -67,7 +67,7 @@ class Volume(object):
 
     @classmethod
     def get_id_from_key(cls, key):
-        return key[len(Volume.KEY) + 2:]
+        return key[len(VolumeManager.KEY) + 2:]
 
 
 class VolumeAttributeSchema(Schema):
@@ -104,7 +104,7 @@ class VolumeSchema(PackerSchema):
             return utils.get_value(attr, obj.unpacked_value, default)
 
         etcd_key = super(VolumeSchema, self).get_attribute('key', obj, default)
-        id = Volume.get_id_from_key(etcd_key)
+        id = VolumeManager.get_id_from_key(etcd_key)
 
         return id
 

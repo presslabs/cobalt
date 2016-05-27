@@ -1,2 +1,1 @@
-from .cobalt import Cobalt
-from .config import context, generate_context
+from .cobalt import cobalt

@@ -1,11 +1,5 @@
-from collections import ChainMap
-
-from config import config
-from utils import ReadOnlyDict
-
-_defaults = {
+config = {
     'etcd': {
-        # python-etcd client parameters https://github.com/jplana/python-etcd/blob/master/src/etcd/client.py
         'host': '127.0.0.1',
         'port': 4001,
         'srv_domain': None,
@@ -23,22 +17,18 @@ _defaults = {
         'per_host_pool_size': 10
     },
     'engine': {
-        'lease_ttl': 60,
-        'refresh_ttl': 40,
-    },
-    'engine_executor': {
-        'timeout': 10
+        'leaser': {
+            'lease_ttl': 60,
+            'refresh_ttl': 40,
+        },
+        'executor': {
+            'timeout': 10
+        }
     },
     'api': {
         'host': '',
         'port': 5000
     },
-    'services': ['engine', 'api', 'agent'],
+    'services': ['engine', 'api', 'engine'],
     'mount_point': None
 }
-
-
-def generate_context(defaults, user):
-    return ReadOnlyDict(ChainMap(user, defaults))
-
-context = generate_context(_defaults, config)

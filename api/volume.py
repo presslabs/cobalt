@@ -1,9 +1,7 @@
 from flask import current_app, request
 from flask_restful import Resource
 
-from api import api_restful as api
 from models import volume_attribute_schema, volume_schema, VolumeSchema
-# from utils import get_volume_or_404, inject_var, state_or_409
 
 
 class Volume(Resource):
@@ -43,7 +41,7 @@ class Volume(Resource):
             return {'message': 'Resource changed during transition.'}, 409
 
         result, _ = volume_schema.dump(volume)
-        return result, 202, {'Location': api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
+        return result, 202, {'Location': current_app.api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
 
     @staticmethod
     def delete(volume_id):
@@ -63,7 +61,7 @@ class Volume(Resource):
             return {'message': 'Resource changed during transition.'}, 409
 
         result, _ = volume_schema.dump(volume)
-        return result, 202, {'Location': api.url_for(Volume, volume_id=result['id'])}
+        return result, 202, {'Location': current_app.api.url_for(Volume, volume_id=result['id'])}
 
 
 class VolumeList(Resource):
@@ -91,9 +89,5 @@ class VolumeList(Resource):
         volume = volume_manager.create(data)
 
         result, errors = volume_schema.dump(volume)
-        return result, 202, {'Location': api.url_for(Volume, volume_id=result['id'])}
+        return result, 202, {'Location': current_app.api.url_for(Volume, volume_id=result['id'])}
 
-
-def register_resources(flask_restful):
-    flask_restful.add_resource(VolumeList, '/volumes')
-    flask_restful.add_resource(Volume, '/volumes/<volume_id>')

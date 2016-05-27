@@ -1,48 +1,36 @@
+import etcd
 import gevent
+import signal
 
-from etcd import Client, Lock
-from werkzeug.debug import DebuggedApplication
-
-from api import Api, app, register_resources, api_restful as api
-from engine import Lease, Engine, Executor
-from models import Volume
-from utils import Service, Connection
-from .config import context
+from api import Api
+from engine import Engine
+from models import VolumeManager
+from utils import Service
+from config import config
 
 
 class Cobalt(Service):
-
     def __init__(self):
-        # TODO apply dependency injection here
-        # TODO cleanup import paths
-        self.etcd = Client(**context['etcd'])
-        self.volume_manager = Volume(self.etcd)
+        signal.signal(signal.SIGINT, self.handler)
+        signal.signal(signal.SIGQUIT, self.handler)
 
-        engine_lock = Lock(self.etcd, 'leader-election')
-        engine_leaser = Lease(engine_lock, **context['engine'])
-        executor = Executor(volume_manager=self.volume_manager, timeout=context['engine_executor']['timeout'])
+        self.etcd = self._create_etcd(config['etcd'])
+        self.volume_manager = self._create_volume_manager(self.etcd)
+        self.config = config
 
-        api_server_context = Connection(context['api']['host'], context['api']['port'])
-        app.volume_manager = Volume(self.etcd)
-        register_resources(api)
-
-        _app = app
-        if app.debug:
-            _app = DebuggedApplication(app)
-
-        service_map = {
-            'engine': Engine(engine_leaser, executor),
-            'api': Api(_app, api_server_context)
+        services = {
+            'engine': Engine(self.etcd, self.volume_manager, self.config['engine']),
+            'api': Api(self.volume_manager, config['api'])
             # TODO add api / agent here
             # 'api', 'agent'
         }
 
         self.services = []
 
-        context_services = context['services'] if hasattr(context['services'], '__iter__') else [context['services']]
+        context_services = self.config['services'] if isinstance(self.config['services'], list) else [self.config['services']]
         for service in context_services:
-            if service in service_map:
-                self.services.append(service_map.get(service))
+            if service in services:
+                self.services.append(services.get(service))
 
     def stop(self):
         for service in self.services:
@@ -55,4 +43,18 @@ class Cobalt(Service):
 
         gevent.joinall(routines)
 
+    def handler(self, signum, frame):
+        print('Stopping..')
+        self.stop()
+
+    @staticmethod
+    def _create_etcd(context):
+        return etcd.Client(**context)
+
+    @staticmethod
+    def _create_volume_manager(etcd):
+        return VolumeManager(etcd)
+
     # TODO Unit test this
+
+cobalt = Cobalt()

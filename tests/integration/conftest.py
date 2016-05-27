@@ -1,8 +1,8 @@
 import pytest
 import etcd
 
-from models import Volume, PackerSchema, VolumeSchema
-from cobalt import context
+from models import VolumeManager, PackerSchema, VolumeSchema
+from config import config as context
 
 
 class ClientVolumeSchema(VolumeSchema):
@@ -21,7 +21,7 @@ def etcd_client(request):
     client = etcd.Client(**context['etcd'])
 
     def fin():
-        entrypoints = [Volume.KEY, '_locks', 'machines']
+        entrypoints = [VolumeManager.KEY, '_locks', 'machines']
 
         for entry in entrypoints:
             try:

@@ -3,9 +3,7 @@ import pytest
 from flask import Flask
 from flask_restful import Api
 
-from api import register_resources
-from api.app import unhandled_exception_errors, config
-from models import Volume, volume_schema, packer_schema, volume_attribute_schema
+from models import VolumeManager, volume_schema, packer_schema, volume_attribute_schema
 
 
 @pytest.fixture
@@ -15,7 +13,7 @@ def etcd_client(mocker):
 
 @pytest.fixture
 def volume_manager(etcd_client):
-    return Volume(etcd_client)
+    return VolumeManager(etcd_client)
 
 
 @pytest.fixture

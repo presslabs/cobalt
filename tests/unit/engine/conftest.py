@@ -4,8 +4,9 @@ from engine import Engine
 
 
 @fixture
-def engine(lease, executor):
-    return Engine(lease, executor)
+def engine(etcd, volume_manager):
+    return Engine(etcd, volume_manager,
+                  {'engine': {'leaser': {'lease_ttl': 0, 'refresh_ttl': 0}, 'executor': {'timeout': 10}}})
 
 
 @fixture

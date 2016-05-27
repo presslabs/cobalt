@@ -2,11 +2,11 @@ import time
 
 
 class Lease(object):
-    def __init__(self, lock, lease_ttl=60, refresh_ttl=40):
+    def __init__(self, lock, context):
         self.lock = lock
 
-        self.lease_ttl = 10 if lease_ttl < 10 else lease_ttl
-        self.refresh_ttl = 6 if refresh_ttl < 6 else refresh_ttl
+        self.lease_ttl = 10 if context['lease_ttl'] < 10 else context['lease_ttl']
+        self.refresh_ttl = 6 if context['refresh_ttl'] < 6 else context['refresh_ttl']
 
         if self.refresh_ttl >= self.lease_ttl:
             self.refresh_ttl = 2 * self.lease_ttl / 3

@@ -1,19 +1,7 @@
 from gevent import monkey
 monkey.patch_all()
 
-import signal
+from cobalt import cobalt
 
-from cobalt import Cobalt
-
-
-cobalt = Cobalt()
-
-
-def handler(signum, frame):
-    print('Stopping..')
-    cobalt.stop()
-
-signal.signal(signal.SIGINT, handler)
-signal.signal(signal.SIGQUIT, handler)
-
-cobalt.start()
+if __name__ == '__main__':
+    cobalt.start()

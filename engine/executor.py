@@ -1,15 +1,20 @@
 import time
 
-from models import Volume
-
 
 class Executor:
-    def __init__(self, volume_manager: Volume, timeout=10):
+    def __init__(self, volume_manager, context):
         self.volume_manager = volume_manager
-        self.delay = timeout
+        self.delay = 10
+        try:
+            self.delay = int(context['timeout'])
+        except (KeyError, ValueError) as e:
+            print('Context provided to Executor erroneous: {}, defaulting: {}\n{}'.format(context, self.delay, e))
 
     def timeout(self):
         time.sleep(self.delay)
 
     def tick(self):
+        pass
+
+    def reset(self):
         pass
