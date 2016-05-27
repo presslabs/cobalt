@@ -11,6 +11,21 @@ def m_etcd_client(mocker):
 
 
 @fixture
+def p_etcd_client_read(mocker, m_etcd_client):
+    return mocker.patch.object(m_etcd_client, 'read')
+
+
+@fixture
+def p_etcd_client_update(mocker, m_etcd_client):
+    return mocker.patch.object(m_etcd_client, 'update')
+
+
+@fixture
+def p_etcd_client_write(mocker, m_etcd_client):
+    return mocker.patch.object(m_etcd_client, 'write')
+
+
+@fixture
 def m_volume_manager(m_etcd_client):
     return VolumeManager(m_etcd_client)
 
