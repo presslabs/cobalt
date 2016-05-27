@@ -3,7 +3,6 @@ import gevent
 from flask import Flask
 from flask_restful import Api as RestApi
 from gevent.pywsgi import WSGIServer
-from werkzeug.debug import DebuggedApplication
 
 from utils import Service
 from .volume import VolumeList, Volume
@@ -21,7 +20,7 @@ class Api(Service):
         except (KeyError, ValueError) as e:
             print('Context provided to api erroneous: {}, defaulting: {}\n{}'.format(context, self._connection, e))
 
-        self.flask_app = self._create_app(volume_manager)
+        self.flask_app = Api._create_app(volume_manager)
         self._api_server = WSGIServer(self._connection, self.flask_app)
 
     def start(self):
@@ -43,7 +42,7 @@ class Api(Service):
         return True
 
     @staticmethod
-    def _create_app(volume_manager, debug=False):
+    def _create_app(volume_manager, testing=False):
         unhandled_exception_errors = {
             'EtcdConnectionFailed': {
                 'message': "The ETCD cluster is not responding.",
@@ -56,7 +55,8 @@ class Api(Service):
                 'separators': (', ', ': '),
                 'indent': 2,
                 'sort_keys': False
-            }
+            },
+            'TESTING': testing
         }
 
         app = Flask(__name__)
@@ -67,11 +67,6 @@ class Api(Service):
 
         app.volume_manager = volume_manager
         app.api = api
-
-        # TODO Disable this for error handling to take effect
-        app.debug = debug
-        if app.debug:
-            app = DebuggedApplication(app)
 
         return app
 

@@ -2,10 +2,10 @@ from pytest import fixture
 
 
 @fixture
-def gevent_spawn(mocker):
+def p_gevent_spawn(mocker):
     return mocker.patch('gevent.spawn')
 
 
 @fixture
-def gevent(mocker):
+def p_time_sleep(mocker):
     return mocker.patch('time.sleep')

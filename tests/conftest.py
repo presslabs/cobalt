@@ -1,48 +1,47 @@
-import pytest
+from pytest import fixture
 
-from flask import Flask
-from flask_restful import Api
+from api import Api
 
 from models import VolumeManager, volume_schema, packer_schema, volume_attribute_schema
 
 
-@pytest.fixture
-def etcd_client(mocker):
+@fixture
+def m_etcd_client(mocker):
     return mocker.MagicMock()
 
 
-@pytest.fixture
-def volume_manager(etcd_client):
-    return VolumeManager(etcd_client)
+@fixture
+def m_volume_manager(m_etcd_client):
+    return VolumeManager(m_etcd_client)
 
 
-@pytest.fixture
-def volume_manager_all(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, 'all')
+@fixture
+def p_volume_manager_all(mocker, m_volume_manager):
+    return mocker.patch.object(m_volume_manager, 'all')
 
 
-@pytest.fixture
-def volume_manager_by_id(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, 'by_id')
+@fixture
+def p_volume_manager_by_id(mocker, m_volume_manager):
+    return mocker.patch.object(m_volume_manager, 'by_id')
 
 
-@pytest.fixture
-def volume_manager_update(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, 'update')
+@fixture
+def p_volume_manager_update(mocker, m_volume_manager):
+    return mocker.patch.object(m_volume_manager, 'update')
 
 
-@pytest.fixture
-def key_getter(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, 'get_id_from_key')
+@fixture
+def p_key_getter(mocker, m_volume_manager):
+    return mocker.patch.object(m_volume_manager, 'get_id_from_key')
 
 
-@pytest.fixture
-def unpacker(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, '_unpack')
+@fixture
+def p_unpacker(mocker, m_volume_manager):
+    return mocker.patch.object(m_volume_manager, '_unpack')
 
 
-@pytest.fixture
-def etcd_dir_result(mocker):
+@fixture
+def m_etcd_dir_result(mocker):
     entry_mock = mocker.MagicMock(
         dir=False,
         key=2,
@@ -62,48 +61,39 @@ def etcd_dir_result(mocker):
     return dir_mock, entry_mock
 
 
-@pytest.fixture
-def volume_schema_loads(mocker):
+@fixture
+def p_volume_schema_loads(mocker):
     return mocker.patch.object(volume_schema, 'loads')
 
 
-@pytest.fixture
-def volume_schema_dumps(mocker):
+@fixture
+def p_volume_schema_dumps(mocker):
     return mocker.patch.object(volume_schema, 'dumps')
 
 
-@pytest.fixture
-def volume_attribute_schema_loads(mocker):
+@fixture
+def p_volume_attribute_schema_loads(mocker):
     return mocker.patch.object(volume_attribute_schema, 'loads')
 
 
-@pytest.fixture
-def volume_attribute_schema_dumps(mocker):
+@fixture
+def p_volume_attribute_schema_dumps(mocker):
     return mocker.patch.object(volume_attribute_schema, 'dumps')
 
 
-@pytest.fixture
-def packer_schema_loads(mocker):
+@fixture
+def p_packer_schema_loads(mocker):
     return mocker.patch.object(packer_schema, 'loads')
 
 
-@pytest.fixture
-def packer_schema_dumps(mocker):
+@fixture
+def p_packer_schema_dumps(mocker):
     return mocker.patch.object(packer_schema, 'dumps')
 
 
-@pytest.fixture
-def flask_app(volume_manager):
-    app = Flask(__name__)
-    api = Api(app, errors=unhandled_exception_errors, catch_all_404s=True)
-
-    app.volume_manager = volume_manager
-    app.config.update(**config)
-
-    app.config['TESTING'] = True
-    register_resources(api)
-
-    return app
+@fixture
+def flask_app(m_volume_manager):
+    return Api._create_app(m_volume_manager, testing=True)
 
 
 class DummyVolume:
