@@ -6,7 +6,7 @@ from engine import Lease
 class TestLease:
     def test_initialization(self, mocker):
         lock = mocker.MagicMock(is_acquired=False)
-        lease = Lease(lock, 9, 10)
+        lease = Lease(lock, {'lease_ttl': 10, 'refresh_ttl': 11})
 
         assert lease.lock == lock
         assert lease.lease_ttl == 10
@@ -23,7 +23,7 @@ class TestLease:
 
         mocker.patch('engine.lease.time.sleep', return_value=None)
 
-        lease = Lease(lock, 10, 6)
+        lease = Lease(lock, {'lease_ttl': 10, 'refresh_ttl': 6})
 
         with pytest.raises(RuntimeError):
             lease.acquire()
@@ -32,7 +32,7 @@ class TestLease:
 
     def test_quit_acquire(self, mocker):
         lock = mocker.MagicMock(is_acquired=False)
-        lease = Lease(lock, 10, 6)
+        lease = Lease(lock, {'lease_ttl': 10, 'refresh_ttl': 11})
 
         lease.quit = True
         lease.acquire()
