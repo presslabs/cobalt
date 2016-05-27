@@ -2,12 +2,12 @@ import gevent
 
 from flask import Flask
 from gevent.pywsgi import WSGIServer
-from werkzeug.debug import DebuggedApplication
 
 from utils import Service, Connection
 
 
 class Api(Service):
+    # TODO drop namedtuple and validate
     def __init__(self, app: Flask, connection: Connection=Connection('', 5000)) -> None:
         self._api_server = WSGIServer(connection, app)
 

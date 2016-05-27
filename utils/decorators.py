@@ -3,7 +3,7 @@ from functools import wraps
 from flask import current_app
 
 
-def state_or_409(volume, state):
+def state_or_409(volume, state='ready'):
     def decorator(f):
         decorator.__name__ = f.__name__
         decorator.__doc__ = f.__doc__
@@ -17,29 +17,8 @@ def state_or_409(volume, state):
 
         @wraps(f)
         def ok(*args, **kwargs):
-            return f(*args, **kwargs)
+            return f(volume=volume, *args, **kwargs)
         return ok
-    return decorator
-
-
-def get_volume_or_404(manager, volume_id='0'):
-    def decorator(f):
-        decorator.__name__ = f.__name__
-        decorator.__doc__ = f.__doc__
-
-        @wraps(f)
-        def not_found():
-            return {'message': 'Not Found'}, 404
-
-        volume = manager.by_id(volume_id)
-        if volume is None:
-            return not_found
-
-        @wraps(f)
-        def found(*args, **kwargs):
-            kwargs['volume'] = volume
-            return f(*args, **kwargs)
-        return found
     return decorator
 
 
@@ -62,3 +41,25 @@ def inject_volume_manager(f):
         kwargs['volume_manager'] = current_app.volume_manager
         return f(*args, **kwargs)
     return inner_dec
+
+
+@inject_volume_manager
+def get_volume_or_404(volume_manager, volume_id='0'):
+    def decorator(f):
+        decorator.__name__ = f.__name__
+        decorator.__doc__ = f.__doc__
+
+        @wraps(f)
+        def not_found():
+            return {'message': 'Not Found'}, 404
+
+        volume = volume_manager.by_id(volume_id)
+        if volume is None:
+            return not_found
+
+        @wraps(f)
+        def found(*args, **kwargs):
+            return f(volume=volume, *args, **kwargs)
+        return found
+    return decorator
+

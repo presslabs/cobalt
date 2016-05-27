@@ -3,6 +3,7 @@ import pytest
 from utils import inject_var, get_volume_or_404, state_or_409, inject_volume_manager
 from tests.conftest import dummy_ready_volume
 
+
 class TestDecorators:
     def test_inject_var(self):
         key = 'foo'
@@ -19,15 +20,16 @@ class TestDecorators:
         assert test.__name__ == 'test'
 
     @pytest.mark.parametrize('by_id_return', [None, {}])
-    def test_get_volume_or_404(self, by_id_return, volume_manager, volume_manager_by_id):
+    def test_get_volume_or_404(self, by_id_return, flask_app, volume_manager_by_id):
         volume_manager_by_id.return_value = by_id_return
         volume_id = '1'
 
-        @get_volume_or_404(volume_manager, volume_id)
-        def test(volume):
-            """Testing"""
-            assert volume is not None
-            assert volume == by_id_return
+        with flask_app.app_context():
+            @get_volume_or_404(volume_id=volume_id)
+            def test(volume):
+                """Testing"""
+                assert volume is not None
+                assert volume == by_id_return
 
         result = test()
         if by_id_return is None:

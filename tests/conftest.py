@@ -95,11 +95,11 @@ def packer_schema_dumps(mocker):
 
 
 @pytest.fixture
-def flask_app(etcd_client):
+def flask_app(volume_manager):
     app = Flask(__name__)
     api = Api(app, errors=unhandled_exception_errors, catch_all_404s=True)
 
-    app.volume_manager = Volume(etcd_client)
+    app.volume_manager = volume_manager
     app.config.update(**config)
 
     app.config['TESTING'] = True
