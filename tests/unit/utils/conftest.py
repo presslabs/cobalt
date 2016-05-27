@@ -1,13 +1,13 @@
-import pytest
+from pytest import fixture
 
 from utils import Service, ReadOnlyDict
 
 
-@pytest.fixture(scope='module')
+@fixture(scope='module')
 def service():
     return Service()
 
 
-@pytest.fixture
+@fixture
 def ro_dictionary():
     return ReadOnlyDict({'test': [1, 2, 3], 'foo': 'bar'})
