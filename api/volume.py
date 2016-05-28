@@ -1,4 +1,4 @@
-from flask import current_app, request
+from flask import current_app as app, request
 from flask_restful import Resource
 
 from models import volume_attribute_schema, volume_schema, VolumeSchema
@@ -7,8 +7,8 @@ from models import volume_attribute_schema, volume_schema, VolumeSchema
 class Volume(Resource):
     @staticmethod
     def get(volume_id):
-        volume_manager = current_app.volume_manager
-        volume = volume_manager.by_id(volume_id)
+        manager = app.volume_manager
+        volume = manager.by_id(volume_id)
 
         if volume is None:
             return {'message': 'Not Found'}, 404
@@ -18,9 +18,9 @@ class Volume(Resource):
 
     @staticmethod
     def put(volume_id):
-        volume_manager = current_app.volume_manager
+        manager = app.volume_manager
 
-        volume = volume_manager.by_id(volume_id)
+        volume = manager.by_id(volume_id)
         if volume is None:
             return {'message': 'Not Found'}, 404
 
@@ -36,18 +36,18 @@ class Volume(Resource):
 
         volume.unpacked_value['requested'] = new_volume
 
-        volume = volume_manager.update(volume)
+        volume = manager.update(volume)
         if not volume:
             return {'message': 'Resource changed during transition.'}, 409
 
         result, _ = volume_schema.dump(volume)
-        return result, 202, {'Location': current_app.api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
+        return result, 202, {'Location': app.api.url_for(Volume, volume_id=volume.unpacked_value['id'])}
 
     @staticmethod
     def delete(volume_id):
-        volume_manager = current_app.volume_manager
+        manager = app.volume_manager
 
-        volume = volume_manager.by_id(volume_id)
+        volume = manager.by_id(volume_id)
         if volume is None:
             return {'message': 'Not Found'}, 404
 
@@ -55,26 +55,24 @@ class Volume(Resource):
             return {'message': 'Resource not in ready state, can\'t delete.'}, 409
 
         volume.unpacked_value['state'] = 'deleting'
-        volume = volume_manager.update(volume)
+        volume = manager.update(volume)
 
         if not volume:
             return {'message': 'Resource changed during transition.'}, 409
 
         result, _ = volume_schema.dump(volume)
-        return result, 202, {'Location': current_app.api.url_for(Volume, volume_id=result['id'])}
+        return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}
 
 
 class VolumeList(Resource):
     @staticmethod
     def get():
-        volume_manager = current_app.volume_manager
-
-        result, _ = volume_schema.dump(volume_manager.all(), many=True)
+        result, _ = volume_schema.dump(app.volume_manager.all(), many=True)
         return result
 
     @staticmethod
     def post():
-        volume_manager = current_app.volume_manager
+        manager = app.volume_manager
 
         fields = ('name', 'meta', 'requested',)
         data, errors = VolumeSchema(only=fields).load(request.get_json(force=True))
@@ -86,8 +84,8 @@ class VolumeList(Resource):
         data['state'] = 'registered'
         data['actual'] = {}
 
-        volume = volume_manager.create(data)
+        volume = manager.create(data)
 
-        result, errors = volume_schema.dump(volume)
-        return result, 202, {'Location': current_app.api.url_for(Volume, volume_id=result['id'])}
+        result, _ = volume_schema.dump(volume)
+        return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}
 
