@@ -25,17 +25,8 @@ class VolumeManager(object):
 
         return self._unpack([volume])[0]
 
-    def by_machine(self, machine_id):
-        pass
-
-    def by_state(self, status):
-        data = []
-
-        volumes = self.all()
-        for entry in volumes:
-            if 'state' in entry.unpacked_value and entry.unpacked_value['state'] == status:
-                data.append(entry)
-        return data
+    def by_state(self, state):
+        return [volume for volume in self.all() if volume.unpacked_value.get('state') == state]
 
     def create(self, volume: dict):
         volume, _ = packer_schema.dumps(volume)
@@ -107,6 +98,7 @@ class VolumeSchema(PackerSchema):
         id = VolumeManager.get_id_from_key(etcd_key)
 
         return id
+
 
 volume_schema = VolumeSchema()
 packer_schema = PackerSchema()

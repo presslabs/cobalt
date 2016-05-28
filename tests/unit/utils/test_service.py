@@ -1,14 +1,12 @@
-from pytest import mark, raises
+from pytest import raises
+
+from utils import Service
 
 
-@mark.parametrize('method', ['start', 'stop'])
 class TestService:
-    def test_has_method(self, method, service):
-        assert hasattr(service, method)
-        assert callable(getattr(service, method))
+    def test_is_abstract(self):
+        with raises(TypeError):
+            Service()
 
-    def test_method_unimplemented(self, method, service):
-        func = getattr(service, method)
-
-        with raises(NotImplementedError):
-            func()
+    def test_has_start_stop_methods(self):
+        assert list(Service.__abstractmethods__) == ['start', 'stop']

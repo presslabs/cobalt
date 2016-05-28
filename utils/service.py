@@ -1,9 +1,11 @@
-from gevent import Greenlet
+from abc import ABC, abstractmethod
 
 
-class Service(object):
-    def start(self) -> [Greenlet]:
-        raise NotImplementedError()
+class Service(ABC):
+    @abstractmethod
+    def start(self):
+        pass
 
-    def stop(self) -> bool:
-        raise NotImplementedError()
+    @abstractmethod
+    def stop(self):
+        pass

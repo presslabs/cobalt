@@ -1,11 +1,6 @@
 from pytest import fixture
 
-from utils import Service, ReadOnlyDict
-
-
-@fixture(scope='module')
-def service():
-    return Service()
+from utils import ReadOnlyDict
 
 
 @fixture

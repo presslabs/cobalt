@@ -11,10 +11,6 @@ class TestEngine:
     def test_inherits_from_service(self, engine):
         assert isinstance(engine, Service)
 
-    @mark.parametrize('method', ['start', 'stop'])
-    def test_implements_from_service(self, method):
-        assert Engine.__dict__.get(method)
-
     def test_start(self, mocker, engine, m_lease, p_gevent_spawn):
         mocked_greenlet = mocker.MagicMock()
         p_gevent_spawn.return_value = mocked_greenlet

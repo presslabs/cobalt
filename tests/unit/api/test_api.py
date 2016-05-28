@@ -9,10 +9,6 @@ class TestApi:
     def test_inherits_from_service(self, api_service):
         assert isinstance(api_service, Service)
 
-    @mark.parametrize('method', ['start', 'stop'])
-    def test_implements_from_service(self, method):
-        assert Api.__dict__.get(method)
-
     def test_start(self, mocker, api_service, p_api_server, p_gevent_spawn):
         mocked_greenlet = mocker.MagicMock()
         p_gevent_spawn.return_value = mocked_greenlet
