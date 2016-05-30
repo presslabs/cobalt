@@ -1,0 +1,4 @@
+-r common.txt
+
+pytest==2.9.1
+pytest-mock==0.11.0
