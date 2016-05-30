@@ -1,9 +1,8 @@
 import etcd
-
 from pytest import mark
 from pytest_mock import mock_module
 
-from models.base_manager import BaseManager, base_schema
+from models.managers.base_manager import BaseManager, base_schema
 from tests.conftest import dummy_ready_volume
 
 

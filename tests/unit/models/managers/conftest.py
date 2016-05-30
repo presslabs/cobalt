@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from models.base_manager import BaseManager, base_schema
+from models.managers.base_manager import BaseManager, base_schema
 
 
 @fixture
