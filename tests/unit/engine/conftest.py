@@ -6,8 +6,8 @@ from engine import Engine, Lease, Executor
 
 @fixture
 @mark.usefixtures('p_create_leaser', 'p_create_lock', 'p_create_executor')
-def engine(m_etcd_client, m_volume_manager):
-    return Engine(m_etcd_client, m_volume_manager,
+def engine(m_etcd_client, volume_manager):
+    return Engine(m_etcd_client, volume_manager,
                   {'leaser': {'lease_ttl': 0, 'refresh_ttl': 0}, 'executor': {'timeout': 10}})
 
 

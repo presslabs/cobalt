@@ -26,33 +26,33 @@ def p_etcd_client_write(mocker, m_etcd_client):
 
 
 @fixture
-def m_volume_manager(m_etcd_client):
+def volume_manager(m_etcd_client):
     return VolumeManager(m_etcd_client)
 
 
 @fixture
-def p_volume_manager_all(mocker, m_volume_manager):
-    return mocker.patch.object(m_volume_manager, 'all')
+def p_volume_manager_all(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'all')
 
 
 @fixture
-def p_volume_manager_by_id(mocker, m_volume_manager):
-    return mocker.patch.object(m_volume_manager, 'by_id')
+def p_volume_manager_by_id(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'by_id')
 
 
 @fixture
-def p_volume_manager_update(mocker, m_volume_manager):
-    return mocker.patch.object(m_volume_manager, 'update')
+def p_volume_manager_update(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'update')
 
 
 @fixture
-def p_key_getter(mocker, m_volume_manager):
-    return mocker.patch.object(m_volume_manager, 'get_id_from_key')
+def p_key_getter(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'get_id_from_key')
 
 
 @fixture
-def p_unpacker(mocker, m_volume_manager):
-    return mocker.patch.object(m_volume_manager, '_unpack')
+def p_unpacker(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, '_unpack')
 
 
 @fixture
@@ -107,8 +107,8 @@ def p_packer_schema_dumps(mocker):
 
 
 @fixture
-def flask_app(m_volume_manager):
-    return Api._create_app(m_volume_manager, testing=True)
+def flask_app(volume_manager):
+    return Api._create_app(volume_manager, testing=True)
 
 
 class DummyVolume:

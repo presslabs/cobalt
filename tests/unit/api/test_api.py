@@ -32,12 +32,12 @@ class TestApi:
 
     @mark.usefixtures('p_flask_restful')
     @mark.parametrize('testing', [True, False])
-    def test_create_app(self, testing, m_volume_manager, m_flask_restful):
-        app = Api._create_app(m_volume_manager, testing)
+    def test_create_app(self, testing, volume_manager, m_flask_restful):
+        app = Api._create_app(volume_manager, testing)
 
         assert app.config['TESTING'] == testing
         assert app.api == m_flask_restful
-        assert app.volume_manager == m_volume_manager
+        assert app.volume_manager == volume_manager
 
     def test_register_resources(self, m_flask_restful):
         Api._register_resources(m_flask_restful)
