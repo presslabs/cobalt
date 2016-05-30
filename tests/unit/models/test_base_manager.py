@@ -54,19 +54,21 @@ class TestBaseManager:
         assert volume == etcd_result_mock
         p_etcd_client_read.assert_called_with('/{}/{}'.format(BaseManager.KEY, '1'))
 
-    def test_volume_create(self, p_etcd_client_write, p_base_schema_dumps, p_base_manager_unpacker, base_manager,
-                           mocker):
-
+    @mark.parametrize('suffix', ['', 'suffix'])
+    def test_volume_create(self, suffix, p_etcd_client_write, p_base_schema_dumps, p_base_manager_unpacker,
+                           base_manager, mocker):
         p_base_schema_dumps.return_value = ('{}', {})
         etcd_result_mock = mocker.MagicMock(name='', value='{}')
         p_etcd_client_write.return_value = etcd_result_mock
         p_base_manager_unpacker.return_value = [etcd_result_mock]
 
-        result = base_manager.create({})
+        result = base_manager.create({}, suffix=suffix)
 
+        append = True if suffix == '' else False
         p_base_schema_dumps.assert_called_with({})
-        p_etcd_client_write.assert_called_with('/{}/'.format(BaseManager.KEY), p_base_schema_dumps.return_value[0],
-                                               append=True)
+        p_etcd_client_write.assert_called_with('/{}/{}'.format(BaseManager.KEY, suffix),
+                                               p_base_schema_dumps.return_value[0],
+                                               append=append)
         p_base_manager_unpacker.assert_called_with([etcd_result_mock])
         assert result == etcd_result_mock
 
