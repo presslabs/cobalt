@@ -1,5 +1,6 @@
 import gevent
 import time
+
 from etcd import Lock
 
 from utils import Service
@@ -8,12 +9,14 @@ from .executor import Executor
 
 
 class Engine(Service):
-    def __init__(self, etcd, volume_manager, context):
+    def __init__(self, etcd, volume_manager, machine_manager, context):
         self.lease = self._create_leaser(self._create_lock(etcd), context['leaser'])
-        self.executor = self._create_executor(volume_manager, context['executor'])
+        self.executor = self._create_executor(volume_manager, machine_manager, context['executor'])
 
+        self._machine_manager = machine_manager
         self._leaser_loop = None
         self._runner_loop = None
+        self._machine_loop = None
 
         self._started = False
 
@@ -25,8 +28,9 @@ class Engine(Service):
 
         self._leaser_loop = gevent.spawn(self.lease.acquire)
         self._runner_loop = gevent.spawn(self._run)
+        self._machine_loop = gevent.spawn(self._machine_heartbeat)
 
-        return [self._runner_loop, self._leaser_loop]
+        return [self._machine_loop, self._runner_loop, self._leaser_loop]
 
     def stop(self):
         if not self._started:
@@ -51,13 +55,33 @@ class Engine(Service):
             self.executor.tick()
             time.sleep(0)
 
+    def _machine_heartbeat(self):
+        machines = None
+
+        while not self._quit:
+            if not self.lease.is_held:
+                self.executor.timeout()
+                continue
+
+            if machines is None:
+                machines = self._machine_manager.all()
+                self.executor.timeout()
+                continue
+
+            new_machines = self._machine_manager.all()
+            if machines != new_machines:
+                machines = new_machines
+                self.executor.reset()
+
+            self.executor.timeout()
+
     @staticmethod
     def _create_lock(etcd):
         return Lock(etcd, 'leader-election')
 
     @staticmethod
-    def _create_executor(volume_manager, context):
-        return Executor(volume_manager, context)
+    def _create_executor(volume_manager, machine_manager, context):
+        return Executor(volume_manager, machine_manager, context)
 
     @staticmethod
     def _create_leaser(lock, context):

@@ -65,6 +65,30 @@ def p_json_loads(mocker):
 
 
 @fixture
+def machine_manager(m_etcd_client):
+    return MachineManager(m_etcd_client)
+
+
+@fixture
+def p_machine_manager_all(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'all')
+
+
+@fixture
+def p_machine_manager_by_id(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'by_id')
+
+
+@fixture
+def p_machine_manager_update(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'update')
+
+@fixture
+def p_machine_manager_create(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'create')
+
+
+@fixture
 def m_etcd_dir_result(mocker):
     entry_mock = mocker.MagicMock(
         dir=False,
