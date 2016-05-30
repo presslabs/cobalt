@@ -53,6 +53,7 @@ class TestVolume:
                            'name': '',
                            'requested': {'constraints': [], 'reserved_size': 1},
                            'actual': {},
+                           'node': '',
                            'state': 'registered'}
         expected_code = 202
 
@@ -74,6 +75,7 @@ class TestVolume:
                            'name': 'ok',
                            'requested': {'constraints': [], 'reserved_size': 10},
                            'actual': {},
+                           'node': '',
                            'state': 'registered'}
 
         expected_code = 202

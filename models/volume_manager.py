@@ -75,6 +75,7 @@ class PackerSchema(Schema):
 
     state = fields.String(default='registered', missing='registered')
     name = fields.String(default='', missing='')
+    node = fields.String(default='', missing='')
     error = fields.String(default='', missing='')
     error_count = fields.Integer(default=0, missing=0)
 
