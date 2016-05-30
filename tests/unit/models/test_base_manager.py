@@ -68,6 +68,7 @@ class TestBaseManager:
         p_etcd_client_write.assert_called_with('/{}/{}'.format(BaseManager.KEY, suffix),
                                                '{}',
                                                append=append)
+
         p_base_manager_load_from_etcd.assert_called_with(etcd_result_mock)
         assert result == etcd_result_mock
 
