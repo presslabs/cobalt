@@ -9,4 +9,5 @@ class TestService:
             Service()
 
     def test_has_start_stop_methods(self):
-        assert list(Service.__abstractmethods__) == ['start', 'stop']
+        for method in ['start', 'stop']:
+            assert method in Service.__abstractmethods__

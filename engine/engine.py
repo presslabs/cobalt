@@ -1,4 +1,5 @@
 import gevent
+import time
 from etcd import Lock
 
 from utils import Service
@@ -48,7 +49,7 @@ class Engine(Service):
                 continue
 
             self.executor.tick()
-            self.executor.timeout()
+            time.sleep(0)
 
     @staticmethod
     def _create_lock(etcd):

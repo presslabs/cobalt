@@ -35,7 +35,7 @@ class TestEngine:
         assert not engine.stop()
 
     @mark.parametrize('lease_held', [False, True])
-    def test_run_with_lease(self, mocker, lease_held, engine, m_lease, m_executor):
+    def test_run_with_lease(self, mocker, p_time_sleep, lease_held, engine, m_lease, m_executor):
         engine._started = True
         engine.lease = m_lease
         engine.executor = m_executor
@@ -47,9 +47,10 @@ class TestEngine:
 
         if lease_held:
             m_executor.tick.assert_called_once_with()
+            p_time_sleep.assert_called_once_with(0)
         else:
+            m_executor.timeout.assert_called_once_with()
             m_executor.reset.assert_called_once_with()
-        m_executor.timeout.assert_called_once_with()
 
     def test_create_lock(self, m_etcd_client):
         actual = Engine._create_lock(m_etcd_client)
