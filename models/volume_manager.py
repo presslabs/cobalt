@@ -60,6 +60,9 @@ class VolumeManager(BaseManager):
 
         return volume
 
+    def watch(self, index=None, timeout=0):
+        return self.client.watch(VolumeManager.KEY, recursive=True, index=index, timeout=timeout)
+
     @staticmethod
     def get_id_from_key(key):
         return key[len(VolumeManager.KEY) + 2:]

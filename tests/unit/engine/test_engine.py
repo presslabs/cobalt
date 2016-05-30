@@ -16,11 +16,12 @@ class TestEngine:
         p_gevent_spawn.return_value = mocked_greenlet
         engine.lease = m_lease
 
-        assert engine.start() == [mocked_greenlet, mocked_greenlet]
+        assert engine.start() == [mocked_greenlet, mocked_greenlet, mocked_greenlet]
         assert not engine.start()
 
         call = mock_module.call
-        p_gevent_spawn.assert_has_calls([call(m_lease.acquire), call(engine._run)], any_order=True)
+        p_gevent_spawn.assert_has_calls([call(m_lease.acquire), call(engine._run), call(engine._machine_heartbeat)],
+                                        any_order=True)
 
         assert engine.stop()
 
@@ -62,8 +63,7 @@ class TestEngine:
 
         assert isinstance(actual, Lease)
 
-    def test_create_executor(self, volume_manager):
-        actual = Engine._create_executor(volume_manager, {'timeout': 0})
+    def test_create_executor(self, volume_manager, machine_manager):
+        actual = Engine._create_executor(volume_manager, machine_manager, {'timeout': 0})
 
         assert isinstance(actual, Executor)
-
