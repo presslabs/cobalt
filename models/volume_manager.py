@@ -1,64 +1,6 @@
-import etcd
-
 from marshmallow import fields, Schema, utils, validate
 
-
-class VolumeManager(object):
-    KEY = 'volumes'
-
-    def __init__(self, etcd_client):
-        self.client = etcd_client
-
-    def all(self):
-        try:
-            volumes = [volume for volume in self.client.read(VolumeManager.KEY, sorted=True).leaves if not volume.dir]
-        except etcd.EtcdKeyNotFound:
-            volumes = []
-
-        return self._unpack(volumes)
-
-    def by_id(self, id):
-        try:
-            volume = self.client.read('/{}/{}'.format(VolumeManager.KEY, id))
-        except etcd.EtcdKeyNotFound:
-            return None
-
-        return self._unpack([volume])[0]
-
-    def by_state(self, state):
-        return [volume for volume in self.all() if volume.unpacked_value.get('state') == state]
-
-    def create(self, volume: dict):
-        volume, _ = packer_schema.dumps(volume)
-        volume = self.client.write(VolumeManager.KEY, volume, append=True)
-        volume = self._unpack([volume])[0]
-
-        return volume
-
-    def update(self, volume):
-        volume.value, _ = packer_schema.dumps(volume.unpacked_value)
-
-        try:
-            volume = self.client.update(volume)
-        except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
-            return False
-
-        volume = self._unpack([volume])[0]
-        # add id manually as it is ignored on load from json
-        volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
-
-        return volume
-
-    def _unpack(self, volumes):
-        # we trust that etcd data is valid
-        for volume in volumes:
-            volume.unpacked_value, _ = volume_schema.loads(volume.value)
-
-        return volumes
-
-    @classmethod
-    def get_id_from_key(cls, key):
-        return key[len(VolumeManager.KEY) + 2:]
+from .base_manager import BaseManager
 
 
 class VolumeAttributeSchema(Schema):
@@ -104,3 +46,31 @@ class VolumeSchema(PackerSchema):
 volume_schema = VolumeSchema()
 packer_schema = PackerSchema()
 volume_attribute_schema = VolumeAttributeSchema()
+
+
+class VolumeManager(BaseManager):
+    KEY = 'volumes'
+    SCHEMA = packer_schema
+
+    def by_state(self, state):
+        return [volume for volume in self.all() if volume.unpacked_value.get('state') == state]
+
+    def update(self, volume):
+        volume = super(VolumeManager, self).update(volume)
+
+        if not volume:
+            return False
+
+        volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
+        return volume
+
+    def _unpack(self, volumes):
+        # we trust that etcd data is valid
+        for volume in volumes:
+            volume.unpacked_value, _ = volume_schema.loads(volume.value)
+
+        return volumes
+
+    @staticmethod
+    def get_id_from_key(key):
+        return key[len(VolumeManager.KEY) + 2:]

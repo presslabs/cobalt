@@ -62,8 +62,8 @@ class TestEngine:
 
         assert isinstance(actual, Lease)
 
-    def test_create_executor(self, m_volume_manager):
-        actual = Engine._create_executor(m_volume_manager, {'timeout': 0})
+    def test_create_executor(self, volume_manager):
+        actual = Engine._create_executor(volume_manager, {'timeout': 0})
 
         assert isinstance(actual, Executor)
 

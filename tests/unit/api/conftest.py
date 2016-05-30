@@ -8,8 +8,8 @@ from api import Api
 
 @fixture
 @mark.usefixtures('p_wsgi', 'p_create_app')
-def api_service(m_volume_manager):
-    return Api(m_volume_manager, {'host': '', 'port': 5000})
+def api_service(volume_manager):
+    return Api(volume_manager, {'host': '', 'port': 5000})
 
 
 @fixture
