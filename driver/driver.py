@@ -3,7 +3,11 @@ from abc import ABCMeta, abstractmethod
 
 class Driver(metaclass=ABCMeta):
     @abstractmethod
-    def create(self):
+    def create(self, requirements):
+        pass
+
+    @abstractmethod
+    def _set_quota(self, id, quota):
         pass
 
     @abstractmethod
@@ -19,5 +23,5 @@ class Driver(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def expose(self, id):
+    def expose(self, id, host, permissions):
         pass
