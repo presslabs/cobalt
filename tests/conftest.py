@@ -1,8 +1,7 @@
 from pytest import fixture
 
 from api import Api
-
-from models import VolumeManager, volume_schema, packer_schema, volume_attribute_schema
+from models import VolumeManager
 
 
 @fixture
@@ -51,8 +50,18 @@ def p_key_getter(mocker, volume_manager):
 
 
 @fixture
-def p_unpacker(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, '_unpack')
+def p_load_from_etcd(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, '_load_from_etcd')
+
+
+@fixture
+def p_json_dumps(mocker):
+    return mocker.patch('flask.json.dumps')
+
+
+@fixture
+def p_json_loads(mocker):
+    return mocker.patch('flask.json.loads')
 
 
 @fixture
@@ -77,36 +86,6 @@ def m_etcd_dir_result(mocker):
 
 
 @fixture
-def p_volume_schema_loads(mocker):
-    return mocker.patch.object(volume_schema, 'loads')
-
-
-@fixture
-def p_volume_schema_dumps(mocker):
-    return mocker.patch.object(volume_schema, 'dumps')
-
-
-@fixture
-def p_volume_attribute_schema_loads(mocker):
-    return mocker.patch.object(volume_attribute_schema, 'loads')
-
-
-@fixture
-def p_volume_attribute_schema_dumps(mocker):
-    return mocker.patch.object(volume_attribute_schema, 'dumps')
-
-
-@fixture
-def p_packer_schema_loads(mocker):
-    return mocker.patch.object(packer_schema, 'loads')
-
-
-@fixture
-def p_packer_schema_dumps(mocker):
-    return mocker.patch.object(packer_schema, 'dumps')
-
-
-@fixture
 def flask_app(volume_manager):
     return Api._create_app(volume_manager, testing=True)
 
@@ -117,10 +96,10 @@ class DummyVolume:
             self.__setattr__(key, val)
 
 
-dummy_ready_volume = DummyVolume(value='{"name": "test", "state": "ready"}',
-                                 unpacked_value={'name': 'test', 'state': 'ready'},
+dummy_ready_volume = DummyVolume(value={'name': 'test', 'state': 'ready'},
+                                 value_json='{"name": "test", "state": "ready"}',
                                  key='/volumes/1')
 
-dummy_invalid_state_volume = DummyVolume(value='{"name": "test", "state": "NONE"}',
-                                         unpacked_value={'name': 'test', 'state': 'NONE'},
+dummy_invalid_state_volume = DummyVolume(value={'name': 'test', 'state': 'NONE'},
+                                         value_json='{"name": "test", "state": "NONE"}',
                                          key='/volumes/2')

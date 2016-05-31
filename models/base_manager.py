@@ -1,16 +1,14 @@
 import etcd
+from flask import json
 from marshmallow import Schema
 
 
 class BaseSchema(Schema):
     pass
 
-base_schema = BaseSchema()
-
 
 class BaseManager:
     KEY = ''
-    SCHEMA = base_schema
 
     def __init__(self, client):
         self.client = client
@@ -21,7 +19,7 @@ class BaseManager:
         except etcd.EtcdKeyNotFound:
             entries = []
 
-        return self._unpack(entries)
+        return self._load_from_etcd(entries)
 
     def by_id(self, entry_id):
         try:
@@ -29,32 +27,35 @@ class BaseManager:
         except etcd.EtcdKeyNotFound:
             return None
 
-        return self._unpack([entry])[0]
+        return self._load_from_etcd(entry)
 
     def create(self, data, suffix=''):
         append = True if suffix == '' else False
         key = '/{}/{}'.format(self.KEY, suffix)
 
-        entry, _ = self.SCHEMA.dumps(data)
-        entry = self.client.write(key, entry, append=append)
+        entry = self.client.write(key, json.dumps(data), append=append)
 
-        return self._unpack([entry])[0]
+        return self._load_from_etcd(entry)
 
     def update(self, entity):
-        entity.value, _ = self.SCHEMA.dumps(entity.unpacked_value)
+        entity.value = json.dumps(entity.value)
 
         try:
             entity = self.client.update(entity)
         except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
             return False
 
-        volume = self._unpack([entity])[0]
+        return self._load_from_etcd(entity)
 
-        return volume
-
-    def _unpack(self, entries):
+    def _load_from_etcd(self, data):
         # we trust that etcd data is valid
-        for entry in entries:
-            entry.unpacked_value, _ = self.SCHEMA.loads(entry.value)
+        try:
+            iter(data)
+        except TypeError:
+            data.value = json.loads(data.value)
+            return data
+        else:
+            for e in data:
+                e.value = json.loads(e.value)
 
-        return entries
+        return data
