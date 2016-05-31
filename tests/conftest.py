@@ -45,6 +45,11 @@ def p_volume_manager_update(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_watch(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'watch')
+
+
+@fixture
 def p_key_getter(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'get_id_from_key')
 
@@ -113,6 +118,11 @@ def m_etcd_dir_result(mocker):
 @fixture
 def flask_app(volume_manager):
     return Api._create_app(volume_manager, testing=True)
+
+
+@fixture
+def p_print(mocker):
+    return mocker.patch('builtins.print')
 
 
 class Dummy:

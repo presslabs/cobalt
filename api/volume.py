@@ -67,7 +67,7 @@ class Volume(Resource):
 class VolumeList(Resource):
     @staticmethod
     def get():
-        result, errors = VolumeSchema().dump(app.volume_manager.all(), many=True)
+        result, errors = VolumeSchema().dump(app.volume_manager.all()[1], many=True)
         return result
 
     @staticmethod

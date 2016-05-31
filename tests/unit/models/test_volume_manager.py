@@ -18,7 +18,7 @@ class TestVolumeManager:
         ([dummy_invalid_state_volume, dummy_ready_volume, dummy_invalid_state_volume], 'ready', [dummy_ready_volume])
     ])
     def test_volume_by_state(self, query, state_filter, result, volume_manager, p_volume_manager_all):
-        p_volume_manager_all.return_value = query
+        p_volume_manager_all.return_value = (None, query)
 
         volumes = volume_manager.by_state(state_filter)
 

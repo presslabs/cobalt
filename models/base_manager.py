@@ -15,11 +15,13 @@ class BaseManager:
 
     def all(self):
         try:
-            entries = [entry for entry in self.client.read(self.KEY, sorted=True).leaves if not entry.dir]
+            dir = self.client.read(self.KEY, sorted=True)
+            entries = [entry for entry in dir.leaves if not entry.dir]
         except etcd.EtcdKeyNotFound:
+            dir = None
             entries = []
 
-        return self._load_from_etcd(entries)
+        return dir, self._load_from_etcd(entries)
 
     def by_id(self, entry_id):
         try:

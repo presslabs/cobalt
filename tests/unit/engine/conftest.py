@@ -27,20 +27,30 @@ def m_executor(mocker):
 
 
 @fixture
+def executor(volume_manager, machine_manager):
+    return Executor(volume_manager, machine_manager, {'timeout': 0})
+
+
+@fixture
 def p_create_executor(mocker, engine):
     return mocker.patch.object(engine, '_create_executor')
 
 
 @fixture
-def p_executor_active_machine(mocker, engine):
+def p_engine_executor_active_machine(mocker, engine):
     return mocker.patch.object(engine.executor, 'get_active_machine_keys')
 
 
 @fixture
-def p_executor_timeout(mocker, engine):
+def p_engine_executor_timeout(mocker, engine):
     return mocker.patch.object(engine.executor, 'timeout')
 
 
 @fixture
-def p_executor_reset(mocker, engine):
+def p_engine_executor_reset(mocker, engine):
     return mocker.patch.object(engine.executor, 'reset')
+
+
+@fixture
+def p_executor_process(mocker, executor):
+    return mocker.patch.object(executor, '_process')
