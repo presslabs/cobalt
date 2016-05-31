@@ -11,7 +11,7 @@ class Node:
     def __init__(self, context):
         self._conf_path = context['machine']['conf_path']
         self._driver = BTRFSDriver(context['volume_path'])
-        self._node, self._labels = '', {}
+        self._name, self._labels = '', {}
 
         config = ConfigParser()
         config.read(self._conf_path)
@@ -26,8 +26,9 @@ class Node:
     def get_subvolumes(self):
         return self._driver.get_all()
 
-    def node(self):
-        return self._node
+    def name(self):
+        return self._name
 
     def labels(self):
         return self._labels
+
