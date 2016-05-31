@@ -55,6 +55,11 @@ class VolumeManager(BaseManager):
     def by_state(self, state):
         return [volume for volume in self.all() if volume.unpacked_value.get('state') == state]
 
+    def by_node(self, node):
+        return [volume for volume in self.all() if 'actual' in volume.unpacked_value.keys() and
+                'node' in volume.unpacked_value.get('actual').keys() and
+                volume.unpacked_value.get('actual')['node'] == node]
+
     def update(self, volume):
         volume = super(VolumeManager, self).update(volume)
 
