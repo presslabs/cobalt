@@ -59,3 +59,15 @@ class BTRFSDriver(Driver):
 
         return True
 
+    def get_all(self):
+        ids = []
+        try:
+            subvolumes = sh.btrfs.subvolume.list('-o', self._path)
+            for line in subvolumes:
+                line = line.strip()
+                id = int(line[line.index('{}/').format(self._path):].replace('{}/'.format(self._path), ''))
+                ids.append(id)
+        except sh.ErrorReturnCode_1 as e:
+            print(e.message, e.full_cmd)
+            return False
+        return ids
