@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from api import Api
-from models import VolumeManager
+from models import VolumeManager, MachineManager
 
 
 @fixture
@@ -82,6 +82,7 @@ def p_machine_manager_by_id(mocker, machine_manager):
 @fixture
 def p_machine_manager_update(mocker, machine_manager):
     return mocker.patch.object(machine_manager, 'update')
+
 
 @fixture
 def p_machine_manager_create(mocker, machine_manager):
