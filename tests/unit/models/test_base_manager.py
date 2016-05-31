@@ -14,8 +14,9 @@ class TestBaseManager:
     def test_all_key_not_found(self, p_etcd_client_read, base_manager):
         p_etcd_client_read.side_effect = etcd.EtcdKeyNotFound
 
-        volumes = base_manager.all()
+        dir, volumes = base_manager.all()
 
+        assert dir is None
         assert volumes == []
         p_etcd_client_read.assert_called_with(BaseManager.KEY, sorted=True)
 
@@ -28,7 +29,7 @@ class TestBaseManager:
         p_base_manager_load_from_etcd.return_value = [entry_mock]
 
         # run
-        volumes = base_manager.all()
+        _, volumes = base_manager.all()
 
         # make the needed assertions
         p_base_manager_load_from_etcd.assert_called_with([entry_mock])

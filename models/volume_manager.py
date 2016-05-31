@@ -43,7 +43,7 @@ class VolumeManager(BaseManager):
     KEY = 'volumes'
 
     def by_state(self, state):
-        return [volume for volume in self.all() if volume.value.get('state') == state]
+        return [volume for volume in self.all()[1] if volume.value.get('state') == state]
 
     def update(self, volume):
         volume = super(VolumeManager, self).update(volume)

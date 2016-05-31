@@ -26,7 +26,10 @@ class Executor:
 
     def tick(self):
         if self._should_reset:
-            self._volumes_to_process = self.volume_manager.all()
+            directory, self._volumes_to_process = self.volume_manager.all()
+
+            if directory is not None:
+                self._watch_index = directory.etcd_index
 
         if self._volumes_to_process:
             volume = self._volumes_to_process.pop()
