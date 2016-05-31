@@ -115,16 +115,23 @@ def flask_app(volume_manager):
     return Api._create_app(volume_manager, testing=True)
 
 
-class DummyVolume:
+class Dummy:
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
             self.__setattr__(key, val)
 
 
-dummy_ready_volume = DummyVolume(value={'name': 'test', 'state': 'ready'},
-                                 value_json='{"name": "test", "state": "ready"}',
-                                 key='/volumes/1')
+dummy_ready_volume = Dummy(value={'name': 'test', 'state': 'ready'},
+                           value_json='{"name": "test", "state": "ready"}',
+                           key='/volumes/1')
 
-dummy_invalid_state_volume = DummyVolume(value={'name': 'test', 'state': 'NONE'},
-                                         value_json='{"name": "test", "state": "NONE"}',
-                                         key='/volumes/2')
+dummy_invalid_state_volume = Dummy(value={'name': 'test', 'state': 'NONE'},
+                                   value_json='{"name": "test", "state": "NONE"}',
+                                   key='/volumes/2')
+
+dummy_machines = [Dummy(value={},
+                        value_json='{}',
+                        key='/machines/1'),
+                  Dummy(value={},
+                        value_json='{}',
+                        key='/machines/2')]

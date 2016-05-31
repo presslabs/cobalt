@@ -27,15 +27,20 @@ def m_executor(mocker):
 
 
 @fixture
-def p_lease(mocker):
-    return mocker.patch.object(Lease, '__init__')
-
-
-@fixture
-def p_executor(mocker):
-    return mocker.patch.object(Executor, '__init__')
-
-
-@fixture
 def p_create_executor(mocker, engine):
     return mocker.patch.object(engine, '_create_executor')
+
+
+@fixture
+def p_executor_active_machine(mocker, engine):
+    return mocker.patch.object(engine.executor, 'get_active_machine_keys')
+
+
+@fixture
+def p_executor_timeout(mocker, engine):
+    return mocker.patch.object(engine.executor, 'timeout')
+
+
+@fixture
+def p_executor_reset(mocker, engine):
+    return mocker.patch.object(engine.executor, 'reset')

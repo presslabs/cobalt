@@ -3,6 +3,7 @@ from etcd import Lock
 
 from pytest_mock import mock_module
 
+from tests.conftest import dummy_machines
 from utils import Service
 from engine import Engine, Lease, Executor
 
@@ -52,6 +53,94 @@ class TestEngine:
         else:
             m_executor.timeout.assert_called_once_with()
             m_executor.reset.assert_called_once_with()
+
+    def test_machine_heartbeat_quit(self, engine, mocker):
+        type(engine)._quit = mocker.PropertyMock(return_value=True)
+        timeout = mocker.patch.object(engine.executor, 'timeout')
+        reset = mocker.patch.object(engine.executor, 'reset')
+
+        engine._machine_heartbeat()
+
+        assert not timeout.called
+        assert not reset.called
+
+    @mark.usefixtures('p_executor_timeout', 'p_executor_reset')
+    def test_machine_heartbeat_no_lease(self, engine, mocker, m_lease):
+        engine.lease = m_lease
+        type(m_lease).is_held = mocker.PropertyMock(return_value=False)
+        type(engine)._quit = mocker.PropertyMock(side_effect=[False, True])
+
+        engine._machine_heartbeat()
+
+        executor = engine.executor
+
+        executor.timeout.assert_called_once_with()
+        assert not executor.reset.called
+
+    @mark.usefixtures('p_executor_timeout', 'p_executor_reset')
+    def test_machine_heartbeat_with_lease_once(self, engine, mocker, m_lease, p_executor_active_machine):
+        engine.lease = m_lease
+        type(m_lease).is_held = mocker.PropertyMock(return_value=True)
+        type(engine)._quit = mocker.PropertyMock(side_effect=[False, True])
+
+        p_executor_active_machine.return_value = ['1', '2']
+
+        executor = engine.executor
+        engine._machine_heartbeat()
+
+        executor.timeout.assert_called_once_with()
+        p_executor_active_machine.assert_called_once_with()
+        assert not executor.reset.called
+
+    @mark.usefixtures('p_executor_timeout', 'p_executor_reset')
+    def test_machine_heartbeat_with_lease_twice_no_change(self, engine, mocker, m_lease, p_executor_active_machine):
+        engine.lease = m_lease
+        type(m_lease).is_held = mocker.PropertyMock(return_value=True)
+        type(engine)._quit = mocker.PropertyMock(side_effect=[False, False, True])
+
+        p_executor_active_machine.return_value = ['1', '2']
+
+        executor = engine.executor
+        engine._machine_heartbeat()
+
+        call = mock_module.call
+        executor.timeout.has_calls([call(), call()])
+        p_executor_active_machine.has_calls([call(), call()])
+
+        assert not executor.reset.called
+
+    @mark.usefixtures('p_executor_timeout', 'p_executor_reset')
+    def test_machine_heartbeat_with_lease_twice_with_change(self, engine, mocker, m_lease, p_executor_active_machine):
+        engine.lease = m_lease
+        type(m_lease).is_held = mocker.PropertyMock(return_value=True)
+        type(engine)._quit = mocker.PropertyMock(side_effect=[False, False, True])
+
+        p_executor_active_machine.side_effect = [['1', '2'], []]
+
+        executor = engine.executor
+        engine._machine_heartbeat()
+
+        call = mock_module.call
+        executor.timeout.has_calls([call(), call()])
+        p_executor_active_machine.has_calls([call(), call()])
+
+        assert executor.reset.called
+
+    @mark.usefixtures('p_executor_timeout', 'p_executor_reset')
+    def test_machine_heartbeat_with_lease_thrice_no_change(self, engine, mocker, m_lease, p_executor_active_machine):
+        engine.lease = m_lease
+        type(m_lease).is_held = mocker.PropertyMock(return_value=True)
+        type(engine)._quit = mocker.PropertyMock(side_effect=[False, False, False, True])
+
+        p_executor_active_machine.side_effect = [['1', '2'], [], []]
+
+        executor = engine.executor
+        engine._machine_heartbeat()
+
+        call = mock_module.call
+        executor.timeout.has_calls([call(), call(), call()])
+        p_executor_active_machine.has_calls([call(), call(), call()])
+        executor.reset.assert_called_once_with()
 
     def test_create_lock(self, m_etcd_client):
         actual = Engine._create_lock(m_etcd_client)

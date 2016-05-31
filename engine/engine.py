@@ -13,7 +13,6 @@ class Engine(Service):
         self.lease = self._create_leaser(self._create_lock(etcd), context['leaser'])
         self.executor = self._create_executor(volume_manager, machine_manager, context['executor'])
 
-        self._machine_manager = machine_manager
         self._leaser_loop = None
         self._runner_loop = None
         self._machine_loop = None
@@ -61,14 +60,15 @@ class Engine(Service):
         while not self._quit:
             if not self.lease.is_held:
                 self.executor.timeout()
+                machines = None
                 continue
 
             if machines is None:
-                machines = self._machine_manager.all()
+                machines = self.executor.get_active_machine_keys()
                 self.executor.timeout()
                 continue
 
-            new_machines = self._machine_manager.all()
+            new_machines = self.executor.get_active_machine_keys()
             if machines != new_machines:
                 machines = new_machines
                 self.executor.reset()
