@@ -1,5 +1,4 @@
 import time
-import etcd
 
 
 class Executor:
@@ -34,15 +33,12 @@ class Executor:
         if self._volumes_to_process:
             volume = self._volumes_to_process.pop()
         else:
-            try:
-                volume = self.volume_manager.watch(timeout=self.delay, index=self._watch_index)
-
-                # watch may cause a context switch, a reset may have happened
-                if self._watch_index is not None:
-                    self._watch_index = volume.modifiedIndex + 1
-            except etcd.EtcdWatchTimedOut:
+            volume = self.volume_manager.watch(timeout=self.delay, index=self._watch_index)
+            if volume is None:
                 self.reset()
                 return
+
+            self._watch_index = volume.modifiedIndex + 1
 
         self._process(volume)
 
@@ -57,7 +53,8 @@ class Executor:
         pass
 
     def get_active_machine_keys(self):
-        return [entry.key for entry in self.machine_manager.all()]
+        _, machines = self.machine_manager.all()
+        return [entry.key for entry in machines]
 
     # TODO test volume_manager watch
     # TODO test executor
