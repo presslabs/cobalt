@@ -24,7 +24,7 @@ class Volume(Resource):
         if volume is None:
             return {'message': 'Not Found'}, 404
 
-        if volume.value.get('state') != 'ready':
+        if volume.value['state'] != 'ready':
             return {'message': 'Resource not in ready state, can\'t update.'}, 409
 
         new_volume, errors = VolumeAttributeSchema().load(request.get_json(force=True))
