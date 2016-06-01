@@ -27,8 +27,7 @@ class Executor:
 
     def tick(self):
         if self._should_reset:
-            directory, _volumes = self.volume_manager.all()
-            self._volumes_to_process = self.volume_manager.filter_states(_volumes, self.states_interested_in)
+            directory, self._volumes_to_process = self.volume_manager.all()
 
             if directory is not None:
                 self._watch_index = directory.etcd_index
@@ -46,6 +45,7 @@ class Executor:
         self._process(volume)
 
     def _process(self, volume):
+        in_state = self.volume_manager.filter_states([volume], self.states_interested_in)
         # make check to see if worth working on volume short-circuit
 
         # machines = self.machine_manager.all()
