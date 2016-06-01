@@ -43,8 +43,11 @@ class VolumeSchema(Schema):
 class VolumeManager(BaseManager):
     KEY = 'volumes'
 
-    def by_state(self, state):
-        return [volume for volume in self.all()[1] if volume.value.get('state') == state]
+    def by_states(self, states=None):
+        states = states or []
+        states = [states] if not isinstance(states, list) else states
+
+        return [volume for volume in self.all()[1] if volume.value['state'] in states]
 
     def update(self, volume):
         volume = super(VolumeManager, self).update(volume)
