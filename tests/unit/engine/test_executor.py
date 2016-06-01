@@ -85,11 +85,3 @@ class TestExecutor:
         assert p_volume_manager_all.called
         assert executor.reset.called
         assert not p_executor_process.called
-
-    def test_get_active_machines(self, mocker, executor, p_machine_manager_all):
-        machine = mocker.MagicMock(key=1)
-        p_machine_manager_all.return_value = (None, [machine])
-
-        active = executor.get_active_machine_keys()
-
-        assert active == [machine.key]

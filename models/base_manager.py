@@ -23,6 +23,9 @@ class BaseManager:
 
         return dir, self._load_from_etcd(entries)
 
+    def all_keys(self):
+        return [entry.key for entry in self.all()[1]]
+
     def by_id(self, entry_id):
         try:
             entry = self.client.read('/{}/{}'.format(self.KEY, entry_id))

@@ -35,6 +35,11 @@ def p_volume_manager_all(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_all_keys(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'all_keys')
+
+
+@fixture
 def p_volume_manager_by_id(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'by_id')
 
@@ -87,6 +92,11 @@ def p_machine_manager_by_id(mocker, machine_manager):
 @fixture
 def p_machine_manager_update(mocker, machine_manager):
     return mocker.patch.object(machine_manager, 'update')
+
+
+@fixture
+def p_machine_manager_all_keys(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'all_keys')
 
 
 @fixture
