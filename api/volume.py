@@ -81,7 +81,7 @@ class VolumeList(Resource):
             return {'message': errors}, 400
 
         data['node'] = ''
-        data['state'] = 'registered'
+        data['state'] = 'scheduling'
         data['actual'] = {}
         data['control'] = {
             'error': '',
