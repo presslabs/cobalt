@@ -52,10 +52,6 @@ class Executor:
 
         pass
 
-    def get_active_machine_keys(self):
-        _, machines = self.machine_manager.all()
-        return [entry.key for entry in machines]
-
     # TODO test volume_manager watch
     # TODO test executor
     # TODO test engine _machine loop

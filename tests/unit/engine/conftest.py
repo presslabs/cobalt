@@ -37,11 +37,6 @@ def p_create_executor(mocker, engine):
 
 
 @fixture
-def p_engine_executor_active_machine(mocker, engine):
-    return mocker.patch.object(engine.executor, 'get_active_machine_keys')
-
-
-@fixture
 def p_engine_executor_timeout(mocker, engine):
     return mocker.patch.object(engine.executor, 'timeout')
 
@@ -54,3 +49,8 @@ def p_engine_executor_reset(mocker, engine):
 @fixture
 def p_executor_process(mocker, executor):
     return mocker.patch.object(executor, '_process')
+
+
+@fixture
+def p_executor_active_machines(mocker, executor):
+    return mocker.patch.object(executor, 'get_active_machines')

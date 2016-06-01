@@ -10,8 +10,11 @@ from .executor import Executor
 
 class Engine(Service):
     def __init__(self, etcd, volume_manager, machine_manager, context):
+        self.volume_manager = volume_manager
+        self.machine_manager = machine_manager
+
         self.lease = self._create_leaser(self._create_lock(etcd), context['leaser'])
-        self.executor = self._create_executor(volume_manager, machine_manager, context['executor'])
+        self.executor = self._create_executor(self.volume_manager, self.machine_manager, context['executor'])
 
         self._leaser_loop = None
         self._runner_loop = None
@@ -64,11 +67,11 @@ class Engine(Service):
                 continue
 
             if machines is None:
-                machines = self.executor.get_active_machine_keys()
+                machines = self.machine_manager.all_keys()
                 self.executor.timeout()
                 continue
 
-            new_machines = self.executor.get_active_machine_keys()
+            new_machines = self.machine_manager.all_keys()
             if machines != new_machines:
                 machines = new_machines
                 self.executor.reset()
@@ -86,3 +89,4 @@ class Engine(Service):
     @staticmethod
     def _create_leaser(lock, context):
         return Lease(lock, context)
+

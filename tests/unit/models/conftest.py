@@ -24,6 +24,11 @@ def p_base_manager_update(mocker, base_manager):
 
 
 @fixture
+def p_base_manager_all_keys(mocker, base_manager):
+    return mocker.patch.object(base_manager, 'all_keys')
+
+
+@fixture
 def p_base_manager_update(mocker, base_manager):
     return mocker.patch.object(base_manager, 'create')
 
