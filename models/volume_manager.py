@@ -2,6 +2,7 @@ import etcd
 from marshmallow import fields, Schema, validate, utils
 
 from .base_manager import BaseManager
+from time import time
 
 
 class VolumeAttributeSchema(Schema):
@@ -49,17 +50,17 @@ class VolumeManager(BaseManager):
         return VolumeManager.filter_states(volumes, states)
 
     def update(self, volume):
+        volume.value['control']['update'] = time()
         volume = super(VolumeManager, self).update(volume)
 
         if not volume:
             return False
 
-        volume.value['id'] = self.get_id_from_key(volume.key)
         return volume
 
     def create(self, data, *unused):
+        data['control']['update'] = time()
         volume = super(VolumeManager, self).create(data, '')
-        volume.value['id'] = self.get_id_from_key(volume.key)
 
         return volume
 
