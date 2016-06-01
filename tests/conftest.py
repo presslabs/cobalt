@@ -55,6 +55,11 @@ def p_volume_manager_watch(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_filter_states(mocker):
+    return mocker.patch('models.volume_manager.VolumeManager.filter_states')
+
+
+@fixture
 def p_key_getter(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'get_id_from_key')
 

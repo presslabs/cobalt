@@ -11,7 +11,7 @@ class TestVolumeManager:
     def test_volume_manager_class_vars(self):
         assert VolumeManager.KEY == 'volumes'
 
-    @mark.parametrize('query,state_filter,result', [
+    @mark.parametrize('query,filter,expected_result', [
         # all() return value, state to query, result
         ([], 'NONE', []),
         ([dummy_ready_volume], 'ready', [dummy_ready_volume]),
@@ -21,13 +21,27 @@ class TestVolumeManager:
         ([dummy_invalid_state_volume], ['ready'], []),
         ([dummy_invalid_state_volume, dummy_ready_volume, dummy_invalid_state_volume], ['ready'], [dummy_ready_volume])
     ])
-    def test_volume_by_states(self, query, state_filter, result, volume_manager, p_volume_manager_all):
+    def test_volume_by_states(self, query, filter, expected_result, volume_manager, p_volume_manager_all):
         p_volume_manager_all.return_value = (None, query)
 
-        volumes = volume_manager.by_states(state_filter)
+        result = volume_manager.by_states(filter)
 
-        assert volumes == result
+        assert expected_result == result
         assert p_volume_manager_all.called
+
+    @mark.parametrize('volumes,filter,expected_result', [
+        ([], 'NONE', []),
+        ([dummy_ready_volume], 'ready', [dummy_ready_volume]),
+        ([dummy_ready_volume], 'readyish', []),
+        ([], ['NONE'], []),
+        ([dummy_ready_volume], ['ready'], [dummy_ready_volume]),
+        ([dummy_invalid_state_volume], ['ready'], []),
+        ([dummy_invalid_state_volume, dummy_ready_volume, dummy_invalid_state_volume], ['ready'], [dummy_ready_volume])
+    ])
+    def test_volume_filter_states(self, volumes, filter, expected_result):
+        result = VolumeManager.filter_states(volumes, filter)
+
+        assert expected_result == result
 
     @mark.parametrize('parent_return', [False, dummy_ready_volume])
     def test_volume_update(self, mocker, parent_return, volume_manager, p_key_getter):

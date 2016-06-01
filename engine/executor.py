@@ -2,6 +2,8 @@ import time
 
 
 class Executor:
+    states_interested_in = ['registered', 'scheduling', 'pending']
+
     def __init__(self, volume_manager, machine_manager, context):
         self.volume_manager = volume_manager
         self.machine_manager = machine_manager
@@ -25,7 +27,8 @@ class Executor:
 
     def tick(self):
         if self._should_reset:
-            directory, self._volumes_to_process = self.volume_manager.all()
+            directory, _volumes = self.volume_manager.all()
+            self._volumes_to_process = self.volume_manager.filter_states(_volumes, self.states_interested_in)
 
             if directory is not None:
                 self._watch_index = directory.etcd_index
