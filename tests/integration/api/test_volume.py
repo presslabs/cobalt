@@ -54,7 +54,8 @@ class TestVolume:
             'state': 'scheduling',
             'control': {
                 'error': '',
-                'error_count': 0
+                'error_count': 0,
+                'parent_id': ''
             }
         }
 
@@ -81,7 +82,8 @@ class TestVolume:
             'state': 'scheduling',
             'control': {
                 'error': '',
-                'error_count': 0
+                'error_count': 0,
+                'parent_id': ''
             }
         }
 
