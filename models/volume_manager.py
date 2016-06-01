@@ -44,10 +44,8 @@ class VolumeManager(BaseManager):
     KEY = 'volumes'
 
     def by_states(self, states=None):
-        states = states or []
-        states = [states] if not isinstance(states, list) else states
-
-        return [volume for volume in self.all()[1] if volume.value['state'] in states]
+        volumes = self.all()[1]
+        return VolumeManager.filter_states(volumes, states)
 
     def update(self, volume):
         volume = super(VolumeManager, self).update(volume)
@@ -74,3 +72,10 @@ class VolumeManager(BaseManager):
     @staticmethod
     def get_id_from_key(key):
         return key[len(VolumeManager.KEY) + 2:]
+
+    @staticmethod
+    def filter_states(volumes, states):
+        states = states or []
+        states = [states] if not isinstance(states, list) else states
+
+        return [volume for volume in volumes if volume.value['state'] in states]
