@@ -19,6 +19,7 @@ class VolumeControlSchema(Schema):
 
     error = fields.String(default='', missing='')
     error_count = fields.Integer(default=0, missing=0)
+    parent_id = fields.String(default='', missing='')
 
 
 class VolumeSchema(Schema):
