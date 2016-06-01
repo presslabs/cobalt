@@ -36,6 +36,8 @@ class VolumeSchema(Schema):
     control = fields.Nested(VolumeControlSchema, required=True)
 
     def get_attribute(self, attr, obj, default):
+        if attr == 'id':
+            return VolumeManager.get_id_from_key(obj.key)
         return utils.get_value(attr, obj.value, default)
 
 

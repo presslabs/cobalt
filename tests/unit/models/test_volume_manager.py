@@ -44,13 +44,12 @@ class TestVolumeManager:
         assert expected_result == result
 
     @mark.parametrize('parent_return', [False, dummy_ready_volume])
-    def test_volume_update(self, mocker, parent_return, volume_manager, p_key_getter):
+    def test_volume_update(self, mocker, parent_return, volume_manager):
         volume = deepcopy(dummy_ready_volume)
         parent_return = False if not parent_return else volume
 
         p_super_update = mocker.patch('models.base_manager.BaseManager.update')
         p_super_update.return_value = parent_return
-        p_key_getter.return_value = '1'
 
         output_volume = volume_manager.update(volume)
 

@@ -215,7 +215,7 @@ class TestVolume:
             result, errors = VolumeSchema().loads(response.data.decode())
 
             assert errors == {}
-            assert result.pop('id') == id
+            assert result['id'] == id
             assert response.status_code == 202
             assert expected == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
@@ -238,7 +238,7 @@ class TestVolume:
 
             result = json.loads(response.data.decode())
 
-            assert result.pop('id') == id
+            assert result['id'] == id
             assert response.status_code == 202
             assert expected == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
