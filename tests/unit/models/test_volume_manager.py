@@ -14,13 +14,17 @@ class TestVolumeManager:
     @mark.parametrize('query,state_filter,result', [
         # all() return value, state to query, result
         ([], 'NONE', []),
-        ([dummy_invalid_state_volume], 'ready', []),
-        ([dummy_invalid_state_volume, dummy_ready_volume, dummy_invalid_state_volume], 'ready', [dummy_ready_volume])
+        ([dummy_ready_volume], 'ready', [dummy_ready_volume]),
+        ([dummy_ready_volume], 'readyish', []),
+        ([], ['NONE'], []),
+        ([dummy_ready_volume], ['ready'], [dummy_ready_volume]),
+        ([dummy_invalid_state_volume], ['ready'], []),
+        ([dummy_invalid_state_volume, dummy_ready_volume, dummy_invalid_state_volume], ['ready'], [dummy_ready_volume])
     ])
-    def test_volume_by_state(self, query, state_filter, result, volume_manager, p_volume_manager_all):
+    def test_volume_by_states(self, query, state_filter, result, volume_manager, p_volume_manager_all):
         p_volume_manager_all.return_value = (None, query)
 
-        volumes = volume_manager.by_state(state_filter)
+        volumes = volume_manager.by_states(state_filter)
 
         assert volumes == result
         assert p_volume_manager_all.called
