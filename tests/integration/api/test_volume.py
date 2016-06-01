@@ -51,7 +51,7 @@ class TestVolume:
             'requested': {'constraints': [], 'reserved_size': 1},
             'actual': {},
             'node': '',
-            'state': 'registered',
+            'state': 'scheduling',
             'control': {
                 'error': '',
                 'error_count': 0
@@ -78,7 +78,7 @@ class TestVolume:
             'requested': {'constraints': [], 'reserved_size': 10},
             'actual': {},
             'node': '',
-            'state': 'registered',
+            'state': 'scheduling',
             'control': {
                 'error': '',
                 'error_count': 0

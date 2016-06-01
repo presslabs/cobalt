@@ -18,7 +18,6 @@ class VolumeControlSchema(Schema):
 
     error = fields.String(default='', missing='')
     error_count = fields.Integer(default=0, missing=0)
-    # TODO consider adding a timestamp
 
 
 class VolumeSchema(Schema):
@@ -26,7 +25,7 @@ class VolumeSchema(Schema):
         ordered = True
 
     id = fields.String(required=True)
-    state = fields.String(default='registered', missing='registered')
+    state = fields.String(default='scheduling', missing='scheduling')
     name = fields.String(default='', missing='')
     node = fields.String(default='', missing='')
 
