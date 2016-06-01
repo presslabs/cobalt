@@ -57,24 +57,18 @@ class TestVolumeManager:
             assert not output_volume
         else:
             assert output_volume
-            assert output_volume.value['id'] == '1'
-            p_key_getter.assert_called_once_with(volume.key)
 
-    def test_volume_create(self, mocker, volume_manager, p_key_getter):
-        data = {}
+    def test_volume_create(self, mocker, volume_manager):
+        data = {'control': {'update': None}}
         volume = deepcopy(dummy_invalid_state_volume)
 
         p_super_create = mocker.patch('models.base_manager.BaseManager.create')
         p_super_create.return_value = volume
-        p_key_getter.return_value = '1'
 
         output_volume = volume_manager.create(data)
 
-        assert output_volume
-        assert output_volume.value['id'] == '1'
-        p_key_getter.assert_called_once_with(volume.key)
-
         p_super_create.assert_called_with(data, '')
+        assert output_volume
 
     def test_volume_get_id_from_key_invalid_input(self):
         key = 'volumes'
