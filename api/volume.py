@@ -35,6 +35,7 @@ class Volume(Resource):
             return '', 304
 
         volume.value['requested'] = new_volume
+        volume.value['state'] = 'pending'
 
         volume = manager.update(volume)
         if not volume:
