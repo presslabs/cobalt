@@ -60,6 +60,10 @@ class BaseManager:
 
         return self._load_from_etcd(entity)
 
+    @staticmethod
+    def get_id_from_key(key):
+        return key[len(BaseManager.KEY) + 2:]
+
     def _load_from_etcd(self, data):
         # we trust that etcd data is valid
         try:

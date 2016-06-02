@@ -73,10 +73,6 @@ class VolumeManager(BaseManager):
         return super(VolumeManager, self)._load_from_etcd(volume)
 
     @staticmethod
-    def get_id_from_key(key):
-        return key[len(VolumeManager.KEY) + 2:]
-
-    @staticmethod
     def filter_states(volumes, states):
         states = states or []
         states = [states] if not isinstance(states, list) else states
