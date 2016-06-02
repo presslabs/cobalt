@@ -3,7 +3,8 @@ import etcd
 from pytest import fixture
 
 from api import Api
-from models import VolumeManager
+from engine import Executor
+from models import VolumeManager, MachineManager
 from config import config as context
 
 
@@ -15,6 +16,11 @@ def flask_app(volume_manager):
 @fixture
 def volume_manager(etcd_client):
     return VolumeManager(etcd_client)
+
+
+@fixture
+def machine_manager(etcd_client):
+    return MachineManager(etcd_client)
 
 
 @fixture
@@ -32,6 +38,11 @@ def etcd_client(request):
 
     request.addfinalizer(fin)
     return client
+
+
+@fixture
+def executor(volume_manager, machine_manager):
+    return Executor(volume_manager, machine_manager, {'timeout': 2})
 
 
 @fixture(scope='module')

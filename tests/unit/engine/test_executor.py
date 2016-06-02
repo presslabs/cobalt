@@ -44,7 +44,7 @@ class TestExecutor:
         p_executor_process.assert_called_with(volume)
         assert p_volume_manager_all.called
         assert executor._volumes_to_process == []
-        assert executor._watch_index == 0
+        assert executor._watch_index == 1
 
     def test_tick_with_reset_no_dir(self, mocker, executor, p_executor_process, p_volume_manager_all):
         volume = mocker.MagicMock()
