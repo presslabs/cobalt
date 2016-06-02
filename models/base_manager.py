@@ -12,6 +12,11 @@ class BaseManager:
 
     def __init__(self, client):
         self.client = client
+        # TODO test this write
+        try:
+            self.client.write(self.KEY, '', dir=True)
+        except (etcd.EtcdAlreadyExist, etcd.EtcdNotFile):
+            pass
 
     def all(self):
         try:
