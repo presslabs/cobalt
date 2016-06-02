@@ -1,5 +1,7 @@
 import json
+import threading
 
+import time
 from marshmallow import pprint
 
 from models import VolumeManager
@@ -575,34 +577,169 @@ class TestExecutor:
         machine.value = json.dumps(machine.value)
         machines[0] = etcd_client.update(machine)
 
-        # this tick should reset local state, the watch is failing
+        # these ticks should reset local state, the watch is failing
+        # there are 2 because there were 2 updates before the watch started
+        executor.tick()
         executor.tick()
 
         # this should move one volume to the other machine
         executor.tick()
 
         volumes = volume_manager.all()[1]
+        for index, test_volume in enumerate(volumes):
+            state = test_volume.value.pop('state')
+            node = test_volume.value.pop('node')
 
-        for index, test_volume in enumerate(volume_manager.all()[1]):
-            test_volume_state = test_volume.value.pop('state')
-            volumes[index].value.pop('node')
-            volumes[index].value.pop('state')
+            assert test_volume.modifiedIndex != test_volume.createdIndex
+            assert state == 'scheduling'
+            assert node == '{}'.format(index)
 
-            assert test_volume.modifiedIndex != volumes[index].createdIndex
-            assert test_volume_state == 'scheduling'
-            assert test_volume.value.pop('node') == '{}'.format(index)
-            assert test_volume.value == volumes[index].value
+    def test_process_with_watch(self, executor, etcd_client, volume_manager):
+        machine_data = ["""
+            {
+                "name": "0",
+                "labels": [],
+                "available": 1
+            }
+        """]
 
-    def test_process_with_watch_ignore_ttl_deleting(self, executor, etcd_client):
-        pass
+        volume_data = ["""
+            {
+                "state": "scheduling",
+                "node": "",
+                "requested": {
+                    "reserved_size": 1,
+                    "constraints": []
+                },
+                "actual": {},
+                "control": {
+                    "parent_id": "",
+                    "updated": 0
+                }
+            }
+        """]
+        self._create_entries('machines', machine_data, etcd_client)
 
-    def test_process_with_watch(self, executor, etcd_client):
-        pass
+        executor._should_reset = False
+        executor.delay = 3
 
-    def test_process_with_multiple_consecutive_watches(self, executor, etcd_client):
-        pass
+        def ticker():
+            executor.tick()
+
+        watch = threading.Thread(target=ticker)
+        watch.start()
+
+        time.sleep(0.1)
+
+        created_volume = self._create_entries('volumes', volume_data, etcd_client)[0]
+        print(created_volume)
+        created_volume.value = json.loads(created_volume.value)
+
+        # discard data that we know changes to test them separately
+        created_volume.value['control'].pop('updated')
+        created_volume.value.pop('node')
+
+        watch.join(5)
+        if watch.is_alive():
+            assert False, 'Operations still in progress, watcher timed out.'
+
+        existing_volume = volume_manager.by_id(volume_manager.get_id_from_key(created_volume.key))
+        updated = existing_volume.value['control'].pop('updated')
+        node = existing_volume.value.pop('node')
+
+        assert node == '0'
+        assert updated != 0
+        assert existing_volume.value == created_volume.value
+
+        # no modifiedIndex + 1 here because this is already the modified volume,
+        # it should be next in line again
+        assert executor._watch_index == created_volume.modifiedIndex
+
+    def test_process_with_multiple_consecutive_watches(self, executor, etcd_client, volume_manager):
+        machine_data = ["""
+            {
+                "name": "0",
+                "labels": [],
+                "available": 1
+            }
+        """]
+
+        volume_data = ["""
+            {
+                "state": "scheduling",
+                "node": "",
+                "requested": {
+                    "reserved_size": 1,
+                    "constraints": []
+                },
+                "actual": {},
+                "control": {
+                    "parent_id": "",
+                    "updated": 0
+                }
+            }
+        """, """
+            {
+                "state": "scheduling",
+                "node": "",
+                "requested": {
+                    "reserved_size": 1,
+                    "constraints": []
+                },
+                "actual": {},
+                "control": {
+                    "parent_id": "",
+                    "updated": 0
+                }
+            }
+        """]
+
+        self._create_entries('machines', machine_data, etcd_client)
+
+        executor._should_reset = False
+        executor.delay = 3
+
+        def ticker():
+            executor.tick()
+            executor.tick()
+
+        watch = threading.Thread(target=ticker)
+        watch.start()
+
+        time.sleep(0.1)
+
+        created_volumes = self._create_entries('volumes', volume_data, etcd_client)
+
+        for created_volume in created_volumes:
+            created_volume.value = json.loads(created_volume.value)
+
+            # discard data that we know changes to test them separately
+            created_volume.value['control'].pop('updated')
+            created_volume.value.pop('node')
+
+        watch.join(5)
+        if watch.is_alive():
+            assert False, 'Operations still in progress, watcher timed out.'
+
+        existing_volumes = volume_manager.all()[1]
+
+        assert len(existing_volumes) == len(created_volumes)
+
+        # this is the modified index no need for +1, as this was not health checked by the watch
+        assert executor._watch_index == existing_volumes[0].modifiedIndex
+
+        for index, existing_volume in enumerate(existing_volumes):
+            updated = existing_volume.value['control'].pop('updated')
+            node = existing_volume.value.pop('node')
+
+            assert node == '0'
+            assert updated != 0
+            assert existing_volume.value == created_volumes[index].value
 
     def test_process_with_multiple_watches_with_reset_between(self, executor, etcd_client):
+        pass
+
+    def test_process_with_watch_ignore_ttl_deleting(self, executor, etcd_client):
         pass
 
     def _create_entries(self, key, entry_data, etcd_client):
