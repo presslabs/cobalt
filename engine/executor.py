@@ -29,6 +29,7 @@ class Executor:
         if self._should_reset:
             directory, self._volumes_to_process = self.volume_manager.all()
 
+            self._should_reset = False
             if directory is not None:
                 self._watch_index = directory.etcd_index
 
@@ -77,9 +78,14 @@ class Executor:
                 data['state'] = next_state
                 if next_state == 'cloning':
                     parent = self.volume_manager.by_id(data['control']['parent_id'])
-                    data['node'] = parent.value['node']
+                    if not parent:
+                        data['state'] = 'deleting'
+                    else:
+                        data['node'] = parent.value['node']
 
-        self.volume_manager.update(volume)
+        volume = self.volume_manager.update(volume)
+        if volume:
+            self._watch_index = volume.modifiedIndex + 1
 
     # TODO test volume_manager watch
     # TODO test executor
@@ -87,7 +93,7 @@ class Executor:
     # TODO test api delete when clones exist
 
     def _find_machine(self, volume):
-        constraints = volume.value['requested']['contraints']
+        constraints = volume.value['requested']['constraints']
         machines = self.machine_manager.all()[1]
 
         machines_ok = []
@@ -113,7 +119,7 @@ class Executor:
         if value['control']['parent_id']:
             return 'cloning'
 
-        if value['requested']['reserved_size'] != volume['actual']['reserved_size']:
+        if value['requested']['reserved_size'] != value['actual']['reserved_size']:
             return 'resizing'
 
         print('Next state for volume {} can\'t be determined!'.format(volume))

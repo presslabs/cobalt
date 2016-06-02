@@ -51,7 +51,7 @@ class VolumeManager(BaseManager):
         return VolumeManager.filter_states(volumes, states)
 
     def update(self, volume):
-        volume.value['control']['update'] = time()
+        volume.value['control']['updated'] = time()
         volume = super(VolumeManager, self).update(volume)
 
         if not volume:
@@ -60,7 +60,7 @@ class VolumeManager(BaseManager):
         return volume
 
     def create(self, data, *unused):
-        data['control']['update'] = time()
+        data['control']['updated'] = time()
         volume = super(VolumeManager, self).create(data, '')
 
         return volume
