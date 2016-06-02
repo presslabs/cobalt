@@ -15,7 +15,6 @@ config = {
         'use_proxies': False,
         'expected_cluster_id': None,
         'per_host_pool_size': 10,
-        'watch_timeout': 10
     },
     'engine': {
         'leaser': {
