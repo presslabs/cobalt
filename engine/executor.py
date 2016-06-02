@@ -31,7 +31,7 @@ class Executor:
 
             self._should_reset = False
             if directory is not None:
-                self._watch_index = directory.etcd_index
+                self._watch_index = directory.etcd_index + 1
 
         if self._volumes_to_process:
             volume = self._volumes_to_process.pop()
@@ -83,9 +83,7 @@ class Executor:
                     else:
                         data['node'] = parent.value['node']
 
-        volume = self.volume_manager.update(volume)
-        if volume:
-            self._watch_index = volume.modifiedIndex + 1
+        self.volume_manager.update(volume)
 
     # TODO test volume_manager watch
     # TODO test executor
