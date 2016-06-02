@@ -52,6 +52,14 @@ class BaseManager:
 
         return self._load_from_etcd(entity)
 
+    def delete(self, entity):
+        try:
+            entity = self.client.delete(entity.key)
+        except etcd.EtcdKeyNotFound:
+            return False
+
+        return self._load_from_etcd(entity)
+
     def _load_from_etcd(self, data):
         # we trust that etcd data is valid
         try:
