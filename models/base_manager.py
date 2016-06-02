@@ -60,6 +60,13 @@ class BaseManager:
 
         return self._load_from_etcd(entity)
 
+    def watch(self, index=None, timeout=0):
+        try:
+            entity = self.client.watch(BaseManager.KEY, recursive=True, index=index, timeout=timeout)
+        except etcd.EtcdWatchTimedOut:
+            return None
+        return self._load_from_etcd(entity)
+
     @staticmethod
     def get_id_from_key(key):
         return key[len(BaseManager.KEY) + 2:]

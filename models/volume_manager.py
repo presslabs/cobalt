@@ -65,13 +65,6 @@ class VolumeManager(BaseManager):
 
         return volume
 
-    def watch(self, index=None, timeout=0):
-        try:
-            volume = self.client.watch(VolumeManager.KEY, recursive=True, index=index, timeout=timeout)
-        except etcd.EtcdWatchTimedOut:
-            return None
-        return super(VolumeManager, self)._load_from_etcd(volume)
-
     @staticmethod
     def filter_states(volumes, states):
         states = states or []
