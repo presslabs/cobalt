@@ -48,20 +48,33 @@ class Volume(Resource):
     def delete(volume_id):
         manager = app.volume_manager
 
-        volume = manager.by_id(volume_id)
-        if volume is None:
+        target_volume = manager.by_id(volume_id)
+        if target_volume is None:
             return {'message': 'Not Found'}, 404
 
-        if volume.value['state'] != 'ready':
+        if target_volume.value['state'] != 'ready':
             return {'message': 'Resource not in ready state, can\'t delete.'}, 409
 
-        volume.value['state'] = 'deleting'
-        volume = manager.update(volume)
+        lock = manager.get_lock(volume_id, 'clone')
+        lock.acquire(timeout=0, lock_ttl=10)
 
-        if not volume:
+        pending_clones = []
+        for volume in manager.all()[1]:
+            if volume.value['control']['parent_id'] == volume_id:
+                pending_clones.append(manager.get_id_from_key(volume.key))
+
+        if pending_clones:
+            return {'message': 'Resource has pending clones, can\'t delete.',
+                    'clones': pending_clones}, 409
+
+        target_volume.value['state'] = 'deleting'
+        target_volume = manager.update(target_volume)
+        lock.release()
+
+        if not target_volume:
             return {'message': 'Resource changed during transition.'}, 409
 
-        result, _ = VolumeSchema().dump(volume)
+        result, _ = VolumeSchema().dump(target_volume)
         return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}
 
 
@@ -74,9 +87,12 @@ class VolumeList(Resource):
     @staticmethod
     def post():
         manager = app.volume_manager
+        request_json = request.get_json(force=True)
+
+        id = request_json.get('id', '')
 
         fields = ('name', 'meta', 'requested',)
-        data, errors = VolumeSchema(only=fields).load(request.get_json(force=True))
+        data, errors = VolumeSchema(only=fields).load(request_json)
         if errors:
             return {'message': errors}, 400
 
@@ -85,10 +101,21 @@ class VolumeList(Resource):
         data['actual'] = {}
         data['control'] = {
             'error': '',
-            'error_count': 0
+            'error_count': 0,
+            'parent_id': id
         }
 
+        lock = manager.get_lock(id, 'clone')
+        lock.acquire(timeout=0, lock_ttl=10)
+
+        if id:
+            data['state'] = 'pending'
+            parent = manager.by_id(id)
+            if not parent:
+                return {'message': 'Parent does not exist. Clone not created'}, 400
+
         volume = manager.create(data)
+        lock.release()
 
         result, _ = VolumeSchema().dump(volume)
         return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}

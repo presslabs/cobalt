@@ -72,6 +72,41 @@ class TestVolume:
             assert expected_result == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
 
+    def test_post_clone(self, volume_raw_minimal, flask_app):
+        expected_result = {
+            'meta': {},
+            'name': '',
+            'requested': {'constraints': [], 'reserved_size': 1},
+            'actual': {},
+            'node': '',
+            'state': 'pending',
+            'control': {
+                'error': '',
+                'error_count': 0,
+                'parent_id': ''
+            }
+        }
+
+        expected_code = 202
+
+        with flask_app.test_client() as c:
+            # create parent and make
+            response = c.post('/volumes', data=volume_raw_minimal, content_type='application/json')
+            result = json.loads(response.data.decode())
+            id = result.pop('id')
+            expected_result['control']['parent_id'] = str(id)
+
+            # create clone
+            request = {'id': str(id), 'requested': {'reserved_size': 1, 'constraints': []}}
+            response = c.post('/volumes', data=json.dumps(request), content_type='application/json')
+            result = json.loads(response.data.decode())
+            id = result.pop('id')
+
+            assert id
+            assert response.status_code == expected_code
+            assert expected_result == result
+            assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
+
     def test_volume_list_post_read_only_and_extra_body(self, volume_raw_read_only_extra, flask_app):
         expected_result = {
             'meta': {"instance.name": "test_instance"},

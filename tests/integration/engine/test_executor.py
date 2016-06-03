@@ -825,9 +825,6 @@ class TestExecutor:
             assert updated != 0
             assert existing_volume.value == created_volumes[index].value
 
-    def test_process_with_watch_ignore_ttl_deleting(self, executor, etcd_client):
-        pass
-
     def _create_entries(self, key, entry_data, etcd_client):
         entries = []
         for data in entry_data:

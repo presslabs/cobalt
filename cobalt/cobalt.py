@@ -56,7 +56,10 @@ class Cobalt(Service):
     def _create_volume_manager(etcd):
         return VolumeManager(etcd)
 
-    # TODO Unit test this
+    @staticmethod
+    def _create_machine_manager(etcd):
+        return MachineManager(etcd)
+
 
     def _create_machine_manager(self, etcd):
         return MachineManager(etcd)

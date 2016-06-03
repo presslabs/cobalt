@@ -51,9 +51,7 @@ class VolumeManager(BaseManager):
         return VolumeManager.filter_states(volumes, states)
 
     def by_node(self, node):
-        return [volume for volume in self.all() if 'actual' in volume.unpacked_value.keys() and
-                'node' in volume.unpacked_value.get('actual').keys() and
-                volume.unpacked_value.get('actual')['node'] == node]
+        return [volume for volume in self.all() if volume.value['node'] == node]
 
     def update(self, volume):
         volume.value['control']['updated'] = time()
@@ -69,6 +67,20 @@ class VolumeManager(BaseManager):
         volume = super(VolumeManager, self).create(data, '')
 
         return volume
+
+    def watch(self, index=None, timeout=0):
+        try:
+            volume = self.client.watch(VolumeManager.KEY, recursive=True, index=index, timeout=timeout)
+        except etcd.EtcdWatchTimedOut:
+            return None
+        return super(VolumeManager, self)._load_from_etcd(volume)
+
+    def get_lock(self, id, purpose='clone'):
+        return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
+
+    @staticmethod
+    def get_id_from_key(key):
+        return key[len(VolumeManager.KEY) + 2:]
 
     @staticmethod
     def filter_states(volumes, states):
