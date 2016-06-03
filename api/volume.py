@@ -35,6 +35,7 @@ class Volume(Resource):
             return '', 304
 
         volume.value['requested'] = new_volume
+        volume.value['state'] = 'pending'
 
         volume = manager.update(volume)
         if not volume:
@@ -67,7 +68,7 @@ class Volume(Resource):
 class VolumeList(Resource):
     @staticmethod
     def get():
-        result, errors = VolumeSchema().dump(app.volume_manager.all(), many=True)
+        result, errors = VolumeSchema().dump(app.volume_manager.all()[1], many=True)
         return result
 
     @staticmethod
@@ -80,7 +81,7 @@ class VolumeList(Resource):
             return {'message': errors}, 400
 
         data['node'] = ''
-        data['state'] = 'registered'
+        data['state'] = 'scheduling'
         data['actual'] = {}
         data['control'] = {
             'error': '',

@@ -14,8 +14,9 @@ class TestBaseManager:
     def test_all_key_not_found(self, p_etcd_client_read, base_manager):
         p_etcd_client_read.side_effect = etcd.EtcdKeyNotFound
 
-        volumes = base_manager.all()
+        dir, volumes = base_manager.all()
 
+        assert dir is None
         assert volumes == []
         p_etcd_client_read.assert_called_with(BaseManager.KEY, sorted=True)
 
@@ -28,12 +29,30 @@ class TestBaseManager:
         p_base_manager_load_from_etcd.return_value = [entry_mock]
 
         # run
-        volumes = base_manager.all()
+        _, volumes = base_manager.all()
 
         # make the needed assertions
         p_base_manager_load_from_etcd.assert_called_with([entry_mock])
         assert volumes == [entry_mock]
         p_etcd_client_read.assert_called_with(BaseManager.KEY, sorted=True)
+
+    def test_all_keys(self, mocker, base_manager, p_base_manager_all):
+        key = 1
+        entry = mocker.MagicMock(key=key)
+        p_base_manager_all.return_value = (None, [entry])
+
+        keys = base_manager.all_keys()
+
+        assert p_base_manager_all.called
+        assert keys == [key]
+
+    def test_all_keys_no_result(self, base_manager, p_base_manager_all):
+        p_base_manager_all.return_value = (None, [])
+
+        keys = base_manager.all_keys()
+
+        assert p_base_manager_all.called
+        assert keys == []
 
     def test_by_id_key_not_found(self, base_manager, p_etcd_client_read):
         p_etcd_client_read.side_effect = etcd.EtcdKeyNotFound
@@ -68,6 +87,7 @@ class TestBaseManager:
         p_etcd_client_write.assert_called_with('/{}/{}'.format(BaseManager.KEY, suffix),
                                                '{}',
                                                append=append)
+
         p_base_manager_load_from_etcd.assert_called_with(etcd_result_mock)
         assert result == etcd_result_mock
 

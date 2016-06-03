@@ -14,7 +14,7 @@ config = {
         'allow_reconnect': False,
         'use_proxies': False,
         'expected_cluster_id': None,
-        'per_host_pool_size': 10
+        'per_host_pool_size': 10,
     },
     'engine': {
         'leaser': {

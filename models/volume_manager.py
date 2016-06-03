@@ -1,6 +1,8 @@
+import etcd
 from marshmallow import fields, Schema, validate, utils
 
 from .base_manager import BaseManager
+from time import time
 
 
 class VolumeAttributeSchema(Schema):
@@ -17,7 +19,7 @@ class VolumeControlSchema(Schema):
 
     error = fields.String(default='', missing='')
     error_count = fields.Integer(default=0, missing=0)
-    # TODO consider adding a timestamp
+    parent_id = fields.String(default='', missing='')
 
 
 class VolumeSchema(Schema):
@@ -25,7 +27,7 @@ class VolumeSchema(Schema):
         ordered = True
 
     id = fields.String(required=True)
-    state = fields.String(default='registered', missing='registered')
+    state = fields.String(default='scheduling', missing='scheduling')
     name = fields.String(default='', missing='')
     node = fields.String(default='', missing='')
 
@@ -36,30 +38,36 @@ class VolumeSchema(Schema):
     control = fields.Nested(VolumeControlSchema, required=True)
 
     def get_attribute(self, attr, obj, default):
+        if attr == 'id':
+            return VolumeManager.get_id_from_key(obj.key)
         return utils.get_value(attr, obj.value, default)
 
 
 class VolumeManager(BaseManager):
     KEY = 'volumes'
 
-    def by_state(self, state):
-        return [volume for volume in self.all() if volume.value.get('state') == state]
+    def by_states(self, states=None):
+        volumes = self.all()[1]
+        return VolumeManager.filter_states(volumes, states)
 
     def update(self, volume):
+        volume.value['control']['updated'] = time()
         volume = super(VolumeManager, self).update(volume)
 
         if not volume:
             return False
 
-        volume.value['id'] = self.get_id_from_key(volume.key)
         return volume
 
     def create(self, data, *unused):
+        data['control']['updated'] = time()
         volume = super(VolumeManager, self).create(data, '')
-        volume.value['id'] = self.get_id_from_key(volume.key)
 
         return volume
 
     @staticmethod
-    def get_id_from_key(key):
-        return key[len(VolumeManager.KEY) + 2:]
+    def filter_states(volumes, states):
+        states = states or []
+        states = [states] if not isinstance(states, list) else states
+
+        return [volume for volume in volumes if volume.value['state'] in states]

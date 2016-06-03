@@ -51,10 +51,11 @@ class TestVolume:
             'requested': {'constraints': [], 'reserved_size': 1},
             'actual': {},
             'node': '',
-            'state': 'registered',
+            'state': 'scheduling',
             'control': {
                 'error': '',
-                'error_count': 0
+                'error_count': 0,
+                'parent_id': ''
             }
         }
 
@@ -78,10 +79,11 @@ class TestVolume:
             'requested': {'constraints': [], 'reserved_size': 10},
             'actual': {},
             'node': '',
-            'state': 'registered',
+            'state': 'scheduling',
             'control': {
                 'error': '',
-                'error_count': 0
+                'error_count': 0,
+                'parent_id': ''
             }
         }
 
@@ -204,6 +206,7 @@ class TestVolume:
         expected, errors = VolumeSchema().dump(volume)
         assert errors == {}
 
+        expected['state'] = 'pending'
         expected['requested'], errors = VolumeAttributeSchema().loads(volume_raw_requested_ok)
         assert errors == {}
 
@@ -213,8 +216,8 @@ class TestVolume:
 
             result, errors = VolumeSchema().loads(response.data.decode())
 
-            assert result.pop('id') == id
             assert errors == {}
+            assert result['id'] == id
             assert response.status_code == 202
             assert expected == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
@@ -227,6 +230,7 @@ class TestVolume:
         expected, errors = VolumeSchema().dump(volume)
         assert errors == {}
 
+        expected['state'] = 'pending'
         expected['requested'], errors = VolumeAttributeSchema().loads(volume_raw_requested_extra)
         assert errors == {}
 
@@ -236,7 +240,7 @@ class TestVolume:
 
             result = json.loads(response.data.decode())
 
-            assert result.pop('id') == id
+            assert result['id'] == id
             assert response.status_code == 202
             assert expected == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
