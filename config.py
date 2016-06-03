@@ -29,6 +29,13 @@ config = {
         'host': '',
         'port': 5000
     },
+    'agent': {
+        'agent_ttl': 60,
+        'volume_path': '/volumes',
+        'node': {
+            'conf_path': '/etc/cobalt.conf'
+        },
+    },
     'services': ['api'],  #['engine', 'api'],
     'mount_point': None
 }
