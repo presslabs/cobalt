@@ -31,8 +31,8 @@ config = {
     },
     'agent': {
         'agent_ttl': 60,
-        'volume_path': '/volumes',
         'node': {
+            'volume_path': '/volumes',
             'conf_path': '/etc/cobalt.conf'
         },
     },
