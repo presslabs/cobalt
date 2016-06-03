@@ -36,7 +36,6 @@ class Executor:
         if self._volumes_to_process:
             volume = self._volumes_to_process.pop()
         else:
-            # TODO expose timeout here as an extra config
             volume = self.volume_manager.watch(timeout=self.delay, index=self._watch_index)
             if volume is None:
                 self.reset()
@@ -57,7 +56,6 @@ class Executor:
         state = data['state']
         node = data['node']
 
-        # TODO expose expired timeout in config
         expired = True if time.time() - data['control']['updated'] > self.delay else False
 
         if state == 'scheduling':
@@ -84,11 +82,6 @@ class Executor:
                         data['node'] = parent.value['node']
 
         self.volume_manager.update(volume)
-
-    # TODO test volume_manager watch
-    # TODO test executor
-    # TODO test engine _machine loop
-    # TODO test api delete when clones exist
 
     def _find_machine(self, volume):
         constraints = volume.value['requested']['constraints']

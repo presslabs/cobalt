@@ -119,5 +119,3 @@ class VolumeList(Resource):
 
         result, _ = VolumeSchema().dump(volume)
         return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}
-
-        # TODO test clone creation / deletion
