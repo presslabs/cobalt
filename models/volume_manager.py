@@ -72,6 +72,11 @@ class VolumeManager(BaseManager):
             return None
         return super(VolumeManager, self)._load_from_etcd(volume)
 
+    def get_lock(self, id, purpose='clone'):
+        return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
+
+    # TODO test get lock
+
     @staticmethod
     def get_id_from_key(key):
         return key[len(VolumeManager.KEY) + 2:]

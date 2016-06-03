@@ -63,7 +63,8 @@ def volume_raw_ok_ready():
         },
         "control": {
             "error": "",
-            "error_count": 0
+            "error_count": 0,
+            "parent_id": ""
         }
     }'''
 
@@ -128,7 +129,7 @@ def volume_raw_minimal():
 @fixture(scope='module')
 def volume_raw_read_only_extra():
     return '''{
-        "id": "random",
+        "id": "",
         "name": "ok",
         "requested": {
             "reserved_size": 10,
