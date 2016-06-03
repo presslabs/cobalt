@@ -1,7 +1,6 @@
 import sh
 
 from .driver import Driver
-from time import time
 
 
 class BTRFSDriver(Driver):
@@ -32,9 +31,9 @@ class BTRFSDriver(Driver):
     def resize(self, id, quota):
         self._set_quota(self, id, quota)
 
-    def clone(self, id):
+    def clone(self, id, parent_id):
         try:
-            sh.btrfs.subvolume.snapshot('{}/{}'.format(self._path, id), '{}/clone-{}-{}'.format(self._path, id, time.strftime('%d%m%Y%H%M%S')))
+            sh.btrfs.subvolume.snapshot('{}/{}'.format(self._path, parent_id), '{}/{}'.format(self._path, id))
         except sh.ErrorReturnCode_1 as e:
             print(e.message, e.full_cmd)
             return False
@@ -72,3 +71,11 @@ class BTRFSDriver(Driver):
             print(e.message, e.full_cmd)
             return False
         return ids
+
+    # TODO implement accurate disk memory usage info for BTRFS
+    def get_free_space(self):
+        try:
+            pass
+        except Exception:
+            pass
+
