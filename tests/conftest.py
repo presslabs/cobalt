@@ -1,8 +1,7 @@
 from pytest import fixture
 
 from api import Api
-
-from models import VolumeManager, volume_schema, packer_schema, volume_attribute_schema
+from models import VolumeManager, MachineManager
 
 
 @fixture
@@ -36,6 +35,11 @@ def p_volume_manager_all(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_all_keys(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'all_keys')
+
+
+@fixture
 def p_volume_manager_by_id(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'by_id')
 
@@ -46,13 +50,73 @@ def p_volume_manager_update(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_watch(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'watch')
+
+
+@fixture
+def p_volume_manager_get_lock(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'get_lock')
+
+
+@fixture
+def p_volume_manager_filter_states(mocker):
+    return mocker.patch('models.volume_manager.VolumeManager.filter_states')
+
+
+@fixture
 def p_key_getter(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'get_id_from_key')
 
 
 @fixture
-def p_unpacker(mocker, volume_manager):
-    return mocker.patch.object(volume_manager, '_unpack')
+def p_load_from_etcd(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, '_load_from_etcd')
+
+
+@fixture
+def p_json_dumps(mocker):
+    return mocker.patch('flask.json.dumps')
+
+
+@fixture
+def p_json_loads(mocker):
+    return mocker.patch('flask.json.loads')
+
+
+@fixture
+def machine_manager(m_etcd_client):
+    return MachineManager(m_etcd_client)
+
+
+@fixture
+def p_machine_manager_all(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'all')
+
+
+@fixture
+def p_machine_manager_by_id(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'by_id')
+
+
+@fixture
+def p_machine_manager_update(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'update')
+
+
+@fixture
+def p_machine_manager_all_keys(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'all_keys')
+
+
+@fixture
+def p_machine_manager_create(mocker, machine_manager):
+    return mocker.patch.object(machine_manager, 'create')
+
+
+@fixture
+def p_etcd_lock(mocker):
+    return mocker.patch('etcd.Lock')
 
 
 @fixture
@@ -77,50 +141,32 @@ def m_etcd_dir_result(mocker):
 
 
 @fixture
-def p_volume_schema_loads(mocker):
-    return mocker.patch.object(volume_schema, 'loads')
-
-
-@fixture
-def p_volume_schema_dumps(mocker):
-    return mocker.patch.object(volume_schema, 'dumps')
-
-
-@fixture
-def p_volume_attribute_schema_loads(mocker):
-    return mocker.patch.object(volume_attribute_schema, 'loads')
-
-
-@fixture
-def p_volume_attribute_schema_dumps(mocker):
-    return mocker.patch.object(volume_attribute_schema, 'dumps')
-
-
-@fixture
-def p_packer_schema_loads(mocker):
-    return mocker.patch.object(packer_schema, 'loads')
-
-
-@fixture
-def p_packer_schema_dumps(mocker):
-    return mocker.patch.object(packer_schema, 'dumps')
-
-
-@fixture
 def flask_app(volume_manager):
     return Api._create_app(volume_manager, testing=True)
 
 
-class DummyVolume:
+@fixture
+def p_print(mocker):
+    return mocker.patch('builtins.print')
+
+
+class Dummy:
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
             self.__setattr__(key, val)
 
 
-dummy_ready_volume = DummyVolume(value='{"name": "test", "state": "ready"}',
-                                 unpacked_value={'name': 'test', 'state': 'ready'},
-                                 key='/volumes/1')
+dummy_ready_volume = Dummy(value={'name': 'test', 'state': 'ready', 'control': {'parent_id': ''}},
+                           value_json='{"name": "test", "state": "ready", "control": {"parent_id": ""}}',
+                           key='/volumes/1')
 
-dummy_invalid_state_volume = DummyVolume(value='{"name": "test", "state": "NONE"}',
-                                         unpacked_value={'name': 'test', 'state': 'NONE'},
-                                         key='/volumes/2')
+dummy_invalid_state_volume = Dummy(value={'name': 'test', 'state': 'NONE', 'control': {'parent_id': ''}},
+                                   value_json='{"name": "test", "state": "NONE", "control": {"parent_id": ""}}',
+                                   key='/volumes/2')
+
+dummy_machines = [Dummy(value={},
+                        value_json='{}',
+                        key='/machines/1'),
+                  Dummy(value={},
+                        value_json='{}',
+                        key='/machines/2')]

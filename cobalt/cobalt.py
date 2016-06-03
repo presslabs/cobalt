@@ -4,7 +4,7 @@ import signal
 
 from api import Api
 from engine import Engine
-from models import VolumeManager
+from models import VolumeManager, MachineManager
 from utils import Service
 from config import config
 
@@ -16,10 +16,11 @@ class Cobalt(Service):
 
         self.etcd = self._create_etcd(config['etcd'])
         self.volume_manager = self._create_volume_manager(self.etcd)
+        self.machine_manager = self._create_machine_manager(self.etcd)
         self.config = config
 
         services = {
-            'engine': Engine(self.etcd, self.volume_manager, self.config['engine']),
+            'engine': Engine(self.etcd, self.volume_manager, self.machine_manager, self.config['engine']),
             'api': Api(self.volume_manager, self.config['api'])
             # TODO add api / agent here
             # 'api', 'agent'
@@ -56,5 +57,9 @@ class Cobalt(Service):
         return VolumeManager(etcd)
 
     # TODO Unit test this
+
+    def _create_machine_manager(self, etcd):
+        return MachineManager(etcd)
+
 
 cobalt = Cobalt()

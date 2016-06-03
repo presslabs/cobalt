@@ -2,8 +2,7 @@ import pytest
 
 from flask import json
 
-from models import volume_schema
-from tests.integration.conftest import ClientVolumeSchema
+from models import VolumeSchema, VolumeAttributeSchema
 
 
 class TestVolume:
@@ -13,18 +12,17 @@ class TestVolume:
         volume_writes = []
         for generator in generators:
             volume_writes.append(etcd_client.write('volumes', generator, append=True))
-        volume_writes = flask_app.volume_manager._unpack(volume_writes)
+        volume_writes = flask_app.volume_manager._load_from_etcd(volume_writes)
 
-        expected, errors = volume_schema.dump(volume_writes, many=True)
+        expected, errors = VolumeSchema().dump(volume_writes, many=True)
         assert errors == {}
 
         with flask_app.test_client() as c:
             response = c.get('/volumes')
             assert response.status_code == 200
 
-            actual, errors = ClientVolumeSchema().loads(response.data.decode(), many=True)
+            actual = json.loads(response.data.decode())
 
-        assert errors == {}
         assert len(actual) == len(expected)
         assert actual == expected
 
@@ -47,14 +45,20 @@ class TestVolume:
             assert expected_result == result
 
     def test_volume_list_post_minimal_body(self, volume_raw_minimal, flask_app):
-        expected_result = {'error': '',
-                           'error_count': 0,
-                           'meta': {},
-                           'name': '',
-                           'requested': {'constraints': [], 'reserved_size': 1},
-                           'actual': {},
-                           'node': '',
-                           'state': 'registered'}
+        expected_result = {
+            'meta': {},
+            'name': '',
+            'requested': {'constraints': [], 'reserved_size': 1},
+            'actual': {},
+            'node': '',
+            'state': 'scheduling',
+            'control': {
+                'error': '',
+                'error_count': 0,
+                'parent_id': ''
+            }
+        }
+
         expected_code = 202
 
         with flask_app.test_client() as c:
@@ -68,15 +72,54 @@ class TestVolume:
             assert expected_result == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
 
+    def test_post_clone(self, volume_raw_minimal, flask_app):
+        expected_result = {
+            'meta': {},
+            'name': '',
+            'requested': {'constraints': [], 'reserved_size': 1},
+            'actual': {},
+            'node': '',
+            'state': 'scheduling',
+            'control': {
+                'error': '',
+                'error_count': 0,
+                'parent_id': ''
+            }
+        }
+
+        expected_code = 202
+
+        with flask_app.test_client() as c:
+            response = c.post('/volumes', data=volume_raw_minimal, content_type='application/json')
+
+            result = json.loads(response.data.decode())
+            id = result.pop('id')
+            expected_result['control']['parent_id'] = str(id)
+
+            request = {'id': str(id), 'requested': {'reserved_size': 1, 'constraints': []}}
+            print(request)
+            response = c.post('/volumes', data=json.dumps(request), content_type='application/json')
+            id = result.pop('id')
+
+            assert id
+            assert response.status_code == expected_code
+            assert expected_result == result
+            assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
+
     def test_volume_list_post_read_only_and_extra_body(self, volume_raw_read_only_extra, flask_app):
-        expected_result = {'error': '',
-                           'error_count': 0,
-                           'meta': {"instance.name": "test_instance"},
-                           'name': 'ok',
-                           'requested': {'constraints': [], 'reserved_size': 10},
-                           'actual': {},
-                           'node': '',
-                           'state': 'registered'}
+        expected_result = {
+            'meta': {"instance.name": "test_instance"},
+            'name': 'ok',
+            'requested': {'constraints': [], 'reserved_size': 10},
+            'actual': {},
+            'node': '',
+            'state': 'scheduling',
+            'control': {
+                'error': '',
+                'error_count': 0,
+                'parent_id': ''
+            }
+        }
 
         expected_code = 202
 
@@ -111,14 +154,14 @@ class TestVolume:
         volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
-        volume = flask_app.volume_manager._unpack([volume])[0]
-        expected, errors = volume_schema.dump(volume)
+        volume = flask_app.volume_manager._load_from_etcd([volume])[0]
+        expected, errors = VolumeSchema().dump(volume)
         assert errors == {}
 
         with flask_app.test_client() as c:
             response = c.get('/volumes/{}'.format(id))
 
-            actual, errors = ClientVolumeSchema().loads(response.data.decode())
+            actual = json.loads(response.data.decode())
 
             assert actual == expected
             assert response.status_code == 200
@@ -193,19 +236,22 @@ class TestVolume:
         volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
-        volume = flask_app.volume_manager._unpack([volume])[0]
-        expected, errors = volume_schema.dump(volume)
+        volume = flask_app.volume_manager._load_from_etcd([volume])[0]
+        expected, errors = VolumeSchema().dump(volume)
         assert errors == {}
 
-        expected = dict(expected)
-        expected['requested'] = json.loads(volume_raw_requested_ok)
+        expected['state'] = 'pending'
+        expected['requested'], errors = VolumeAttributeSchema().loads(volume_raw_requested_ok)
+        assert errors == {}
 
         with flask_app.test_client() as c:
             response = c.put('/volumes/{}'.format(id), data=volume_raw_requested_ok,
                              content_type='application/json')
 
-            result = json.loads(response.data.decode())
+            result, errors = VolumeSchema().loads(response.data.decode())
 
+            assert errors == {}
+            assert result['id'] == id
             assert response.status_code == 202
             assert expected == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)
@@ -214,13 +260,13 @@ class TestVolume:
         volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
-        volume = flask_app.volume_manager._unpack([volume])[0]
-        expected, errors = volume_schema.dump(volume)
+        volume = flask_app.volume_manager._load_from_etcd([volume])[0]
+        expected, errors = VolumeSchema().dump(volume)
         assert errors == {}
 
-        expected = dict(expected)
-        expected['requested'] = json.loads(volume_raw_requested_extra)
-        expected['requested'].pop('extra')
+        expected['state'] = 'pending'
+        expected['requested'], errors = VolumeAttributeSchema().loads(volume_raw_requested_extra)
+        assert errors == {}
 
         with flask_app.test_client() as c:
             response = c.put('/volumes/{}'.format(id), data=volume_raw_requested_extra,
@@ -228,6 +274,7 @@ class TestVolume:
 
             result = json.loads(response.data.decode())
 
+            assert result['id'] == id
             assert response.status_code == 202
             assert expected == result
             assert response.headers['Location'] == 'http://localhost/volumes/{}'.format(id)

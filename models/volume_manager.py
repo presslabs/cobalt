@@ -1,6 +1,8 @@
-from marshmallow import fields, Schema, utils, validate
+import etcd
+from marshmallow import fields, Schema, validate, utils
 
 from .base_manager import BaseManager
+from time import time
 
 
 class VolumeAttributeSchema(Schema):
@@ -11,49 +13,42 @@ class VolumeAttributeSchema(Schema):
     constraints = fields.List(fields.String(validate=[validate.Length(min=1)]), required=True)
 
 
-class PackerSchema(Schema):
+class VolumeControlSchema(Schema):
     class Meta:
         ordered = True
 
-    state = fields.String(default='registered', missing='registered')
-    name = fields.String(default='', missing='')
-    node = fields.String(default='', missing='')
     error = fields.String(default='', missing='')
     error_count = fields.Integer(default=0, missing=0)
+    parent_id = fields.String(default='', missing='')
+
+
+class VolumeSchema(Schema):
+    class Meta:
+        ordered = True
+
+    id = fields.String(required=True)
+    state = fields.String(default='scheduling', missing='scheduling')
+    name = fields.String(default='', missing='')
+    node = fields.String(default='', missing='')
 
     meta = fields.Dict(default={}, missing={})
 
     actual = fields.Nested(VolumeAttributeSchema, missing={}, default={})
     requested = fields.Nested(VolumeAttributeSchema, required=True)
-
-
-class VolumeSchema(PackerSchema):
-    class Meta:
-        ordered = True
-
-    id = fields.String(required=True)
+    control = fields.Nested(VolumeControlSchema, required=True)
 
     def get_attribute(self, attr, obj, default):
-        if attr != 'id':
-            return utils.get_value(attr, obj.unpacked_value, default)
-
-        etcd_key = super(VolumeSchema, self).get_attribute('key', obj, default)
-        id = VolumeManager.get_id_from_key(etcd_key)
-
-        return id
-
-
-volume_schema = VolumeSchema()
-packer_schema = PackerSchema()
-volume_attribute_schema = VolumeAttributeSchema()
+        if attr == 'id':
+            return VolumeManager.get_id_from_key(obj.key)
+        return utils.get_value(attr, obj.value, default)
 
 
 class VolumeManager(BaseManager):
     KEY = 'volumes'
-    SCHEMA = packer_schema
 
-    def by_state(self, state):
-        return [volume for volume in self.all() if volume.unpacked_value.get('state') == state]
+    def by_states(self, states=None):
+        volumes = self.all()[1]
+        return VolumeManager.filter_states(volumes, states)
 
     def by_node(self, node):
         return [volume for volume in self.all() if 'actual' in volume.unpacked_value.keys() and
@@ -61,21 +56,39 @@ class VolumeManager(BaseManager):
                 volume.unpacked_value.get('actual')['node'] == node]
 
     def update(self, volume):
+        volume.value['control']['updated'] = time()
         volume = super(VolumeManager, self).update(volume)
 
         if not volume:
             return False
 
-        volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
         return volume
 
-    def _unpack(self, volumes):
-        # we trust that etcd data is valid
-        for volume in volumes:
-            volume.unpacked_value, _ = volume_schema.loads(volume.value)
+    def create(self, data, *unused):
+        data['control']['updated'] = time()
+        volume = super(VolumeManager, self).create(data, '')
 
-        return volumes
+        return volume
+
+    def watch(self, index=None, timeout=0):
+        try:
+            volume = self.client.watch(VolumeManager.KEY, recursive=True, index=index, timeout=timeout)
+        except etcd.EtcdWatchTimedOut:
+            return None
+        return super(VolumeManager, self)._load_from_etcd(volume)
+
+    def get_lock(self, id, purpose='clone'):
+        return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
+
+    # TODO test get lock
 
     @staticmethod
     def get_id_from_key(key):
         return key[len(VolumeManager.KEY) + 2:]
+
+    @staticmethod
+    def filter_states(volumes, states):
+        states = states or []
+        states = [states] if not isinstance(states, list) else states
+
+        return [volume for volume in volumes if volume.value['state'] in states]

@@ -3,19 +3,9 @@ import etcd
 from pytest import fixture
 
 from api import Api
-from models import VolumeManager, PackerSchema, VolumeSchema
+from engine import Executor
+from models import VolumeManager, MachineManager
 from config import config as context
-
-
-class ClientVolumeSchema(VolumeSchema):
-    """
-        Created just to check the output of the api and easily compare it with the generated one from etcd_result
-    """
-    class Meta:
-        ordered = True
-
-    def get_attribute(self, attr, obj, default):
-        super(PackerSchema, self).get_attribute(attr, obj, default)
 
 
 @fixture
@@ -26,6 +16,11 @@ def flask_app(volume_manager):
 @fixture
 def volume_manager(etcd_client):
     return VolumeManager(etcd_client)
+
+
+@fixture
+def machine_manager(etcd_client):
+    return MachineManager(etcd_client)
 
 
 @fixture
@@ -45,6 +40,11 @@ def etcd_client(request):
     return client
 
 
+@fixture
+def executor(volume_manager, machine_manager):
+    return Executor(volume_manager, machine_manager, {'timeout': 2})
+
+
 @fixture(scope='module')
 def volume_raw_ok_ready():
     return '''{
@@ -60,6 +60,11 @@ def volume_raw_ok_ready():
         },
         "meta": {
             "instance.name": "test_instance"
+        },
+        "control": {
+            "error": "",
+            "error_count": 0,
+            "parent_id": ""
         }
     }'''
 
@@ -79,6 +84,10 @@ def volume_raw_ok_deleting():
         },
         "meta": {
             "instance.name": "test_instance"
+        },
+        "control": {
+            "error": "",
+            "error_count": 0
         }
     }'''
 
@@ -120,7 +129,7 @@ def volume_raw_minimal():
 @fixture(scope='module')
 def volume_raw_read_only_extra():
     return '''{
-        "id": "random",
+        "id": "",
         "name": "ok",
         "requested": {
             "reserved_size": 10,
@@ -135,6 +144,8 @@ def volume_raw_read_only_extra():
             "instance.name": "test_instance"
         },
         "undefined": 1,
-        "error": "random",
-        "error_count": 1
+        "control": {
+            "error": "random",
+            "error_count": 1
+        }
     }'''

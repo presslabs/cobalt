@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from models.base_manager import BaseManager, base_schema
+from models.base_manager import BaseManager
 
 
 @fixture
@@ -24,20 +24,15 @@ def p_base_manager_update(mocker, base_manager):
 
 
 @fixture
+def p_base_manager_all_keys(mocker, base_manager):
+    return mocker.patch.object(base_manager, 'all_keys')
+
+
+@fixture
 def p_base_manager_update(mocker, base_manager):
     return mocker.patch.object(base_manager, 'create')
 
 
 @fixture
-def p_base_manager_unpacker(mocker, base_manager):
-    return mocker.patch.object(base_manager, '_unpack')
-
-
-@fixture
-def p_base_schema_dumps(mocker):
-    return mocker.patch.object(base_schema, 'dumps')
-
-
-@fixture
-def p_base_schema_loads(mocker):
-    return mocker.patch.object(base_schema, 'loads')
+def p_base_manager_load_from_etcd(mocker, base_manager):
+    return mocker.patch.object(base_manager, '_load_from_etcd')
