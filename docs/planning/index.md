@@ -6,3 +6,4 @@
 - [Environment](environment.md)
 - [States](states.md)
 - [UML](uml.md)
+- [Failures](failures.md)
