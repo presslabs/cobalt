@@ -70,6 +70,16 @@ class TestVolumeManager:
         p_super_create.assert_called_with(data, '')
         assert output_volume
 
+    def test_get_lock(self, volume_manager, m_etcd_client, p_etcd_lock):
+        volume_manager.get_lock('1')
+
+        p_etcd_lock.assert_called_with(m_etcd_client, 'clone-1')
+
+    def test_get_lock_custom_purpose(self, volume_manager, m_etcd_client, p_etcd_lock):
+        volume_manager.get_lock('1', 'foobar')
+
+        p_etcd_lock.assert_called_with(m_etcd_client, 'foobar-1')
+
     def test_volume_get_id_from_key_invalid_input(self):
         key = 'volumes'
 

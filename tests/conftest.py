@@ -55,6 +55,11 @@ def p_volume_manager_watch(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_get_lock(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'get_lock')
+
+
+@fixture
 def p_volume_manager_filter_states(mocker):
     return mocker.patch('models.volume_manager.VolumeManager.filter_states')
 
@@ -107,6 +112,11 @@ def p_machine_manager_all_keys(mocker, machine_manager):
 @fixture
 def p_machine_manager_create(mocker, machine_manager):
     return mocker.patch.object(machine_manager, 'create')
+
+
+@fixture
+def p_etcd_lock(mocker):
+    return mocker.patch('etcd.Lock')
 
 
 @fixture
