@@ -79,7 +79,7 @@ class TestVolume:
             'requested': {'constraints': [], 'reserved_size': 1},
             'actual': {},
             'node': '',
-            'state': 'scheduling',
+            'state': 'pending',
             'control': {
                 'error': '',
                 'error_count': 0,
@@ -90,15 +90,16 @@ class TestVolume:
         expected_code = 202
 
         with flask_app.test_client() as c:
+            # create parent and make
             response = c.post('/volumes', data=volume_raw_minimal, content_type='application/json')
-
             result = json.loads(response.data.decode())
             id = result.pop('id')
             expected_result['control']['parent_id'] = str(id)
 
+            # create clone
             request = {'id': str(id), 'requested': {'reserved_size': 1, 'constraints': []}}
-            print(request)
             response = c.post('/volumes', data=json.dumps(request), content_type='application/json')
+            result = json.loads(response.data.decode())
             id = result.pop('id')
 
             assert id
