@@ -10,7 +10,7 @@ class BTRFSDriver(Driver):
     def create(self, requirements):
         try:
             sh.btrfs.subvolume.create('{}/{}'.format(self._path, requirements['id']))
-            quota = '{}G'.format(requirements['requested']['reservedSize'])
+            quota = '{}G'.format(requirements['reserved_size'])
 
             self._set_quota(requirements['id'], quota)
         except sh.ErrorReturnCode_1 as e:
