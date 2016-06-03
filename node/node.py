@@ -9,7 +9,7 @@ class Node:
     ssd = True
     """
     def __init__(self, context):
-        self._conf_path = context['node']['conf_path']
+        self._conf_path = context['conf_path']
         self._driver = BTRFSDriver(context['volume_path'])
         self._name, self._labels = '', {}
 
