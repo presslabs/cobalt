@@ -50,6 +50,9 @@ class VolumeManager(BaseManager):
         volumes = self.all()[1]
         return VolumeManager.filter_states(volumes, states)
 
+    def by_node(self, node):
+        return [volume for volume in self.all() if volume.value['node'] == node]
+
     def update(self, volume):
         volume.value['control']['updated'] = time()
         volume = super(VolumeManager, self).update(volume)
@@ -74,8 +77,6 @@ class VolumeManager(BaseManager):
 
     def get_lock(self, id, purpose='clone'):
         return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
-
-    # TODO test get lock
 
     @staticmethod
     def get_id_from_key(key):

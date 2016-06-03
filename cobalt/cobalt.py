@@ -61,4 +61,8 @@ class Cobalt(Service):
         return MachineManager(etcd)
 
 
+    def _create_machine_manager(self, etcd):
+        return MachineManager(etcd)
+
+
 cobalt = Cobalt()

@@ -12,6 +12,7 @@ class BaseManager:
 
     def __init__(self, client):
         self.client = client
+
         try:
             self.client.write(self.KEY, '', dir=True)
         except (etcd.EtcdAlreadyExist, etcd.EtcdNotFile):
@@ -55,6 +56,25 @@ class BaseManager:
             return False
 
         return self._load_from_etcd(entity)
+
+    def delete(self, entity):
+        try:
+            entity = self.client.delete(entity.key)
+        except etcd.EtcdKeyNotFound:
+            return False
+
+        return self._load_from_etcd(entity)
+
+    def watch(self, index=None, timeout=0):
+        try:
+            entity = self.client.watch(BaseManager.KEY, recursive=True, index=index, timeout=timeout)
+        except etcd.EtcdWatchTimedOut:
+            return None
+        return self._load_from_etcd(entity)
+
+    @staticmethod
+    def get_id_from_key(key):
+        return key[len(BaseManager.KEY) + 2:]
 
     def _load_from_etcd(self, data):
         # we trust that etcd data is valid
