@@ -1,4 +1,4 @@
-from marshmallow import fields, Schema, utils, validate
+from marshmallow import fields, Schema, validate, utils
 
 from .base_manager import BaseManager
 
@@ -11,49 +11,39 @@ class VolumeAttributeSchema(Schema):
     constraints = fields.List(fields.String(validate=[validate.Length(min=1)]), required=True)
 
 
-class PackerSchema(Schema):
+class VolumeControlSchema(Schema):
     class Meta:
         ordered = True
 
+    error = fields.String(default='', missing='')
+    error_count = fields.Integer(default=0, missing=0)
+    # TODO consider adding a timestamp
+
+
+class VolumeSchema(Schema):
+    class Meta:
+        ordered = True
+
+    id = fields.String(required=True)
     state = fields.String(default='registered', missing='registered')
     name = fields.String(default='', missing='')
     node = fields.String(default='', missing='')
-    error = fields.String(default='', missing='')
-    error_count = fields.Integer(default=0, missing=0)
 
     meta = fields.Dict(default={}, missing={})
 
     actual = fields.Nested(VolumeAttributeSchema, missing={}, default={})
     requested = fields.Nested(VolumeAttributeSchema, required=True)
-
-
-class VolumeSchema(PackerSchema):
-    class Meta:
-        ordered = True
-
-    id = fields.String(required=True)
+    control = fields.Nested(VolumeControlSchema, required=True)
 
     def get_attribute(self, attr, obj, default):
-        if attr != 'id':
-            return utils.get_value(attr, obj.unpacked_value, default)
-
-        etcd_key = super(VolumeSchema, self).get_attribute('key', obj, default)
-        id = VolumeManager.get_id_from_key(etcd_key)
-
-        return id
-
-
-volume_schema = VolumeSchema()
-packer_schema = PackerSchema()
-volume_attribute_schema = VolumeAttributeSchema()
+        return utils.get_value(attr, obj.value, default)
 
 
 class VolumeManager(BaseManager):
     KEY = 'volumes'
-    SCHEMA = packer_schema
 
     def by_state(self, state):
-        return [volume for volume in self.all() if volume.unpacked_value.get('state') == state]
+        return [volume for volume in self.all() if volume.value.get('state') == state]
 
     def update(self, volume):
         volume = super(VolumeManager, self).update(volume)
@@ -61,15 +51,14 @@ class VolumeManager(BaseManager):
         if not volume:
             return False
 
-        volume.unpacked_value['id'] = self.get_id_from_key(volume.key)
+        volume.value['id'] = self.get_id_from_key(volume.key)
         return volume
 
-    def _unpack(self, volumes):
-        # we trust that etcd data is valid
-        for volume in volumes:
-            volume.unpacked_value, _ = volume_schema.loads(volume.value)
+    def create(self, data, *unused):
+        volume = super(VolumeManager, self).create(data, '')
+        volume.value['id'] = self.get_id_from_key(volume.key)
 
-        return volumes
+        return volume
 
     @staticmethod
     def get_id_from_key(key):
