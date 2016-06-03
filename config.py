@@ -31,10 +31,12 @@ config = {
     },
     'agent': {
         'agent_ttl': 60,
+        'max_error_count': 3,
         'node': {
             'volume_path': '/volumes',
             'conf_path': '/etc/cobalt.conf'
         },
+        'watch_timeout': 10
     },
     'services': ['api'],  #['engine', 'api'],
     'mount_point': None
