@@ -61,7 +61,7 @@ class Api(Service):
 
         app = Flask(__name__)
         app.config.update(**config)
-        app.debug=True # todo remove this
+
         api = RestApi(app, errors=unhandled_exception_errors, catch_all_404s=True)
         Api._register_resources(api)
 
