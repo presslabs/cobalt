@@ -50,6 +50,11 @@ class VolumeManager(BaseManager):
         volumes = self.all()[1]
         return VolumeManager.filter_states(volumes, states)
 
+    def by_node(self, node):
+        return [volume for volume in self.all() if 'actual' in volume.unpacked_value.keys() and
+                'node' in volume.unpacked_value.get('actual').keys() and
+                volume.unpacked_value.get('actual')['node'] == node]
+
     def update(self, volume):
         volume.value['control']['updated'] = time()
         volume = super(VolumeManager, self).update(volume)
