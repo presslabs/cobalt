@@ -38,6 +38,6 @@ config = {
         },
         'watch_timeout': 10
     },
-    'services': ['api'],  #['engine', 'api'],
+    'services': ['api', 'engine', 'agent'],
     'mount_point': None
 }
