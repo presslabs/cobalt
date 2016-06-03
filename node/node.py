@@ -26,9 +26,11 @@ class Node:
     def get_subvolumes(self):
         return self._driver.get_all()
 
+    @property
     def name(self):
         return self._name
 
+    @property
     def labels(self):
         return self._labels
 
