@@ -48,11 +48,11 @@ class Volume(Resource):
     def delete(volume_id):
         manager = app.volume_manager
 
-        volume = manager.by_id(volume_id)
-        if volume is None:
+        target_volume = manager.by_id(volume_id)
+        if target_volume is None:
             return {'message': 'Not Found'}, 404
 
-        if volume.value['state'] != 'ready':
+        if target_volume.value['state'] != 'ready':
             return {'message': 'Resource not in ready state, can\'t delete.'}, 409
 
         lock = manager.get_lock(volume_id, 'clone')
@@ -67,14 +67,14 @@ class Volume(Resource):
             return {'message': 'Resource has pending clones, can\'t delete.',
                     'clones': pending_clones}, 409
 
-        volume.value['state'] = 'deleting'
-        volume = manager.update(volume)
+        target_volume.value['state'] = 'deleting'
+        target_volume = manager.update(target_volume)
         lock.release()
 
-        if not volume:
+        if not target_volume:
             return {'message': 'Resource changed during transition.'}, 409
 
-        result, _ = VolumeSchema().dump(volume)
+        result, _ = VolumeSchema().dump(target_volume)
         return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}
 
 

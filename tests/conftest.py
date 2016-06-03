@@ -156,12 +156,12 @@ class Dummy:
             self.__setattr__(key, val)
 
 
-dummy_ready_volume = Dummy(value={'name': 'test', 'state': 'ready', 'control': {}},
-                           value_json='{"name": "test", "state": "ready", "control": {}}',
+dummy_ready_volume = Dummy(value={'name': 'test', 'state': 'ready', 'control': {'parent_id': ''}},
+                           value_json='{"name": "test", "state": "ready", "control": {"parent_id": ""}}',
                            key='/volumes/1')
 
-dummy_invalid_state_volume = Dummy(value={'name': 'test', 'state': 'NONE', 'control': {}},
-                                   value_json='{"name": "test", "state": "NONE", "control": {}}',
+dummy_invalid_state_volume = Dummy(value={'name': 'test', 'state': 'NONE', 'control': {'parent_id': ''}},
+                                   value_json='{"name": "test", "state": "NONE", "control": {"parent_id": ""}}',
                                    key='/volumes/2')
 
 dummy_machines = [Dummy(value={},
