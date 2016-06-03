@@ -1,6 +1,7 @@
 import sh
 
 from .driver import Driver
+from time import time
 
 
 class BTRFSDriver(Driver):
@@ -33,7 +34,7 @@ class BTRFSDriver(Driver):
 
     def clone(self, id):
         try:
-            sh.btrfs.subvolume.snapshot('{}/{}'.format(self._path, id), '{}/clone-{}'.format(self._path, id))
+            sh.btrfs.subvolume.snapshot('{}/{}'.format(self._path, id), '{}/clone-{}-{}'.format(self._path, id, time.strftime('%d%m%Y%H%M%S')))
         except sh.ErrorReturnCode_1 as e:
             print(e.message, e.full_cmd)
             return False
