@@ -55,6 +55,7 @@ class Agent(Service):
         self._from_etcd = self.get_all()
 
     def _machine_heartbeat(self):
+        pass
 
 
     def _volume_heartbeat(self):
