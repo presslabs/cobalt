@@ -1,5 +1,4 @@
 import pytest
-
 from flask import json
 
 from models import VolumeSchema, VolumeAttributeSchema

@@ -1,8 +1,8 @@
 from pytest import mark
 from pytest_mock import mock_module
 
-from api import Api, Volume, VolumeList
 from utils import Service
+from api import Api, Volume, VolumeList
 
 
 class TestApi:
