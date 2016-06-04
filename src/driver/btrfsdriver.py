@@ -1,3 +1,4 @@
+import re
 import sh
 
 from driver import Driver
@@ -71,6 +72,7 @@ class BTRFSDriver(Driver):
         ids = []
         try:
             subvolumes = sh.btrfs.subvolume.list('-o', self._base_path)
+            subvolumes = subvolumes.strip()
 
             for line in subvolumes.splitlines():
                 line = line.strip()
@@ -85,10 +87,26 @@ class BTRFSDriver(Driver):
 
         return ids
 
-    # TODO implement accurate disk memory usage info for BTRFS
-    def get_free_space(self):
-        try:
-            pass
-        except Exception:
-            pass
+    """
+    Gets info about total disk space and used disk space
+    using the df command provided by btrfs tools
 
+    Unit of measure is GiB
+    """
+    def df(self):
+        try:
+            usage = sh.btrfs.filesystem.df('-g', self._base_path)
+            usage = usage.strip()
+
+            # First line should contain overall usage info
+            total_usage = usage.splitlines()[0]
+            total, used = None, None
+            match = re.search(r'total=(.*?)GiB, used=(.*?)GiB', total_usage)
+
+            if match:
+                total, used = match.group(1), match.group(2)
+
+        except sh.ErrorReturnCode_1 as e:
+            print(self._err('get_all', e.stderr, e.full_cmd))
+
+        return total, used
