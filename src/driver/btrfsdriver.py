@@ -1,29 +1,37 @@
 import sh
 
-from .driver import Driver
+from driver import Driver
 
 
 class BTRFSDriver(Driver):
-    def __init__(self, path):
-        self._path = path
+    def __init__(self, base_path):
+        self._base_path = base_path
+
+    def _get_path(self, id):
+        return '{}/{}'.format(self._base_path, id)
+
+    def _get_quota(self, quota):
+        return '{}G'.format(quota)
+
+    def _err(self, operation, stderr, cmd):
+        return 'BTRFS driver failed! \nOPERATION: {} \nCOMMAND: {} \nSTDERR: {}'.format(operation, cmd, stderr)
 
     def create(self, requirements):
         try:
-            sh.btrfs.subvolume.create('{}/{}'.format(self._path, requirements['id']))
-            quota = '{}G'.format(requirements['reserved_size'])
-
+            sh.btrfs.subvolume.create(self._get_path(requirements['id']))
+            quota = self._get_quota(requirements['reserved_size'])
             self._set_quota(requirements['id'], quota)
         except sh.ErrorReturnCode_1 as e:
-            print(e.message, e.full_cmd)
+            print(self._err('create', e.stderr, e.full_cmd))
             return False
 
         return True
 
     def _set_quota(self, id, quota):
         try:
-            sh.btrfs.qgroup.limit(quota, '{}/{}'.format(self._path, id))
+            sh.btrfs.qgroup.limit(quota, self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
-            print(e.message, e.full_cmd)
+            print(self._err('resize', e.stderr, e.full_cmd))
             return False
 
         return True
@@ -33,24 +41,24 @@ class BTRFSDriver(Driver):
 
     def clone(self, id, parent_id):
         try:
-            sh.btrfs.subvolume.snapshot('{}/{}'.format(self._path, parent_id), '{}/{}'.format(self._path, id))
+            sh.btrfs.subvolume.snapshot(self._get_path(parent_id), self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
-            print(e.message, e.full_cmd)
+            print(self._err('clone', e.stderr, e.full_cmd))
             return False
 
         return True
 
     def remove(self, id):
         try:
-            sh.btrfs.subvolume.delete('{}/{}'.format(self._path, id))
+            sh.btrfs.subvolume.delete(self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
-            print(e.message, e.full_cmd)
+            print(self._err('remove', e.stderr, e.full_cmd))
             return False
 
         return True
 
     def expose(self, id, host, permissions):
-        export = '{}/{}   {}({})\n'.format(self._path, id, host, ','.join(permissions))
+        export = '{}   {}({})\n'.format(self._get_path(id), host, ','.join(permissions))
         try:
             with open('/etc/exports', 'a') as f:
                 f.write(export)
@@ -62,14 +70,19 @@ class BTRFSDriver(Driver):
     def get_all(self):
         ids = []
         try:
-            subvolumes = sh.btrfs.subvolume.list('-o', self._path)
-            for line in subvolumes:
+            subvolumes = sh.btrfs.subvolume.list('-o', self._base_path)
+
+            for line in subvolumes.splitlines():
                 line = line.strip()
-                id = int(line[line.index('{}/').format(self._path):].replace('{}/'.format(self._path), ''))
-                ids.append(id)
+                try:
+                    id = line[line.index('{}/'.format(self._base_path)):].replace('{}/'.format(self._base_path), '')
+                    ids.append(int(id))
+                except ValueError:
+                    pass
         except sh.ErrorReturnCode_1 as e:
-            print(e.message, e.full_cmd)
-            return False
+            print(self._err('get_all', e.stderr, e.full_cmd))
+            return []
+
         return ids
 
     # TODO implement accurate disk memory usage info for BTRFS
