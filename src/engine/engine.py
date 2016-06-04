@@ -1,11 +1,11 @@
-import gevent
 import time
 
+import gevent
 from etcd import Lock
 
 from utils import Service
-from .lease import Lease
 from .executor import Executor
+from .lease import Lease
 
 
 class Engine(Service):

@@ -1,6 +1,5 @@
-from pytest import mark
 from etcd import Lock
-
+from pytest import mark
 from pytest_mock import mock_module
 
 from utils import Service

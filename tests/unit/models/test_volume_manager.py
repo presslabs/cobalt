@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-from flask import json
 from pytest import mark
 
 from models import VolumeManager

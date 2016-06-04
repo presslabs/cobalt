@@ -1,7 +1,6 @@
-from pytest import fixture, mark
-
 from flask import Flask
 from flask_restful import Api as FlaskRestful
+from pytest import fixture, mark
 
 from api import Api
 

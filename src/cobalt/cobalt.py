@@ -1,11 +1,12 @@
-import etcd
-import gevent
 import signal
 
+import etcd
+import gevent
 from api import Api
 from engine import Engine
 from models import VolumeManager, MachineManager
 from utils import Service
+
 from config import config
 
 

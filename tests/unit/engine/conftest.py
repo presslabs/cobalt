@@ -1,6 +1,6 @@
+from etcd import Lock
 from pytest import fixture, mark
 
-from etcd import Lock
 from engine import Engine, Lease, Executor
 
 

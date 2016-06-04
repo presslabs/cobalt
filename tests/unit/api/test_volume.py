@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from api import Volume, VolumeList
+from api import Volume
 from tests.conftest import dummy_ready_volume
 
 
