@@ -1,7 +1,7 @@
 import pytest
 from flask import json
 
-from models import VolumeSchema, VolumeAttributeSchema
+from models.manager import VolumeSchema, VolumeAttributeSchema
 
 
 class TestVolumeIntegration:

@@ -1,5 +1,6 @@
 from configparser import ConfigParser
-from driver import BTRFSDriver
+
+from models.driver import BTRFSDriver
 
 
 class Node:

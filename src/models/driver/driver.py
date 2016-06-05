@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class Driver(metaclass=ABCMeta):
     @abstractmethod
-    def create(self):
+    def create(self, requirements):
         pass
 
     @abstractmethod
@@ -11,7 +11,7 @@ class Driver(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def clone(self, id):
+    def clone(self, id, parent_id):
         pass
 
     @abstractmethod
@@ -19,7 +19,7 @@ class Driver(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def expose(self, id):
+    def expose(self, id, host, permissions):
         pass
 
     @abstractmethod

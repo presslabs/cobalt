@@ -1,9 +1,10 @@
-import gevent
 import time
 
+import gevent
+
+from models.driver import BTRFSDriver
+from models.node import Node
 from utils.service import Service
-from node import Node
-from driver import BTRFSDriver
 
 
 class Agent(Service):

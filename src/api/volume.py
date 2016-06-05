@@ -1,7 +1,7 @@
 from flask import current_app as app, request
 from flask_restful import Resource
 
-from models import VolumeSchema, VolumeAttributeSchema
+from models.manager import VolumeSchema, VolumeAttributeSchema
 
 
 class Volume(Resource):

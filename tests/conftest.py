@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from api import Api
-from models import VolumeManager, MachineManager
+from models.manager import VolumeManager, MachineManager
 
 
 @fixture
