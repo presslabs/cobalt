@@ -1,0 +1,22 @@
+---
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - python
+  fixme:
+    enabled: true
+  radon:
+    enabled: true
+  markdownlint:
+    enabled: true
+  pep8:
+    enabled: true
+
+exclude_paths:
+- tests/
+
+ratings:
+  paths:
+  - "**.py"
