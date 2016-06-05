@@ -4,7 +4,7 @@ build:
     - rm -rf tests/.cache
     - apk add --no-cache gcc musl-dev
     - pip install -r requirements/development.txt
-    - PYTHONPATH=src py.test --cov=src --color=yes tests
+    - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src py.test --cov=src --color=yes tests
 
 compose:
   etcd:
