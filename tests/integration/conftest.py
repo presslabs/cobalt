@@ -4,7 +4,7 @@ from pytest import fixture
 
 from api import Api
 from engine import Executor
-from models import VolumeManager, MachineManager
+from models.manager import VolumeManager, MachineManager
 from config import config as context
 
 
