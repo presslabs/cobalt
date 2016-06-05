@@ -1,7 +1,7 @@
 import re
 import sh
 
-from models.driver import Driver
+from .driver import Driver
 
 
 class BTRFSDriver(Driver):
