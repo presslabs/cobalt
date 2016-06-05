@@ -7,6 +7,11 @@ from .driver import Driver
 class BTRFSDriver(Driver):
     def __init__(self, base_path):
         self._base_path = base_path
+        try:
+            self._btrfs = sh.Command('btrfs')
+        except sh.CommandNotFound as e:
+            print(self._err('driver init', e.stderr, e.full_cmd))
+            return None
 
     def _get_path(self, id):
         return '{}/{}'.format(self._base_path, id)
@@ -19,7 +24,7 @@ class BTRFSDriver(Driver):
 
     def create(self, requirements):
         try:
-            sh.btrfs.subvolume.create(self._get_path(requirements['id']))
+            self._btrfs('subvolume', 'create', self._get_path(requirements['id']))
             quota = self._get_quota(requirements['reserved_size'])
             self._set_quota(requirements['id'], quota)
         except sh.ErrorReturnCode_1 as e:
@@ -30,7 +35,7 @@ class BTRFSDriver(Driver):
 
     def _set_quota(self, id, quota):
         try:
-            sh.btrfs.qgroup.limit(quota, self._get_path(id))
+            self._btrfs('qgroup', 'limit', quota, self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
             print(self._err('resize', e.stderr, e.full_cmd))
             return False
@@ -42,7 +47,7 @@ class BTRFSDriver(Driver):
 
     def clone(self, id, parent_id):
         try:
-            sh.btrfs.subvolume.snapshot(self._get_path(parent_id), self._get_path(id))
+            self._btrfs('subvolume', 'snapshot', self._get_path(parent_id), self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
             print(self._err('clone', e.stderr, e.full_cmd))
             return False
@@ -51,7 +56,7 @@ class BTRFSDriver(Driver):
 
     def remove(self, id):
         try:
-            sh.btrfs.subvolume.delete(self._get_path(id))
+            self._btrfs('subvolume', 'delete', self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
             print(self._err('remove', e.stderr, e.full_cmd))
             return False
@@ -71,7 +76,7 @@ class BTRFSDriver(Driver):
     def get_all(self):
         ids = []
         try:
-            subvolumes = sh.btrfs.subvolume.list('-o', self._base_path)
+            subvolumes = self._btrfs('subvolume', 'list', '-o', self._base_path)
             subvolumes = subvolumes.strip()
 
             for line in subvolumes.splitlines():
@@ -95,7 +100,7 @@ class BTRFSDriver(Driver):
     """
     def df(self):
         try:
-            usage = sh.btrfs.filesystem.df('-g', self._base_path)
+            usage = self._btrfs('filesystem', 'df', '-g', self._base_path)
             usage = usage.strip()
 
             # First line should contain overall usage info
