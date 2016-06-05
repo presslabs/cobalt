@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
+from time import time
 
 import gevent
 
@@ -22,20 +22,21 @@ from utils.service import Service
 
 
 class Agent(Service):
-    def __init__(self, volume_manager, context):
-        # Not sure if I need this anymore
-        # self._from_node = None
+    def __init__(self, machine_manager, volume_manager, context):
         self._driver = BTRFSDriver(context['node']['volume_path'])
         self._from_etcd = None
-        self._manager = volume_manager
-        self._max_error_count = context['max_error_count']
+        self._machine_manager = machine_manager
+        self._volume_manager = volume_manager
         self._node = Node(context['node'])
-        self._watch_timeout = context['watch_timeout']
         self._work = []
 
         self._agent_loop = None
+        self._max_error_count = context['max_error_count']
         self._delay = context['agent_ttl']
+        self._watch_timeout = context['watch_timeout']
         self._started = False
+
+        self._machine_heartbeat()
 
     def start(self):
         if self._started:
@@ -70,7 +71,13 @@ class Agent(Service):
         self._from_etcd = self.get_all()
 
     def _machine_heartbeat(self):
-        pass
+        node = self._machine_manager.by_id(self._node.name)
+        if node:
+            node.value['available'] = self._node.get_space()
+            node.value['labels'] = self._node.labels
+        else:
+            node = dict(id=self._node.name, available=self._node.get_space(), labels=self._node.labels)
+        self._machine_manager.create(node, self._node.name)
 
     def _volume_heartbeat(self):
         self.get_work()
@@ -78,8 +85,8 @@ class Agent(Service):
         if len(self._work) > 0:
             self.do_work()
         else:
-            volume = self._manager.watch(timeout=self._watch_timeout)
-            if volume is not None and volume.value['node'] == self._node.name and volume.value['state'] != 'ready':
+            volume = self._volume_manager.watch(timeout=self._watch_timeout)
+            if volume and volume.value['node'] == self._node.name and volume.value['state'] not in ['ready', 'pending']:
                 self._work.append(volume)
                 self.do_work()
             else:
@@ -92,69 +99,62 @@ class Agent(Service):
         return self._node.get_subvolumes()
 
     def get_all(self):
-        return self._manager.by_node(self._node.name)
+        return self._volume_manager.by_node(self._node.name)
 
     def get_work(self):
         self._work = [volume for volume in self._from_etcd if volume.value['state'] not in ['ready', 'pending']]
 
     def do_work(self):
-        # Operation priority:
-        #   deleting
-        #   [moving]
-        #   resizing
-        #   cloning
-        #   creating
         for volume in self._work:
-            while time.time() - volume.value['control']['updated'] >= 10:
-                id = self._manager.__class__.get_id_from_key(volume.key)
+            while time() - volume.value['control']['updated'] >= 10:
+                id = self._volume_manager.__class__.get_id_from_key(volume.key)
 
                 if volume.value['state'] == 'deleting':
                     if self._driver.remove(id):
-                        self._manager.delete(volume)
+                        self._volume_manager.delete(volume)
                     else:
                         volume.value['control']['error_count'] += 1
                         if volume.value['control']['error_count'] % self._max_error_count == 0:
-                            volume.value['control']['updated'] = time.time()
+                            volume.value['control']['updated'] = time()
 
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
                 elif volume.value['state'] == 'resizing':
                     if self._driver.resize(id, volume.value['requested']['reserved_size']):
                         volume.value['actual']['reserved_size'] = volume.value['requested']['reserved_size']
                         volume.value['state'] = 'pending'
                         volume.value['control']['error_count'] = 0
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
                     else:
                         volume.value['control']['error_count'] += 1
                         if volume.value['control']['error_count'] % self._max_error_count == 0:
-                            volume.value['control']['updated'] = time.time()
+                            volume.value['control']['updated'] = time()
 
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
                 elif volume.value['state'] == 'cloning':
                     if self._driver.clone(volume.value['id'], volume.value['control']['parent_id']):
                         volume.value['control']['parent_id'] = ''
                         volume.value['control']['error_count'] = 0
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
                     else:
                         volume.value['control']['error_count'] += 1
                         if volume.value['control']['error_count'] % self._max_error_count == 0:
-                            volume.value['control']['updated'] = time.time()
+                            volume.value['control']['updated'] = time()
 
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
                 elif volume.value['state'] == 'scheduling':
-                    requirements = {
-                        'id': id,
-                        'reserved_size': volume.value['requested']['reserved_size']
-                    }
+                    requirements = dict(id=id, reserved_size=volume.value['requested']['reserved_size'])
+
                     if self._driver.create(requirements):
                         volume.value['actual'] = {
                             'node': self._node.name,
                             'reserved_size': volume.value['requested']['reserved_size']
                         }
                         volume.value['control']['error_count'] = 0
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
                     else:
                         volume.value['control']['error_count'] += 1
                         if volume.value['control']['error_count'] % self._max_error_count == 0:
-                            volume.value['control']['updated'] = time.time()
+                            volume.value['control']['updated'] = time()
 
-                        self._manager.update(volume)
+                        self._volume_manager.update(volume)
+

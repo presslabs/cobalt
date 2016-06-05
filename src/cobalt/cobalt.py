@@ -20,6 +20,7 @@ import time
 
 from api import Api
 from engine import Engine
+from agent import Agent
 from models.manager import VolumeManager, MachineManager
 from utils import Service
 
@@ -54,7 +55,8 @@ class Cobalt(Service):
         self._service_endpoints = {
             'engine': Engine(self.etcd, self.volume_manager,
                              self.machine_manager, self.config['engine']),
-            'api': Api(self.volume_manager, self.config['api'])
+            'api': Api(self.volume_manager, self.config['api']),
+            'agent': Agent(self.machine_manager, self.volume_manager, self.config['agent'])
         }
 
     def filter_services(self):
@@ -186,3 +188,4 @@ class Cobalt(Service):
 
         """
         return MachineManager(etcd)
+
