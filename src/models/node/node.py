@@ -12,33 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from configparser import ConfigParser
-
-from models.driver import BTRFSDriver
+import json
 
 
 class Node:
     """
     # Dummy config example
-    [bk1-z3.presslabs.net]
-    labels = ssd, some_label, another_label ...
+    {
+        "name": "bk1-z3.presslabs.net",
+        "labels": ["ssd"]
+    }
     """
-    def __init__(self, context):
+    def __init__(self, context, driver):
         self._conf_path = context['conf_path']
-        self._driver = BTRFSDriver(context['volume_path'])
-        self._name, self._labels = '', []
+        self._conf = context['conf']
+        self._driver = driver
         self._available = self.get_space()
-
-        config = ConfigParser()
-        config.read(self._conf_path)
+        self._max_fill = context['max_fill']
 
         try:
-            self._name = config.sections()[0]
-
-            # Rule of thumb: have all labels declared on the same line in config file
-            for key, value in config[self._name].items():
-                self._labels.extend([label.strip() for label in value.split(',') if key == 'labels'])
-        except IndexError:
+            if len(self._conf['name']) and len(self._conf['labels']):
+                with open(self._conf_path, 'w') as c:
+                    json.dump(self._conf, c)
+            else:
+                with open(self._conf_path, 'r') as c:
+                    self._conf = json.load(c)
+        except (IOError, ValueError):
             pass
 
     def get_subvolumes(self):
@@ -46,18 +45,17 @@ class Node:
 
     @property
     def name(self):
-        return self._name
+        return self._conf['name']
 
     @property
     def labels(self):
-        return self._labels
+        return self._conf['labels']
 
     def get_space(self):
         total, used = self._driver.df()
 
         if total and used:
-            # Max fill only up to 80%
-            total -= total * 0.2
+            total -= total * (1 - self._max_fill)
             return total - used
 
         return None
