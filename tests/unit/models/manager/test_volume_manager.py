@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from pytest import mark
 
-from models import VolumeManager
+from models.manager import VolumeManager
 from tests.conftest import dummy_invalid_state_volume, dummy_ready_volume
 
 
@@ -47,7 +47,7 @@ class TestVolumeManager:
         volume = deepcopy(dummy_ready_volume)
         parent_return = False if not parent_return else volume
 
-        p_super_update = mocker.patch('models.base_manager.BaseManager.update')
+        p_super_update = mocker.patch('models.manager.base_manager.BaseManager.update')
         p_super_update.return_value = parent_return
 
         output_volume = volume_manager.update(volume)
@@ -61,7 +61,7 @@ class TestVolumeManager:
         data = {'control': {'update': None}}
         volume = deepcopy(dummy_invalid_state_volume)
 
-        p_super_create = mocker.patch('models.base_manager.BaseManager.create')
+        p_super_create = mocker.patch('models.manager.base_manager.BaseManager.create')
         p_super_create.return_value = volume
 
         output_volume = volume_manager.create(data)
