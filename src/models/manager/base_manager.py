@@ -60,7 +60,7 @@ class BaseManager:
     def delete(self, entity):
         try:
             entity = self.client.delete(entity.key)
-        except etcd.EtcdKeyNotFound:
+        except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
             return False
 
         return self._load_from_etcd(entity)

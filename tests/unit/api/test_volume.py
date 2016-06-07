@@ -5,7 +5,7 @@ from tests.conftest import dummy_ready_volume
 
 
 class TestVolume:
-    def test_delete_cas(self, mocker, volume_manager, p_volume_manager_by_id, p_volume_manager_update,
+    def test_delete_case(self, mocker, volume_manager, p_volume_manager_by_id, p_volume_manager_update,
                         p_volume_manager_get_lock, flask_app):
         volume = deepcopy(dummy_ready_volume)
         flask_app.volume_manager = volume_manager
