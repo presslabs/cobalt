@@ -5,6 +5,11 @@ from models.manager import VolumeManager, MachineManager
 
 
 @fixture
+def p_signal(mocker):
+    return mocker.patch('signal.signal')
+
+
+@fixture
 def m_etcd_client(mocker):
     return mocker.MagicMock()
 
@@ -161,13 +166,15 @@ class Dummy:
             self.__setattr__(key, val)
 
 
-dummy_ready_volume = Dummy(value={'name': 'test', 'state': 'ready', 'control': {'parent_id': ''}},
-                           value_json='{"name": "test", "state": "ready", "control": {"parent_id": ""}}',
-                           key='/volumes/1')
+dummy_ready_volume = Dummy(
+    value={'name': 'test', 'state': 'ready', 'control': {'parent_id': ''}},
+    value_json='{"name": "test", "state": "ready", "control": {"parent_id": ""}}',
+    key='/volumes/1')
 
-dummy_invalid_state_volume = Dummy(value={'name': 'test', 'state': 'NONE', 'control': {'parent_id': ''}},
-                                   value_json='{"name": "test", "state": "NONE", "control": {"parent_id": ""}}',
-                                   key='/volumes/2')
+dummy_invalid_state_volume = Dummy(
+    value={'name': 'test', 'state': 'NONE', 'control': {'parent_id': ''}},
+    value_json='{"name": "test", "state": "NONE", "control": {"parent_id": ""}}',
+    key='/volumes/2')
 
 dummy_machines = [Dummy(value={},
                         value_json='{}',
