@@ -45,6 +45,11 @@ def p_volume_manager_by_id(mocker, volume_manager):
 
 
 @fixture
+def p_volume_manager_by_node(mocker, volume_manager):
+    return mocker.patch.object(volume_manager, 'by_node')
+
+
+@fixture
 def p_volume_manager_update(mocker, volume_manager):
     return mocker.patch.object(volume_manager, 'update')
 
