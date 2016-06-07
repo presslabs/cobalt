@@ -7,32 +7,36 @@ from engine import Engine
 from models.manager import VolumeManager, MachineManager
 from utils import Service
 
-from config import config
-
 
 class Cobalt(Service):
-    def __init__(self):
-        signal.signal(signal.SIGINT, self.handler)
-        signal.signal(signal.SIGQUIT, self.handler)
-
+    def __init__(self, config):
         self.etcd = self._create_etcd(config['etcd'])
         self.volume_manager = self._create_volume_manager(self.etcd)
         self.machine_manager = self._create_machine_manager(self.etcd)
         self.config = config
 
-        services = {
-            'engine': Engine(self.etcd, self.volume_manager, self.machine_manager, self.config['engine']),
+        self._service_endpoints = {}
+        self.services = {}
+
+        self.setup_services()
+        self.filter_services()
+        self.attach_handlers()
+
+    def setup_services(self):
+        self._service_endpoints = {
+            'engine': Engine(self.etcd, self.volume_manager,
+                             self.machine_manager, self.config['engine']),
             'api': Api(self.volume_manager, self.config['api'])
             # TODO add api / agent here
             # 'api', 'agent'
         }
 
-        self.services = {}
-
-        context_services = self.config['services'] if isinstance(self.config['services'], list) else [self.config['services']]
+    def filter_services(self):
+        context_services = self.config['services'] if isinstance(
+            self.config['services'], list) else [self.config['services']]
         for service in context_services:
-            if service in services:
-                self.services[service] = services.get(service)
+            if service in self._service_endpoints:
+                self.services[service] = self._service_endpoints.get(service)
 
     def stop(self):
         for _, service in self.services.items():
@@ -49,6 +53,10 @@ class Cobalt(Service):
         print('Stopping..')
         self.stop()
 
+    def attach_handlers(self):
+        signal.signal(signal.SIGINT, self.handler)
+        signal.signal(signal.SIGQUIT, self.handler)
+
     @staticmethod
     def _create_etcd(context):
         return etcd.Client(**context)
@@ -61,9 +69,3 @@ class Cobalt(Service):
     def _create_machine_manager(etcd):
         return MachineManager(etcd)
 
-
-    def _create_machine_manager(self, etcd):
-        return MachineManager(etcd)
-
-
-cobalt = Cobalt()
