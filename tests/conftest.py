@@ -15,7 +15,10 @@
 from pytest import fixture
 
 from api import Api
+from agent import Agent
 from models.manager import VolumeManager, MachineManager
+from models.driver import BTRFSDriver
+from models.node import Node
 
 
 @fixture
@@ -167,6 +170,54 @@ def m_etcd_dir_result(mocker):
 @fixture
 def flask_app(volume_manager):
     return Api._create_app(volume_manager, testing=True)
+
+
+@fixture
+def m_driver():
+    return BTRFSDriver('/volumes')
+
+
+@fixture
+def p_driver_df(mocker, m_driver):
+    return mocker.patch.object(m_driver, 'df')
+
+
+@fixture
+def m_node(m_driver, p_driver_df):
+    p_driver_df.return_value = 30, 20
+    return Node({
+        'volume_path': '/volumes',
+        'conf_path': '/etc/cobalt.conf',
+        'max_fill': 0.8,
+        'conf': {
+            'name': 'test-node',
+            'labels': ['ssd']
+        }
+    }, m_driver)
+
+
+@fixture
+def agent_service(volume_manager, machine_manager, m_driver, m_node):
+    agent = Agent(volume_manager, machine_manager, {
+        'agent_ttl': 60,
+        'max_error_count': 3,
+        'max_error_timeout': 10,
+        'node': {
+            'volume_path': '/volumes',
+            'conf_path': '/etc/cobalt.conf',
+            'max_fill': 0.8,
+            'conf': {
+                'name': 'test',
+                'labels': ['ssd']
+            }
+        },
+        'watch_timeout': 10
+    })
+
+    agent._driver = m_driver
+    agent._node = m_node
+
+    return agent
 
 
 @fixture

@@ -25,7 +25,6 @@ class BTRFSDriver(Driver):
             self._btrfs = sh.Command('btrfs')
         except sh.CommandNotFound as e:
             print(self._err('driver init', e.stderr, e.full_cmd))
-            return None
 
     def _get_path(self, id):
         return '{}/{}'.format(self._base_path, id)
