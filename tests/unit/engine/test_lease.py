@@ -38,4 +38,5 @@ class TestLease:
         lease.acquire()
 
         assert not lock.acquire.called
+        assert lock.release.called
         assert not lease.is_held

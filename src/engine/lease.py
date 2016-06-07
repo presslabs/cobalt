@@ -19,6 +19,8 @@ class Lease(object):
 
             time.sleep(self.refresh_ttl)
 
+        self.lock.release()
+
     @property
     def is_held(self):
         return self.lock.is_acquired

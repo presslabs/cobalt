@@ -28,24 +28,24 @@ class TestEngineIntegration:
 
         aq1.start()
         run1.start()
-        time.sleep(0.2)
+        time.sleep(0.1)
         aq2.start()
         run2.start()
-        time.sleep(0.3)
+        time.sleep(0.1)
 
         assert engine1.lease.is_held
         assert not engine2.lease.is_held
 
-        engine1.lease.quit = True
-        engine1.lease.lock.release()
-        engine1._started = False
-        time.sleep(0.2)
+        assert engine1.stop()
+        time.sleep(1.2)
 
         assert not engine1.lease.is_held
         assert engine2.lease.is_held
 
-        engine2._started = False
-        engine2.lease.quit = True
+        assert engine2.stop()
+        time.sleep(0.1)
+
+        assert not engine2.lease.is_held
 
         threads = [run1, run2, aq1, aq2]
         for thread in threads:

@@ -10,7 +10,7 @@ class Executor:
 
         self.delay = 10
         try:
-            self.delay = int(context['timeout'])
+            self.delay = float(context['timeout'])
         except (KeyError, ValueError) as e:
             print('Context provided to Executor erroneous: {}, defaulting: {}\n{}'.format(context, self.delay, e))
 
