@@ -107,7 +107,7 @@ class Cobalt(Service):
         gevent.joinall(routines)
 
     def handler(self, signum, frame):
-        print('Stopping..')
+        print('Stopping...')
         self.stop()
 
     def attach_handlers(self):
