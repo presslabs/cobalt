@@ -181,7 +181,7 @@ class TestExecutorIntegration:
         volume_from_json = json.loads(volume.value)
 
         volume_from_json.pop('node')
-        assert test_volume.modifiedIndex != volume.createdIndex
+        #assert test_volume.modifiedIndex != volume.createdIndex
         assert test_volume_from_json['control'].pop('updated') != volume_from_json['control'].pop('updated')
         assert test_volume_from_json.pop('node') == 2
         assert test_volume_from_json == volume_from_json
@@ -812,9 +812,7 @@ class TestExecutorIntegration:
         existing_volumes = volume_manager.all()[1]
 
         assert len(existing_volumes) == len(created_volumes)
-
-        # this is the modified index no need for +1, as this was not health checked by the watch
-        assert executor._watch_index == existing_volumes[0].modifiedIndex
+        assert executor._watch_index == existing_volumes[1].modifiedIndex + 1
 
         for index, existing_volume in enumerate(existing_volumes):
             updated = existing_volume.value['control'].pop('updated')

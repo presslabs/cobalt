@@ -57,7 +57,6 @@ class Executor:
         node = data['node']
 
         expired = True if time.time() - data['control']['updated'] > self.delay else False
-
         if state == 'scheduling':
             if not node or expired:
                 machine = self._find_machine(volume)
@@ -65,6 +64,8 @@ class Executor:
                     return
 
                 data['node'] = machine.value['name']
+            else:
+                return
         elif state == 'pending':
             if data['requested'] == data['actual']:
                 data['state'] = 'ready'
@@ -114,4 +115,4 @@ class Executor:
             return 'resizing'
 
         print('Next state for volume {} can\'t be determined!'.format(volume))
-        return
+        return 'error'
