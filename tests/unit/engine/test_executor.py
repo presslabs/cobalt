@@ -15,6 +15,7 @@
 from pytest import mark
 
 from engine import Executor
+from tests.conftest import Dummy
 
 
 class TestExecutor:
@@ -39,7 +40,7 @@ class TestExecutor:
 
         p_time_sleep.assert_called_with(executor.delay)
 
-    def reset(self, executor):
+    def test_reset(self, executor):
         executor._should_reset = False
         executor._watch_index = 1
 
@@ -47,6 +48,19 @@ class TestExecutor:
 
         assert executor._should_reset
         assert executor._watch_index is None
+
+    @mark.parametrize('volume,next_state', [
+        [Dummy(value={'control': {'parent_id': ''},
+                      'requested': {'reserved_size': 1},
+                      'actual': {'reserved_size': 1}}), 'error'],
+        [Dummy(value={'control': {'parent_id': ''},
+                      'requested': {'reserved_size': 1},
+                      'actual': {'reserved_size': 2}}), 'resizing'],
+        [Dummy(value={'control': {'parent_id': '1'}}), 'cloning']
+    ])
+    def test_next_state(self, volume, next_state, executor):
+        got_state = executor._next_state(volume)
+        assert got_state == next_state
 
     def test_tick_with_reset(self, mocker, executor, p_executor_process, p_volume_manager_all):
         directory = mocker.MagicMock(etcd_index=0)
