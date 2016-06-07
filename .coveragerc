@@ -1,6 +1,7 @@
 [run]
 source=src
 branch=True
+concurrency=gevent
 
 [report]
 show_missing=True

@@ -1,10 +1,10 @@
 import pytest
 from flask import json
 
-from models import VolumeSchema, VolumeAttributeSchema
+from models.manager import VolumeSchema, VolumeAttributeSchema
 
 
-class TestVolume:
+class TestVolumeIntegration:
     def test_volume_list_get(self, etcd_client, volume_raw_ok_ready, flask_app):
         generators = [volume_raw_ok_ready, volume_raw_ok_ready]
 

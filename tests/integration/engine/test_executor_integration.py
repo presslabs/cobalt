@@ -2,10 +2,10 @@ import json
 import threading
 import time
 
-from models import VolumeManager
+from models.manager import VolumeManager
 
 
-class TestExecutor:
+class TestExecutorIntegration:
     def test_scheduling_no_machines(self, executor, etcd_client):
         volume_data = ["""
             {

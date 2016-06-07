@@ -3,7 +3,7 @@ from copy import deepcopy
 import etcd
 from pytest import mark
 
-from models.base_manager import BaseManager
+from models.manager.base_manager import BaseManager
 from tests.conftest import dummy_ready_volume
 
 

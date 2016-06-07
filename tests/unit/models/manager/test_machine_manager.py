@@ -1,4 +1,4 @@
-from models import MachineManager
+from models.manager import MachineManager
 
 
 class TestMachineManager:
