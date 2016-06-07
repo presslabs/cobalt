@@ -17,7 +17,7 @@ import etcd
 from pytest import fixture
 
 from api import Api
-from engine import Executor
+from engine import Executor, Engine
 from models.manager import VolumeManager, MachineManager
 from config import config as context
 
@@ -57,6 +57,35 @@ def etcd_client(request):
 @fixture
 def executor(volume_manager, machine_manager):
     return Executor(volume_manager, machine_manager, {'timeout': 2})
+
+
+@fixture
+def engine(etcd_client, machine_manager, volume_manager):
+    return Engine(etcd_client, volume_manager, machine_manager, {
+        'leaser': {
+            'lease_ttl': 10,
+            'refresh_ttl': 6,
+        },
+        'executor': {
+            'timeout': 1
+        }
+    })
+
+
+@fixture
+def engine_factory(etcd_client, machine_manager, volume_manager):
+    class Factory:
+        def get(self):
+            return Engine(etcd_client, volume_manager, machine_manager, {
+                'leaser': {
+                    'lease_ttl': 10,
+                    'refresh_ttl': 6,
+                },
+                'executor': {
+                    'timeout': 0.1
+                }
+            })
+    return Factory()
 
 
 @fixture(scope='module')
