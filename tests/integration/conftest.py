@@ -42,7 +42,11 @@ def etcd_client(request):
     client = etcd.Client(**context['etcd'])
 
     def fin():
-        entrypoints = [VolumeManager.KEY, '_locks', 'machines']
+        entrypoints = [
+            VolumeManager.KEY,
+            MachineManager.KEY,
+            '_locks',
+            'version']
 
         for entry in entrypoints:
             try:

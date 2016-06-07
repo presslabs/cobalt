@@ -16,6 +16,8 @@ import signal
 
 import etcd
 import gevent
+import time
+
 from api import Api
 from engine import Engine
 from models.manager import VolumeManager, MachineManager
@@ -23,6 +25,8 @@ from utils import Service
 
 
 class Cobalt(Service):
+    VERSION = '0.1'
+
     def __init__(self, config):
         self.etcd = self._create_etcd(config['etcd'])
         self.volume_manager = self._create_volume_manager(self.etcd)
@@ -52,11 +56,50 @@ class Cobalt(Service):
             if service in self._service_endpoints:
                 self.services[service] = self._service_endpoints.get(service)
 
+    def _ensure_versions_match(self):
+        while True:
+            try:
+                etcd_version = self.etcd.read('version')
+                if etcd_version.value == self.VERSION:
+                    return True
+
+                print('VERSION MISMATCH: local={}, cluster={}'.format(
+                    self.VERSION, etcd_version.value))
+                return False
+            except etcd.EtcdConnectionFailed:
+                print('Connection not established with ETCD.')
+                return False
+            except etcd.EtcdKeyNotFound:
+                etcd_version = self._write_version()
+
+                if etcd_version == self.VERSION:
+                    return True
+            except etcd.EtcdException as e:
+                print('Unhandled exception {}'.format(e))
+                return False
+
+            print('Cobalt cluster version not ensured, trying again in 1 sec.')
+            time.sleep(1)
+
+    def _write_version(self):
+        try:
+            update_version = self.etcd.write('version', self.VERSION,
+                                             prevExists=False)
+
+            return update_version.value
+        except etcd.EtcdException:
+            return False
+
     def stop(self):
         for _, service in self.services.items():
             service.stop()
 
+        return True
+
     def start(self):
+        if not self._ensure_versions_match():
+            return False
+
         routines = []
         for _, service in self.services.items():
             routines += service.start()
@@ -64,7 +107,7 @@ class Cobalt(Service):
         gevent.joinall(routines)
 
     def handler(self, signum, frame):
-        print('Stopping..')
+        print('Stopping...')
         self.stop()
 
     def attach_handlers(self):
