@@ -6,8 +6,8 @@ WORKDIR /code
 RUN apk add --no-cache gcc musl-dev btrfs-progs
 RUN pip install -r requirements.txt
 
-VOLUME /mnt/cobalt-root
-VOLUME /etc/cobalt/config.json
+VOLUME /mnt
+VOLUME /etc/cobalt
 
 EXPOSE 80
 
