@@ -1,6 +1,6 @@
 version: '2'
 services:
-  cobalt-1:
+  cobalt1:
     image: presslabs/cobalt:latest
     expose:
       - "80"
@@ -11,7 +11,7 @@ services:
       - etcd
     links:
       - etcd
-  cobalt-2:
+  cobalt2:
     image: presslabs/cobalt:latest
     expose:
       - "80"
@@ -22,7 +22,7 @@ services:
       - etcd
     links:
       - etcd
-  cobalt-3:
+  cobalt3:
     image: presslabs/cobalt:latest
     expose:
       - "80"
@@ -36,13 +36,13 @@ services:
   ha:
     image: tutum/haproxy:latest
     depends_on:
-        - cobalt-1
-        - cobalt-2
-        - cobalt-3
+        - cobalt1
+        - cobalt2
+        - cobalt3
     links:
-        - cobalt-1:cobalt-1
-        - cobalt-2:cobalt-2
-        - cobalt-3:cobalt-3
+        - cobalt1:cobalt
+        - cobalt2:cobalt
+        - cobalt3:cobalt
     ports:
         - "80:80"
   etcd:
