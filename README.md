@@ -15,6 +15,6 @@ PYTHONPATH=src py.test tests --cov=src
 ```bash
 # run from cobalt directory
 # create a 1G file
-dd if=/dev/zero of=../mnt/root1 bs=1024 count=1000000
-mkfs.btrfs ../mnt/root1
+dd if=/dev/zero of=../mnt/root1/cobalt-root bs=1024 count=1000000
+mkfs.btrfs ../mnt/root1/cobalt-root
 ```

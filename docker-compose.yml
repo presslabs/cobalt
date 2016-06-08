@@ -5,8 +5,8 @@ services:
     expose:
       - "80"
     volumes:
-      - ./sample/config1.json:/etc/cobalt/config.json
-      #- ../mnt/root1:/mnt/cobalt-root
+      - ./sample/config1:/etc/cobalt
+      - ./../mnt/root1:/mnt
     depends_on:
       - etcd
     links:
@@ -16,8 +16,8 @@ services:
     expose:
       - "80"
     volumes:
-      - ./sample/config2.json:/etc/cobalt/config.json
-      #- ../mnt/root2:/mnt/cobalt-root
+      - ./sample/config2:/etc/cobalt
+      - ./../mnt/root2:/mnt
     depends_on:
       - etcd
     links:
@@ -27,8 +27,8 @@ services:
     expose:
       - "80"
     volumes:
-      - ./sample/config3.json:/etc/cobalt/config.json
-      #- ../mnt/root3:/mnt/cobalt-root
+      - ./sample/config3:/etc/cobalt
+      - ./../mnt/root3:/mnt
     depends_on:
       - etcd
     links:
