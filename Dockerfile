@@ -12,3 +12,4 @@ VOLUME /etc/cobalt
 EXPOSE 80
 
 CMD ["sh", "entry.sh"]
+

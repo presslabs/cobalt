@@ -1,0 +1,46 @@
+{
+  "etcd": {
+    "ca_cert": null,
+    "version_prefix": "/v2",
+    "use_proxies": false,
+    "expected_cluster_id": null,
+    "port": 4001,
+    "cert": null,
+    "host": "etcd",
+    "password": null,
+    "allow_redirect": true,
+    "protocol": "http",
+    "per_host_pool_size": 10,
+    "allow_reconnect": false,
+    "read_timeout": 60,
+    "username": null,
+    "srv_domain": null
+  },
+  "engine": {
+    "leaser": {
+      "refresh_ttl": 40,
+      "lease_ttl": 60
+    },
+    "executor": {
+      "timeout": 10
+    }
+  },
+  "api": {
+    "host": "",
+    "port": 80
+  },
+  "agent": {
+    "node": {
+      "conf_path": "/etc/cobalt.conf",
+      "volume_path": "/mnt/cobalt-root"
+    },
+    "watch_timeout": 10,
+    "max_error_count": 3,
+    "agent_ttl": 60
+  },
+  "services": [
+    "api",
+    "engine",
+    "agent"
+  ]
+}
