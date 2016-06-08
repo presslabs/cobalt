@@ -1,8 +1,55 @@
-etcd:
-  hostname: etcd
-  image: quay.io/coreos/etcd:v2.2.1
-  ports: [ "4001:4001" ]
-  command: >
-    --listen-client-urls 'http://etcd:4001'
-    --advertise-client-urls 'http://etcd:4001'
-    --initial-cluster-state new
+version: '2'
+services:
+  cobalt-1:
+    image: presslabs/cobalt:latest
+    expose:
+      - "80"
+    volumes:
+      - ./sample/config1.json:/etc/cobalt/config.json
+      #- ../mnt/root1:/mnt/cobalt-root
+    depends_on:
+      - etcd
+    links:
+      - etcd
+  cobalt-2:
+    image: presslabs/cobalt:latest
+    expose:
+      - "80"
+    volumes:
+      - ./sample/config2.json:/etc/cobalt/config.json
+      #- ../mnt/root2:/mnt/cobalt-root
+    depends_on:
+      - etcd
+    links:
+      - etcd
+  cobalt-3:
+    image: presslabs/cobalt:latest
+    expose:
+      - "80"
+    volumes:
+      - ./sample/config3.json:/etc/cobalt/config.json
+      #- ../mnt/root3:/mnt/cobalt-root
+    depends_on:
+      - etcd
+    links:
+      - etcd
+  ha:
+    image: tutum/haproxy:latest
+    depends_on:
+        - cobalt-1
+        - cobalt-2
+        - cobalt-3
+    links:
+        - cobalt-1:cobalt-1
+        - cobalt-2:cobalt-2
+        - cobalt-3:cobalt-3
+    ports:
+        - "80:80"
+  etcd:
+    hostname: etcd
+    image: quay.io/coreos/etcd:v2.2.1
+    ports: [ "4001:4001" ]
+    command: >
+      --listen-client-urls 'http://etcd:4001'
+      --advertise-client-urls 'http://etcd:4001'
+      --initial-cluster-state new

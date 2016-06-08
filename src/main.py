@@ -11,12 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from gevent import monkey
 monkey.patch_all()
 
+import json
+
+from sys import argv
 from cobalt import Cobalt
-from config import config
+
+
+def start():
+    if len(argv) != 2:
+        print('Config file must be specified. Usage: main.py <config_path>')
+
+    try:
+        with open(argv[1]) as data_file:
+            config = json.load(data_file)
+            Cobalt(config).start()
+    except Exception as e:
+        print('Error encountered when reading config: {}'.format(e))
 
 if __name__ == '__main__':
-    Cobalt(config).start()
+    start()

@@ -9,3 +9,12 @@ mkvirtualenv -p python3 cobalt
 pip install -r requirements/development.txt
 PYTHONPATH=src py.test tests --cov=src
 ```
+
+### Sample
+
+```bash
+# run from cobalt directory
+# create a 1G file
+dd if=/dev/zero of=../mnt/root1 bs=1024 count=1000000
+mkfs.btrfs ../mnt/root1
+```
