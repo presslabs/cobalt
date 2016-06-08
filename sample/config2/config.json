@@ -32,7 +32,7 @@
   "agent": {
     "node": {
       "conf_path": "/etc/cobalt.conf",
-      "volume_path": "/mnt"
+      "volume_path": "/mnt/cobalt-root"
     },
     "watch_timeout": 10,
     "max_error_count": 3,
