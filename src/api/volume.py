@@ -128,6 +128,11 @@ class VolumeList(Resource):
             if not parent:
                 return {'message': 'Parent does not exist. Clone not created'}, 400
 
+            parent_state = parent.value['state']
+            if parent_state in ['deleting', 'scheduling']:
+                return {'message': 'Parent can\'t have state {} '
+                                   'in order to clone'.format(parent_state)}, 400
+
         volume = manager.create(data)
         lock.release()
 

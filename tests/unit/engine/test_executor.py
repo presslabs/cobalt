@@ -49,6 +49,7 @@ class TestExecutor:
         assert executor._should_reset
         assert executor._watch_index is None
 
+    @mark.usefixtures('p_print')
     @mark.parametrize('volume,next_state', [
         [Dummy(value={'control': {'parent_id': ''},
                       'requested': {'reserved_size': 1},
