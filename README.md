@@ -13,8 +13,20 @@ PYTHONPATH=src py.test tests --cov=src
 ### Sample
 
 ```bash
-# run from cobalt directory
-# create a 1G file
-dd if=/dev/zero of=../mnt/root1/cobalt-root bs=1024 count=1000000
-mkfs.btrfs ../mnt/root1/cobalt-root
+# run from cobalt directory, /dev/sda3 shuld have ~4GB
+sudo mkfs.btrfs /dev/sda3
+sudo mount /dev/sda3 ../mnt/
+sudo btrfs quota enable mnt
+
+cd ../mnt
+sudo btrfs subvolume create root1
+sudo btrfs subvolume create root2
+sudo btrfs subvolume create root3
+
+sudo btrfs qgroup limit -e 1g root1
+sudo btrfs qgroup limit -e 1g root2
+sudo btrfs qgroup limit -e 1g root3
+
+sudo btrfs filesystem sync .
+sudo btrfs qgroup show .
 ```
