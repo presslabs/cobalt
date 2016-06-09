@@ -12,3 +12,4 @@ python src/main.py "/etc/cobalt/config.json" &
 
 child=$!
 wait "$child"
+
