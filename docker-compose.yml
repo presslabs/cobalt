@@ -2,33 +2,36 @@ version: '2'
 services:
   cobalt1:
     image: presslabs/cobalt:latest
+    privileged: true
     expose:
       - "80"
     volumes:
       - ./sample/config1:/etc/cobalt
-      - ./../mnt/root1:/mnt
+      - ./../btrfs/root1:/btrfs-volume
     depends_on:
       - etcd
     links:
       - etcd
   cobalt2:
     image: presslabs/cobalt:latest
+    privileged: true
     expose:
       - "80"
     volumes:
       - ./sample/config2:/etc/cobalt
-      - ./../mnt/root2:/mnt
+      - ./../btrfs/root2:/btrfs-volume
     depends_on:
       - etcd
     links:
       - etcd
   cobalt3:
     image: presslabs/cobalt:latest
+    privileged: true
     expose:
       - "80"
     volumes:
       - ./sample/config3:/etc/cobalt
-      - ./../mnt/root3:/mnt
+      - ./../btrfs/root3:/btrfs-volume
     depends_on:
       - etcd
     links:

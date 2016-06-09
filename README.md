@@ -12,21 +12,11 @@ PYTHONPATH=src py.test tests --cov=src
 
 ### Sample
 
+To run the sample cluster you need ~4GB of space
+
+From the project root folder
 ```bash
-# run from cobalt directory, /dev/sda3 shuld have ~4GB
-sudo mkfs.btrfs /dev/sda3
-sudo mount /dev/sda3 ../mnt/
-sudo btrfs quota enable mnt
-
-cd ../mnt
-sudo btrfs subvolume create root1
-sudo btrfs subvolume create root2
-sudo btrfs subvolume create root3
-
-sudo btrfs qgroup limit -e 1g root1
-sudo btrfs qgroup limit -e 1g root2
-sudo btrfs qgroup limit -e 1g root3
-
-sudo btrfs filesystem sync .
-sudo btrfs qgroup show .
+docker built -t presslabs/cobalt:latest .
+sample/setup.sh
+docker-compose up
 ```
