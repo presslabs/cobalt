@@ -78,6 +78,7 @@ class Volume(Resource):
                 pending_clones.append(manager.get_id_from_key(volume.key))
 
         if pending_clones:
+            lock.release()
             return {'message': 'Resource has pending clones, can\'t delete.',
                     'clones': pending_clones}, 409
 
@@ -126,7 +127,14 @@ class VolumeList(Resource):
             data['state'] = 'pending'
             parent = manager.by_id(id)
             if not parent:
+                lock.release()
                 return {'message': 'Parent does not exist. Clone not created'}, 400
+
+            parent_state = parent.value['state']
+            if parent_state in ['deleting', 'scheduling']:
+                lock.release()
+                return {'message': 'Parent can\'t have state {} '
+                                   'in order to clone'.format(parent_state)}, 400
 
         volume = manager.create(data)
         lock.release()
