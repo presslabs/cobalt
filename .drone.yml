@@ -2,7 +2,7 @@ build:
   image: python:3.4-alpine
   commands:
     - rm -rf tests/.cache
-    - apk add --no-cache gcc musl-dev
+    - apk add --no-cache gcc musl-dev btrfs-progs
     - pip install -r requirements/development.txt
     - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src py.test --cov=src --color=yes tests
 

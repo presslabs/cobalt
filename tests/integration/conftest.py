@@ -19,7 +19,6 @@ from pytest import fixture
 from api import Api
 from engine import Executor, Engine
 from models.manager import VolumeManager, MachineManager
-from config import config as context
 
 
 @fixture
@@ -39,7 +38,7 @@ def machine_manager(etcd_client):
 
 @fixture
 def etcd_client(request):
-    client = etcd.Client(**context['etcd'])
+    client = etcd.Client(version_prefix="/v2", host="127.0.0.1", port=4001)
 
     def fin():
         entrypoints = [

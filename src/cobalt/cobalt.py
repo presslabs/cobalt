@@ -111,8 +111,10 @@ class Cobalt(Service):
         self.stop()
 
     def attach_handlers(self):
-        signal.signal(signal.SIGINT, self.handler)
-        signal.signal(signal.SIGQUIT, self.handler)
+        signals = ['SIGHUP', 'SIGTERM', 'SIGINT', 'SIGQUIT']
+        for sig in signals:
+            code = getattr(signal, sig)
+            signal.signal(code, self.handler)
 
     @staticmethod
     def _create_etcd(context):
