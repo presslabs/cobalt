@@ -121,9 +121,10 @@ class VolumeList(Resource):
         }
 
         lock = manager.get_lock(id, 'clone')
-        lock.acquire(timeout=0, lock_ttl=10)
 
         if id:
+            lock.acquire(timeout=0, lock_ttl=10)
+
             data['state'] = 'pending'
             parent = manager.by_id(id)
             if not parent:
@@ -137,7 +138,8 @@ class VolumeList(Resource):
                                    'in order to clone'.format(parent_state)}, 400
 
         volume = manager.create(data)
-        lock.release()
+        if id:
+            lock.release()
 
         result, _ = VolumeSchema().dump(volume)
         return result, 202, {'Location': app.api.url_for(Volume, volume_id=result['id'])}
