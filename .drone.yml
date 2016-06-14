@@ -4,8 +4,8 @@ build:
     - rm -rf tests/.cache
     - apk add --no-cache gcc musl-dev btrfs-progs
     - pip install -r requirements/development.txt
-    - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src py.test --cov=src --color=yes tests \
-      && if [ "$DRONE_BRANCH" == "master" ]; then codeclimate-test-reporter; fi
+    - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src py.test --cov=src --color=yes tests
+    - if [ "$DRONE_BRANCH" == "master" ]; then codeclimate-test-reporter; fi
 
 compose:
   etcd:
