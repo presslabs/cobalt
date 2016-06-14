@@ -20,3 +20,4 @@ docker built -t presslabs/cobalt:latest .
 sample/setup.sh
 docker-compose up
 ```
+
