@@ -43,7 +43,7 @@ class TestEngineIntegration:
         assert engine2.lease.is_held
 
         assert engine2.stop()
-        time.sleep(0.1)
+        time.sleep(0.2)
 
         assert not engine2.lease.is_held
 
