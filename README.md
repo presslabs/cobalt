@@ -21,3 +21,9 @@ sample/setup.sh
 docker-compose up
 ```
 
+### Reload drone.sec
+
+Each time someone modifies .drone.yml this needs to be ran
+```bash
+drone secure --repo PressLabs/cobalt
+```
