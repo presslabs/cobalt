@@ -27,8 +27,7 @@ class Executor:
             self.delay = float(context['timeout'])
         except (KeyError, ValueError) as e:
             print('Context provided to Executor'
-                  ' erroneous: {}, defaulting: {}\n{}'.format(
-                context, self.delay, e))
+                  ' erroneous: {}, defaulting: {}\n{}'.format(context, self.delay, e))
 
         self._should_reset = True
         self._volumes_to_process = []
@@ -52,8 +51,7 @@ class Executor:
         if self._volumes_to_process:
             volume = self._volumes_to_process.pop()
         else:
-            volume = self.volume_manager.watch(timeout=self.delay,
-                                               index=self._watch_index)
+            volume = self.volume_manager.watch(timeout=self.delay, index=self._watch_index)
             if volume is None:
                 self.reset()
                 return
@@ -65,45 +63,49 @@ class Executor:
         self._process(volume)
 
     def _process(self, volume):
-        in_state = self.volume_manager.filter_states([volume],
-                                                     self.states_interested_in)
+        in_state = self.volume_manager.filter_states([volume], self.states_interested_in)
         if not in_state:
             return
 
-        data = volume.value
-        state = data['state']
-        node = data['node']
+        state = volume.value['state']
+        if state == 'scheduling':
+            self._process_scheduling(volume)
+        elif state == 'pending':
+            self._process_pending(volume)
 
-        last_updated = data['control']['updated']
+    def _process_scheduling(self, volume):
+        value = volume.value
+        last_updated = value['control']['updated']
         expired = True if time.time() - last_updated > self.delay else False
 
-        if state == 'scheduling':
-            if not node or expired:
-                machine = self._find_machine(volume)
-                if not machine:
-                    return
-
-                data['node'] = machine.value['name']
-            else:
+        if not value['node'] or expired:
+            machine = self._find_machine(volume)
+            if not machine:
                 return
-        elif state == 'pending':
-            if data['requested'] == data['actual']:
-                data['state'] = 'ready'
-            else:
-                next_state = self._next_state(volume)
-                if not next_state:
-                    return
 
-                data['state'] = next_state
-                if next_state == 'cloning':
-                    parent = self.volume_manager.by_id(
-                        data['control']['parent_id'])
-                    if not parent:
-                        data['state'] = 'deleting'
-                    else:
-                        data['node'] = parent.value['node']
+            value['node'] = machine.value['name']
+        else:
+            return
 
         self.volume_manager.update(volume)
+
+    def _process_pending(self, volume):
+        value = volume.value
+        value['state'] = self._next_state(volume)
+
+        if value['state'] == 'cloning':
+            self._process_cloning(volume)
+
+        self.volume_manager.update(volume)
+
+    def _process_cloning(self, volume):
+        value = volume.value
+        parent = self.volume_manager.by_id(value['control']['parent_id'])
+
+        if not parent:
+            value['state'] = 'deleting'
+        else:
+            value['node'] = parent.value['node']
 
     def _find_machine(self, volume):
         constraints = volume.value['requested']['constraints']
@@ -132,6 +134,9 @@ class Executor:
 
         if value['control']['parent_id']:
             return 'cloning'
+
+        if value['requested'] == value['actual']:
+            return 'ready'
 
         actual_size = value['actual']['reserved_size']
         requested_size = value['requested']['reserved_size']

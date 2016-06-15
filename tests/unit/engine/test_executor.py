@@ -53,7 +53,10 @@ class TestExecutor:
     @mark.parametrize('volume,next_state', [
         [Dummy(value={'control': {'parent_id': ''},
                       'requested': {'reserved_size': 1},
-                      'actual': {'reserved_size': 1}}), 'error'],
+                      'actual': {'reserved_size': 1, 'random': 2}}), 'error'],
+        [Dummy(value={'control': {'parent_id': ''},
+                      'requested': {'reserved_size': 1},
+                      'actual': {'reserved_size': 1}}), 'ready'],
         [Dummy(value={'control': {'parent_id': ''},
                       'requested': {'reserved_size': 1},
                       'actual': {'reserved_size': 2}}), 'resizing'],

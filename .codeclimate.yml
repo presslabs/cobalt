@@ -9,6 +9,8 @@ engines:
     enabled: true
   radon:
     enabled: true
+    config:
+      threshold: "C"
   markdownlint:
     enabled: true
   pep8:
@@ -16,6 +18,7 @@ engines:
 
 exclude_paths:
 - tests/
+- .idea/
 
 ratings:
   paths:

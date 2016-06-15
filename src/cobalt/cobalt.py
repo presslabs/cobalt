@@ -45,8 +45,6 @@ class Cobalt(Service):
             'engine': Engine(self.etcd, self.volume_manager,
                              self.machine_manager, self.config['engine']),
             'api': Api(self.volume_manager, self.config['api'])
-            # TODO add api / agent here
-            # 'api', 'agent'
         }
 
     def filter_services(self):
@@ -63,8 +61,7 @@ class Cobalt(Service):
                 if etcd_version.value == self.VERSION:
                     return True
 
-                print('VERSION MISMATCH: local={}, cluster={}'.format(
-                    self.VERSION, etcd_version.value))
+                print('VERSION MISMATCH: local={}, cluster={}'.format(self.VERSION, etcd_version.value))
                 return False
             except etcd.EtcdConnectionFailed:
                 print('Connection not established with ETCD.')
@@ -127,4 +124,3 @@ class Cobalt(Service):
     @staticmethod
     def _create_machine_manager(etcd):
         return MachineManager(etcd)
-
