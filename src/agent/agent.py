@@ -159,5 +159,3 @@ class Agent(Service):
                             volume.value['control']['updated'] = time.time()
 
                         self._manager.update(volume)
-
-
