@@ -81,7 +81,8 @@ class BaseManager:
 
     def watch(self, index=None, timeout=0):
         try:
-            entity = self.client.watch(BaseManager.KEY, recursive=True, index=index, timeout=timeout)
+            entity = self.client.watch(self.KEY, recursive=True, index=index,
+                                       timeout=timeout)
         except etcd.EtcdWatchTimedOut:
             return None
         return self._load_from_etcd(entity)
