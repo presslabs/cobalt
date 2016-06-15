@@ -1,13 +1,13 @@
 # Concurrency
 
-### Possibilities
+## Possibilities
 
 - Processes
 - Threads
 - Coroutines [gevent](http://www.gevent.org/),
 [goroutines](https://tour.golang.org/concurrency/1)
 
-### Objective
+## Objective
 
 Each of these will be described with respect to inter communication,
 memory footprint, and last but not least speed.
@@ -16,13 +16,13 @@ for the current task.
 
 ---
 
-#### Processes
+### Processes
 
 Each computer program is a **process**, a set of instructions that run a
 specific task concurrently. Each process has 1 main thread running
 from the get-go.
 
-##### Memory
+#### Memory
 
 The OS provides each process with different memory section and provides bounds
 checking for memory interactions achieving data tampering prevention from
@@ -44,7 +44,7 @@ and possible disk dumps of data and load the new processes' snapshot. As one
 could imagine this takes a lot of time and due to the way memory is managed
 and can easily fill disks.
 
-##### Communication
+#### Communication
 
 __Events - Signals__
 
@@ -63,7 +63,7 @@ well defined, in case of linux commands this protocol is simple text. While
 transferring data is now straight forward, marshalling and unmarshalling
 is not as it takes a lot of time if not done properly / frequently.
 
-##### Conclusions
+#### Conclusions
 
 Processes should be used for independent parts of a program that can
 function as separate units and don't require communication between them, or
@@ -72,12 +72,12 @@ kept as low as possible due to all the context switching carried out.
 
 ---
 
-#### Threads
+### Threads
 
 Threads are the parallel work horses of processes, and are bound to one in
 particular.
 
-##### Memory
+#### Memory
 
 Their memory regime is shared between all threads of the same process.
 Exception being the stack of called functions, these are unique for each and
@@ -88,12 +88,12 @@ regarding concurrent execution without proper locking mechanisms.
 Threads can be ran in 2 different modes -> joinable or detached (an obvious
 difference is the time at which data will be gc-ed)
 
-##### Communication
+#### Communication
 
 Since memory is shared communication can be done directly without any need for
 serialization / data transfer and thus faster.
 
-##### Conclusions
+#### Conclusions
 
 Threads are faster and are currently the standard of multitasking things,
 but require greater care of synchronization especially when dealing with state
@@ -101,7 +101,7 @@ machines (cobalt).
 
 ---
 
-#### Coroutines
+### Coroutines
 
 Unlike threads coroutines are functions scheduled by the program and not by the
 OS. They are extremely lite in regarding memory footprint as they only require

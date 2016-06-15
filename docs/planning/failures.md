@@ -1,6 +1,6 @@
 # Failures
 
-### Objective
+## Objective
 
 The purpose of this document is to document and state all possible failures
 that could happen, and figure out a solution prior to the implementation
@@ -9,7 +9,7 @@ phase actually starting.
 ---
 
 
-#### ETCD
+### ETCD
 
 Since this component is outside the scope of the project we'll talk briefly on
 possible problems when integrating it in the cluster.
@@ -29,7 +29,7 @@ to one another possibly situated on the same rack (which is frowned upon,
 at least 2 racks to provide the necessary redundancy) could
 could leave one naked in the event of a power outage.
 
-#### API
+### API
 
 Since the API will be hosted on each node it may be the case when 2 updates
 happen in the same time each changing
@@ -41,10 +41,9 @@ volume as possible or to have the API use ETCD's compare and swap. Both should
 work just fine as the throughput of commands for
 volume management is quite low.
 
-#### ENGINE
+### ENGINE
 
-
-##### Leader election
+#### Leader election
 
 Since the engine component will run on all storage nodes by default a master
 election method is needed to prevent multiple decision makers at any time.
@@ -73,7 +72,7 @@ the leader status. The new leader should be aware of this fact and monitor
 the task as if it were his own.
 
 
-##### No suitable host for Volume
+#### No suitable host for Volume
 
 In the event a volume doesn't meet the specified requirements on all available
 machines. What then?
@@ -85,7 +84,7 @@ machines. What then?
         - Resource changes (Machine added, Volumes resized, Labels changed)
 - Notification toward maintainers.
 
-##### Insufficient storage for current volumes
+#### Insufficient storage for current volumes
 
 Due to the existence of only a soft cap for reserving space on the machine but
 no constraint for the actual volume sizes
@@ -95,7 +94,7 @@ available memory can reach 0.
 - Machines added to cluster -> trigger minimal rebalancing of volumes
 - Apply subvolume quotas (hard limits)
 
-#### AGENT
+### AGENT
 
 The agent should be resilient to network failures and should not delete volumes
 unless explicitly told to do so. In case of a network failure no volume

@@ -1,6 +1,6 @@
 # Environment
 
-### Objective
+## Objective
 
 To explain what Cobalt is responsible for setting up and what is taken for
 granted. How it will be used and how it will be tested.
@@ -10,7 +10,7 @@ granted. How it will be used and how it will be tested.
 The storage cluster will be comprised of an ETCD cluster and several storage
 nodes running cobalt.
 
-#### ETCD cluster
+### ETCD cluster
 
 Cobalt sees this cluster as an external service, it is not responsible for
 expanding or shrinking the quorum nor does it care of its size.
@@ -21,7 +21,7 @@ All connections to ETCD will be done though a DNS and it will know which
 servers are down and route accordingly. Possibilities: AWS Route 53,
 HA Proxy at a known address.
 
-#### Daemon
+### Daemon
 
 The daemon will allow control over which components should be started.
 Consider the case when there are no storage nodes but requests for future
@@ -41,7 +41,7 @@ for the volumes has to be specified at first start time, later these configs
 will persist in ETCD and will be the default values.
 
 
-### Use cases
+## Use cases
 
 - Create / clone volumes
 - Resize / move volumes
@@ -49,7 +49,7 @@ will persist in ETCD and will be the default values.
 - Defragmentation / compression of volumes
 - Storage node addition / removal - rebalancing
 
-### Testing
+## Testing
 
 Drone will be used to run the testcases after each push on git.
 
@@ -57,13 +57,13 @@ Drone will be used to run the testcases after each push on git.
 - Integration testing: API public endpoints, Engine, Agent
 - System tests
 
-##### Integration testing
+### Integration testing
 
 1. API:
     * all public endpoints will be tested and checked for proper changes in ETCD
 2. Engine
 
-##### System tests
+### System tests
 
 To manage all the containers spawned we'll be using docker-compose.
 
@@ -89,7 +89,7 @@ should have BTRFS and NFS on them.
     * Volume moved to another machine notify and remount
 
 
-### Volumes
+## Volumes
 
 As an end user volumes will be available to be mounted using the data
 provided by the api ip permissions etc.
@@ -98,7 +98,7 @@ Regular `mount` commands should work.
 **Note:** [BTRFS restrictions](https://en.wikipedia.org/wiki/Btrfs)
 
 
-### In house usage
+## In house usage
 
 Currently we are using zfs data storage servers with automatic
 replication as backups. Their main focus is to provide a place to store

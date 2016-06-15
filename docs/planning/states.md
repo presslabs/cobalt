@@ -1,17 +1,17 @@
 # States
 
-### Objectives
+## Objectives
 
 To show all possible transitions and what are each an every one of them
 responsible for.
 
 ---
 
-### Diagram
+## Diagram
 
 ![States](../assets/cobalt-states.png)
 
-### Volume transitions
+## Volume transitions
 
 Every new volume will have the `scheduling` state which tells the system it
 should be scheduled on a machine. Once a suitable machine is found it assigns

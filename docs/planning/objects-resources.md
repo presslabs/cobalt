@@ -1,6 +1,6 @@
 # Objects & Resources
 
-### Objective
+## Objective
 
 Brief presentation of the resources managed by cobalt,
 along with the implicated resources needed for performing
@@ -9,18 +9,18 @@ cobalt will be given.
 
 ---
 
-### Managed objects & resources
+## Managed objects & resources
 
 - Storage nodes
 - BTRFS volumes
 
-#### Storage nodes
+### Storage nodes
 
 The purpose of cobalt is to manage nodes used for storing data such as static
 media files in an efficient way
 (more about this [here](environment.md#in-house-usage))
 
-#### BTRFS volumes
+### BTRFS volumes
 
 Storage nodes will be composed of BTRFS volumes of various sizes,
 satisfying the needs of each user. Cobalt will take care of allocating space
@@ -34,11 +34,11 @@ hosting industry.
 
 ---
 
-### Implicated resources
+## Implicated resources
 
 - etcd cluster
 
-#### etcd cluster
+### etcd cluster
 
 The [etcd](https://coreos.com/etcd/) distributed key value store is our choice
 for storing information that needs to be accessible to the whole cluster.
@@ -50,36 +50,36 @@ through watches once a feature flag has changed its value.
 
 ---
 
-### Client operations
+## Client operations
 
 Cobalt will give clients the liberty of performing basic CRUD operations
 (Create, Read, Update, Delete) on BTRFS volumes. Each will be accessible
 through an API endpoint that will be made available to the client.
 
-#### Create
+### Create
 
 This operation will be used to create new BTRFS volumes of various sizes.
 Upon making a request, cobalt will take care of finding the right storage node
 for the new volume.
 
-#### Read
+### Read
 
 This operation will be used for querying information about volumes or storage
 nodes. This information will consist of properties like free space, number of
 volumes on node and volume / machine [state](states.md).
 
-#### Update
+### Update
 
 This operation will be used for resizing or moving volumes.
 
-##### Resize volume
+#### Resize volume
 
 For certain reasons, one might want to reduce or expand the size of his volume.
 In the case of insufficient disk space on the current storage node,
 this operation will probably be prefixed behind the scenes with a move
 operation.
 
-##### Move volume (Clone volume)
+#### Move volume (Clone volume)
 
 A move operation might be needed in case of insufficient disk space for
 volume expansion. It may also be needed in the case of making a
