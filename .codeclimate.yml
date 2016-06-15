@@ -16,6 +16,7 @@ engines:
 
 exclude_paths:
 - tests/
+- .idea/
 
 ratings:
   paths:

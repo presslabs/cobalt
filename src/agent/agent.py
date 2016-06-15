@@ -72,7 +72,6 @@ class Agent(Service):
     def _machine_heartbeat(self):
         pass
 
-
     def _volume_heartbeat(self):
         self.get_work()
 
