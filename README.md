@@ -1,7 +1,6 @@
 # PROJECT UNDER DEVELOPMENT NOT FOR PRODUCTION USE!!!
 
 # Cobalt
---------
 
 [![Code Climate](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/gpa.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/feed)
 [![Test Coverage](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/coverage.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/coverage)
