@@ -27,8 +27,7 @@ class Executor:
             self.delay = float(context['timeout'])
         except (KeyError, ValueError) as e:
             print('Context provided to Executor'
-                  ' erroneous: {}, defaulting: {}\n{}'.format(
-                context, self.delay, e))
+                  ' erroneous: {}, defaulting: {}\n{}'.format(context, self.delay, e))
 
         self._should_reset = True
         self._volumes_to_process = []
@@ -52,8 +51,7 @@ class Executor:
         if self._volumes_to_process:
             volume = self._volumes_to_process.pop()
         else:
-            volume = self.volume_manager.watch(timeout=self.delay,
-                                               index=self._watch_index)
+            volume = self.volume_manager.watch(timeout=self.delay, index=self._watch_index)
             if volume is None:
                 self.reset()
                 return
@@ -65,8 +63,7 @@ class Executor:
         self._process(volume)
 
     def _process(self, volume):
-        in_state = self.volume_manager.filter_states([volume],
-                                                     self.states_interested_in)
+        in_state = self.volume_manager.filter_states([volume], self.states_interested_in)
         if not in_state:
             return
 
