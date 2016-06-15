@@ -1,6 +1,7 @@
 # Language choice
 
 ## Possibilities
+
 - Python
 - Go
 
@@ -10,16 +11,14 @@ Based on the needs of the project that need to be satisfied along with other
 perks that these languages bring, we will debate on which one is more fit for
 the job.
 
-## Brief description
-
-### Python
+### Brief description - Python
 
 Python is an interpreted object-oriented high-level programming language that
 first appeared in 1991. It is best known for the emphasis it puts on
 readability, as well as for its high-level built in data structures and dynamic
 typing & binding, which make prototyping and rapid coding an easy task.
 
-### Go
+### Brief description - Go
 
 Go is a compiled, statically typed programming language that first appeared
 in 2009. It was created in the tradition of Algol and C, following the
@@ -35,12 +34,10 @@ structured and imperative paradigms.
 - Libraries
 - Prototyping ease
 
-### Concurrency & Parallelism
-
 After previous discussions regarding [concurrency](concurrency.md),
 we have settled that we will use coroutines.
 
-#### Python
+### Concurrency - Python
 
 One of the best options for concurrency and parallelism in Python is to use the
 [gevent](https://github.com/gevent/gevent) library.
@@ -53,7 +50,7 @@ interface, using the `wait()`, `get()` and `join()` methods.
 As a downside, gevent requires monkey patching the run-time code in order
 to be able to play nice with it.
 
-#### Go
+### Concurrency - Go
 
 In Go the option for obtaining both concurrency and parallelism is by using
 goroutines. A possibly good reason for choosing Go would be that goroutines
@@ -64,9 +61,7 @@ and only one goroutine will be ran on a thread at any given time.
 When a goroutine is blocked, it is switched with another goroutine to be
 executed on that thread instead.
 
-### Language perks
-
-#### Python
+### Perks - Python
 
 - **Simplicity**
 
@@ -80,13 +75,16 @@ Operations that would take up many lines of code in other languages can
 simply be written in Python even on one line.
 
 Example:
+
 ```
 list = []
 for i in range(1, 10):
     if i % 2 == 0:
         list.append(i ** 2)
 ```
+
 versus
+
 ```
 list = [i**2 for i in range(1, 10) if i % 2 == 0]
 ```
@@ -98,6 +96,7 @@ different data types carefully and does not rely on intuition, rather
 than throwing an error.
 
 Example:
+
 ```
 // Javascript addition between an array and an object
 // will give an unexpected result
@@ -116,7 +115,7 @@ Traceback (most recent call last):
 TypeError: can only concatenate list (not "dict") to list
 ```
 
-#### Go
+### Perks - Go
 
 - **Different error handling**
 
@@ -128,6 +127,7 @@ errors, such as failing to open a file, as exceptional". As an alternative,
 Go uses multi-value returns for this.
 
 Example:
+
 ```
 f, err := os.Open("filename.ext")
 if err != nil {
@@ -180,9 +180,7 @@ to develop a great community in its 7 years of existence, but given the long
 time Python has been around (25 years) you are more prone to finding answers
 when working with Python rather than when working with Go.
 
-### Testability
-
-#### Python
+### Testability - Python
 
 Writing tests in Python can be done by using [pytest](http://pytest.org/),
 which is a great testing tool with many features. Setting up a baseline for
@@ -192,7 +190,7 @@ effect at function level, module level or for the whole project.
 using the classic Python module for testing. It does so by collecting
 `unittest.TestCase` subclasses and making their tests run using `pytest`.
 
-#### Go
+### Testability - Go
 
 Go provides a package for testing which only requires knowing a few simple rules
  in order to start. All test functions must be of the form
@@ -206,15 +204,13 @@ the form `BenchmarkXxxx` and receive a `*testing.B` type parameter.
 Benchmarks are only ran if the `-bench` flag is specified alongside the
 `go test` command.
 
-### Libraries
-
-#### Python
+### Libraries - Python
 
 As far as our interest in libraries for this project goes, Python offers the
 gevent library that has been discussed above. Pytest as a testing tool and
 library is also recommended and they are both backed up by a large community.
 
-#### Go
+### Libraries - Go
 
 The Go package for testing along with the built-in goroutines for concurrency
 represent most of what is helpful for cobalt development.
@@ -223,8 +219,8 @@ represent most of what is helpful for cobalt development.
 
 As mentioned in different sections above, Python stands out when it comes to
 writing programs fast and easy and the road from start to a working prototype or
- even a first version of the project can be increasingly shorter in time
- compared to what it would take to do the same thing in Go.
+even a first version of the project can be increasingly shorter in time
+compared to what it would take to do the same thing in Go.
 
 ## Conclusions
 

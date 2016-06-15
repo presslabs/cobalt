@@ -5,7 +5,7 @@
 - Processes
 - Threads
 - Coroutines [gevent](http://www.gevent.org/),
-[goroutines](https://tour.golang.org/concurrency/1)
+  [goroutines](https://tour.golang.org/concurrency/1)
 
 ## Objective
 
@@ -22,7 +22,7 @@ Each computer program is a **process**, a set of instructions that run a
 specific task concurrently. Each process has 1 main thread running
 from the get-go.
 
-#### Memory
+#### Processes - Memory
 
 The OS provides each process with different memory section and provides bounds
 checking for memory interactions achieving data tampering prevention from
@@ -44,9 +44,9 @@ and possible disk dumps of data and load the new processes' snapshot. As one
 could imagine this takes a lot of time and due to the way memory is managed
 and can easily fill disks.
 
-#### Communication
+#### Processes - Communication
 
-__Events - Signals__
+##### Events - Signals
 
 Inter-process communication can be done minimalistically through signals.
 For instance each parent will get notified with SIGCHLD when one of its children
@@ -55,7 +55,7 @@ provide an insufficient method of communication as transferring data back
 can't be done directly. Spawning an extra process and its overhead just to
 record data using I/O is a huge waste.
 
-__Data transfer - Pipes__
+##### Data transfer - Pipes
 
 Pipes are a one way shared communication channel allowing 2 processes to
 communicate to each other. Like any other communication protocol it has to be
@@ -63,7 +63,7 @@ well defined, in case of linux commands this protocol is simple text. While
 transferring data is now straight forward, marshalling and unmarshalling
 is not as it takes a lot of time if not done properly / frequently.
 
-#### Conclusions
+#### Processes - Conclusions
 
 Processes should be used for independent parts of a program that can
 function as separate units and don't require communication between them, or
@@ -77,7 +77,7 @@ kept as low as possible due to all the context switching carried out.
 Threads are the parallel work horses of processes, and are bound to one in
 particular.
 
-#### Memory
+#### Threads - Memory
 
 Their memory regime is shared between all threads of the same process.
 Exception being the stack of called functions, these are unique for each and
@@ -88,12 +88,12 @@ regarding concurrent execution without proper locking mechanisms.
 Threads can be ran in 2 different modes -> joinable or detached (an obvious
 difference is the time at which data will be gc-ed)
 
-#### Communication
+#### Threads - Communication
 
 Since memory is shared communication can be done directly without any need for
 serialization / data transfer and thus faster.
 
-#### Conclusions
+#### Threads - Conclusions
 
 Threads are faster and are currently the standard of multitasking things,
 but require greater care of synchronization especially when dealing with state
@@ -111,7 +111,7 @@ side). Usually such routines can control when the execution switches focus to
 another routine either by calling some system call, like sleep or by calling the
 scheduler directly in case of Go.
 
-#### Memory
+#### Coroutines - Memory
 
 Since they are normal function executions they only require data on their
 stack which normally is of small size.
@@ -122,12 +122,12 @@ Being part of a process they have the same features as threads and by that I
 mean they have a shared memory space, facilitating
 communication between several coroutines / threads.
 
-#### Communication
+#### Coroutines - Communication
 
 Synchronizing message consumption and creation / data transmission etc. both
 Python and Go implemented different concepts
 
-__Python__
+##### Coroutines - Python
 
 Queues, Events
 
@@ -135,7 +135,7 @@ Queues: A synchronized data structure to send and receive messages like a pipe.
 Events: Are basically a sort of barrier structure found in other languages that
 can synchronize execution blocks
 
-__GO__
+##### Coroutines - GO
 
 Chan, Timeout, Select
 
@@ -145,7 +145,7 @@ intervals or once after a delay, as well as stopping already running ones.
 Select: A type of switch case that blocks until one of its branches can be
 executed (events received / closed etc)
 
-#### Conclusions
+#### Coroutines - Conclusions
 
 Unlike threads, coroutines can be more tightly packed onto a processor and can
 be controlled without the interraction of the OS making it a lot faster.

@@ -40,7 +40,6 @@ BTRFS and NFS-server have to be installed on the nodes and a proper endpoint
 for the volumes has to be specified at first start time, later these configs
 will persist in ETCD and will be the default values.
 
-
 ## Use cases
 
 - Create / clone volumes
@@ -59,9 +58,10 @@ Drone will be used to run the testcases after each push on git.
 
 ### Integration testing
 
-1. API:
-    * all public endpoints will be tested and checked for proper changes in ETCD
-2. Engine
+- API:
+  - all public endpoints will be tested and checked for proper
+    changes in ETCD
+- Engine
 
 ### System tests
 
@@ -69,25 +69,24 @@ To manage all the containers spawned we'll be using docker-compose.
 
 - 1 ETCD docker container with just one server in the quorum (for speed)
 - 3 Cobalt containers that act as a storage / api providers. These containers
-should have BTRFS and NFS on them.
+  should have BTRFS and NFS on them.
 
-**Cases:**
+#### Cases
 
-1. ETCD down (at start / during runtime)
-    * any API call
-    * Engine lease expiration (none should remain)
-    * Agent still runs, no changes
-2. Agent down
-    * Volume present, changes in ETCD
-    * Volume not present, scheduled for this agent but gone down -> reschedule
-3. Engine leader down
-    * Another takes its place and schedules (Only engine down,
+- ETCD down (at start / during runtime)
+  - any API call
+  - Engine lease expiration (none should remain)
+  - Agent still runs, no changes
+- Agent down
+  - Volume present, changes in ETCD
+  - Volume not present, scheduled for this agent but gone down -> reschedule
+- Engine leader down
+  - Another takes its place and schedules (Only engine down,
     agent still has heartbeat)
-4. NFS export created / modified
-    * permission changes do consumers get affected -> mount
+- NFS export created / modified
+  - permission changes do consumers get affected -> mount
     destroyed / recreated
-    * Volume moved to another machine notify and remount
-
+  - Volume moved to another machine notify and remount
 
 ## Volumes
 
@@ -96,7 +95,6 @@ provided by the api ip permissions etc.
 Regular `mount` commands should work.
 
 **Note:** [BTRFS restrictions](https://en.wikipedia.org/wiki/Btrfs)
-
 
 ## In house usage
 

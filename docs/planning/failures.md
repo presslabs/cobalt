@@ -8,7 +8,6 @@ phase actually starting.
 
 ---
 
-
 ### ETCD
 
 Since this component is outside the scope of the project we'll talk briefly on
@@ -58,10 +57,10 @@ decision as all of them have the same view on the world in the first place.
 The FIFO method works like this:
 
 1. On engine start it appends to an ETCD managed list, refreshing it constantly
-2. If it is the first, with respect to ETCD modification index it is the MASTER,
-if not continue
-3. Sets a watch on the previous entry
-4. If the node watched goes away, check if it is the new master else go to `3.`
+1. If it is the first, with respect to ETCD modification index it is the MASTER,
+   if not continue
+1. Sets a watch on the previous entry
+1. If the node watched goes away, check if it is the new master else go to `3.`
 
 This works even when multiple nodes die off at the watch time since a watch on
 an nonexistent entry will through an exception and a watch could then be
@@ -71,17 +70,16 @@ If the engine schedules a volume change to one machine, and then it looses
 the leader status. The new leader should be aware of this fact and monitor
 the task as if it were his own.
 
-
 #### No suitable host for Volume
 
 In the event a volume doesn't meet the specified requirements on all available
 machines. What then?
 
 - Volume remains in pending state.
-    - How long?
-    - Method or retrial:
-        - Pooling
-        - Resource changes (Machine added, Volumes resized, Labels changed)
+  - How long?
+  - Method or retrial:
+    - Pooling
+    - Resource changes (Machine added, Volumes resized, Labels changed)
 - Notification toward maintainers.
 
 #### Insufficient storage for current volumes

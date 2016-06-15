@@ -47,23 +47,23 @@ in its queue.
 
 ![API engine schema](assets/api-as-engine.png  "API Engine Schema")
 
-#### Pros
+#### Api-engine Pros
 
 - The only role of the API is to process requests. It has no need to
-communicate with an external service (etcd)
+  communicate with an external service (etcd)
 - Decision making relies exclusively on the engine, which conceptually is
-correct
+  correct
 - The storage boxes have only one responsibility beside data storage,
-that being volume management itself, which is the main purpose of Cobalt
+  that being volume management itself, which is the main purpose of Cobalt
 - Storage node downtime does not imply inaccessibility to the API. Requests
-can still be made and will be resolved later
+  can still be made and will be resolved later
 
-#### Cons
+#### Api-engine Cons
 
 - Increased number of nodes
 - If none of the storage box agents can schedule new pending requests, the risk
-of an infinite loop occurs and none of the API-engine nodes can return an error
-response to the client
+  of an infinite loop occurs and none of the API-engine nodes can return an error
+  response to the client
 
 ---
 
@@ -95,19 +95,19 @@ jobs are placed there. It will then try to bring the node from its current state
 
 ![API & engine schema](assets/api-and-engine.png  "API & Engine Schema")
 
-#### Pros
+#### Separate Pros
 
 - The etcd cluster is internal to the storage box cluster. There is no need for
-any other node types to communicate with it
+  any other node types to communicate with it
 - One less layer of complexity: if a problem occurs, the entire logic resides
-in one place. Network connectivity issues are less likely to be the problem.
+  in one place. Network connectivity issues are less likely to be the problem.
 
-#### Cons
+#### Separate Cons
 
 - Full failure: if the node is down for some reason, none of its components will
- do their job. Unlike in the first architecture implementation, this one does
- not permit sending requests to be processed by the API and scheduled later,
- when the storage node is restored to a functional state
+  do their job. Unlike in the first architecture implementation, this one does
+  not permit sending requests to be processed by the API and scheduled later,
+  when the storage node is restored to a functional state
 
 ---
 
