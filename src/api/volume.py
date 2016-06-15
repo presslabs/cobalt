@@ -19,8 +19,18 @@ from models.manager import VolumeSchema, VolumeAttributeSchema
 
 
 class Volume(Resource):
+    """FlaskRestful API controller and resource handler for one specific volume"""
+
     @staticmethod
     def get(volume_id):
+        """Returns a volume dict as a json response or 404 if not found
+
+        Args:
+            volume_id (str): The id parsed from the URL
+
+        Returns (tuple): payload, http status code
+
+        """
         manager = app.volume_manager
         volume = manager.by_id(volume_id)
 
@@ -32,6 +42,16 @@ class Volume(Resource):
 
     @staticmethod
     def put(volume_id):
+        """Edits a volume dict based on the given representation
+
+        Expects to receive a json payload with a complete new version of the volume to be edited
+
+        Args:
+            volume_id (str): The id parsed from the URL
+
+        Returns (tuple): payload, http status code, headers
+
+        """
         manager = app.volume_manager
 
         volume = manager.by_id(volume_id)
@@ -60,6 +80,14 @@ class Volume(Resource):
 
     @staticmethod
     def delete(volume_id):
+        """Deletes the volume pointed by the id
+
+        Args:
+            volume_id (str): The id parsed from the URL
+
+        Returns (tuple): payload, http status code, headers
+
+        """
         manager = app.volume_manager
 
         target_volume = manager.by_id(volume_id)
@@ -94,13 +122,25 @@ class Volume(Resource):
 
 
 class VolumeList(Resource):
+    """FlaskRestful API controller and resource handler for the entire volume endpoint"""
+
     @staticmethod
     def get():
+        """It will return a list of all the volumes
+
+        Returns (tuple): payload, http status code
+
+        """
         result, errors = VolumeSchema().dump(app.volume_manager.all()[1], many=True)
         return result
 
     @staticmethod
     def post():
+        """It will create a volume with the given input as a starting point
+
+        Returns (tuple): payload, http status code, headers
+
+        """
         manager = app.volume_manager
         request_json = request.get_json(force=True)
 
