@@ -717,7 +717,7 @@ class TestExecutorIntegration:
         watch = threading.Thread(target=ticker)
         watch.start()
 
-        time.sleep(0.1)
+        time.sleep(0.2)
 
         created_volumes = self._create_entries('volumes', volume_data, etcd_client)
 
@@ -808,7 +808,7 @@ class TestExecutorIntegration:
         watch = threading.Thread(target=ticker)
         watch.start()
 
-        time.sleep(0.1)
+        time.sleep(0.2)
 
         created_volumes = self._create_entries('volumes', volume_data, etcd_client)
 
