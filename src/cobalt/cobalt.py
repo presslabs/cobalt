@@ -38,7 +38,7 @@ class Cobalt(Service):
 
         self.setup_services()
         self.filter_services()
-        self.attach_handlers()
+        self._attach_handlers()
 
     def setup_services(self):
         self._service_endpoints = {
@@ -53,6 +53,22 @@ class Cobalt(Service):
         for service in context_services:
             if service in self._service_endpoints:
                 self.services[service] = self._service_endpoints.get(service)
+
+    def stop(self):
+        for _, service in self.services.items():
+            service.stop()
+
+        return True
+
+    def start(self):
+        if not self._ensure_versions_match():
+            return False
+
+        routines = []
+        for _, service in self.services.items():
+            routines += service.start()
+
+        gevent.joinall(routines)
 
     def _ensure_versions_match(self):
         while True:
@@ -87,31 +103,15 @@ class Cobalt(Service):
         except etcd.EtcdException:
             return False
 
-    def stop(self):
-        for _, service in self.services.items():
-            service.stop()
-
-        return True
-
-    def start(self):
-        if not self._ensure_versions_match():
-            return False
-
-        routines = []
-        for _, service in self.services.items():
-            routines += service.start()
-
-        gevent.joinall(routines)
-
-    def handler(self, signum, frame):
-        print('Stopping...')
-        self.stop()
-
-    def attach_handlers(self):
+    def _attach_handlers(self):
         signals = ['SIGHUP', 'SIGTERM', 'SIGINT', 'SIGQUIT']
         for sig in signals:
             code = getattr(signal, sig)
-            signal.signal(code, self.handler)
+            signal.signal(code, self._handler)
+
+    def _handler(self, signum, frame):
+        print('Stopping...')
+        self.stop()
 
     @staticmethod
     def _create_etcd(context):
