@@ -74,7 +74,7 @@ class Api(Service):
 
     @staticmethod
     def _create_app(volume_manager, testing=False):
-        """
+        """Factory method to create the Flask app and register all dependencies
 
         Args:
             volume_manager (VolumeManager): The volume manager to be used withing the API controller
@@ -112,7 +112,7 @@ class Api(Service):
 
     @staticmethod
     def _register_resources(api):
-        """A utility method to inject the resources and their endpoints
+        """Utility method to inject the resources and their endpoints
 
         Args:
             api (flask_restful.API): The API instance that needs to have the resources added.

@@ -16,9 +16,18 @@ import time
 
 
 class Executor:
+    """Class responsible for all decision making within the cluster"""
+
     states_interested_in = ['registered', 'scheduling', 'pending']
 
     def __init__(self, volume_manager, machine_manager, context):
+        """Creates an Executor instance
+
+        Args:
+            volume_manager (VolumeManager): Data source for the volume model
+            machine_manager (MachineManager): Data source for the machine model
+            context (dict): THe context for the Executor
+        """
         self.volume_manager = volume_manager
         self.machine_manager = machine_manager
 
@@ -34,13 +43,16 @@ class Executor:
         self._watch_index = None
 
     def timeout(self):
+        """Make the Executor sleep for the defined amount, configured inside context"""
         time.sleep(self.delay)
 
     def reset(self):
+        """Reset the state of the Executor causing the next operation to pool and heal"""
         self._should_reset = True
         self._watch_index = None
 
     def tick(self):
+        """Method that causes the Executor to process one volume, either by watching or by polled state"""
         if self._should_reset:
             directory, self._volumes_to_process = self.volume_manager.all()
 
@@ -63,6 +75,14 @@ class Executor:
         self._process(volume)
 
     def _process(self, volume):
+        """ Method for processing a volume
+
+        It figures out the next state and tries to transition the object based on the
+        state machine diagram
+
+        Args:
+            volume (etcd.Result): THe volume object to process
+        """
         in_state = self.volume_manager.filter_states([volume], self.states_interested_in)
         if not in_state:
             return
@@ -108,6 +128,14 @@ class Executor:
             value['node'] = parent.value['node']
 
     def _find_machine(self, volume):
+        """Utility method to get an appropriate machine for a volume, based on required space and constraints
+
+        Args:
+            volume (etcd.Result): The volume it should find place for
+
+        Returns (etcd.Result): The matched machine with expanded value
+
+        """
         constraints = volume.value['requested']['constraints']
         machines = self.machine_manager.all()[1]
 
@@ -130,6 +158,13 @@ class Executor:
         return machines_ok[0]
 
     def _next_state(self, volume):
+        """Utility method for finding the next state of a volume based on transitions available
+
+        Args:
+            volume (etcd.Result): And expanded volume representation
+
+        Returns (str): Next state
+        """
         value = volume.value
 
         if value['control']['parent_id']:
