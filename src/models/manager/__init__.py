@@ -13,4 +13,4 @@
 # limitations under the License.
 
 from .machine_manager import MachineManager
-from .volume_manager import VolumeManager, VolumeSchema, VolumeAttributeSchema
+from .volume_manager import VolumeManager, VolumeSchema, VolumeControlSchema, VolumeAttributeSchema

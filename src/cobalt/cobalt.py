@@ -28,6 +28,7 @@ class Cobalt(Service):
     """Main service class responsible for setting up and managing all Cobalt components"""
 
     VERSION = '0.1'
+    """Version of the current Cobalt app, used to ensure consistency inside the cluster"""
 
     def __init__(self, config):
         """Creates an instance of the Cobalt class
@@ -68,8 +69,8 @@ class Cobalt(Service):
     def stop(self):
         """A means to gracefully stop all services registered to Cobalt
 
-        Returns (bool): Returns true in any occasion
-
+        Returns:
+             bool: Returns true in any occasion
         """
         for _, service in self.services.items():
             service.stop()
@@ -79,8 +80,8 @@ class Cobalt(Service):
     def start(self):
         """Starts Cobalt only if the ETCD versions match with the defined one
 
-        Returns (bool): If the start operation succeded or not
-
+        Returns:
+             bool: If the start operation succeded or not
         """
         if not self._ensure_versions_match():
             return False
@@ -96,8 +97,8 @@ class Cobalt(Service):
 
         If this is the first node it will write its version upstream
 
-        Returns (bool): If the versions match or not
-
+        Returns:
+             bool: If the versions match or not
         """
         while True:
             try:
@@ -125,8 +126,8 @@ class Cobalt(Service):
     def _write_version(self):
         """Utility method to write current version upstream
 
-        Returns (bool): If the write operation was successful or not
-
+        Returns:
+            bool: If the write operation was successful or not
         """
         try:
             update_version = self.etcd.write('version', self.VERSION,
@@ -155,7 +156,8 @@ class Cobalt(Service):
         Args:
             context (dict): The config for the client
 
-        Returns (etcd.Client):
+        Returns:
+             etcd.Client: Client to be used by the APP
 
         """
         return etcd.Client(**context)
@@ -167,8 +169,8 @@ class Cobalt(Service):
         Args:
             etcd (etcd.Client): The client responsible for communicating with the database
 
-        Returns (VolumeManager):
-
+        Returns:
+            VolumeManager: The volume manager to be used by the APP
         """
         return VolumeManager(etcd)
 
@@ -179,7 +181,8 @@ class Cobalt(Service):
         Args:
             etcd (etcd.Client): The client responsible for communicating with the database
 
-        Returns (MachineManager):
+        Returns:
+            MachineManager: The machine manager to be used by the APP
 
         """
         return MachineManager(etcd)

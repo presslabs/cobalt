@@ -28,8 +28,8 @@ class Volume(Resource):
         Args:
             volume_id (str): The id parsed from the URL
 
-        Returns (tuple): payload, http status code
-
+        Returns:
+            tuple: payload, http status code
         """
         manager = app.volume_manager
         volume = manager.by_id(volume_id)
@@ -49,8 +49,8 @@ class Volume(Resource):
         Args:
             volume_id (str): The id parsed from the URL
 
-        Returns (tuple): payload, http status code, headers
-
+        Returns:
+             tuple: payload, http status code, headers
         """
         manager = app.volume_manager
 
@@ -85,8 +85,8 @@ class Volume(Resource):
         Args:
             volume_id (str): The id parsed from the URL
 
-        Returns (tuple): payload, http status code, headers
-
+        Returns:
+            tuple: payload, http status code, headers
         """
         manager = app.volume_manager
 
@@ -128,8 +128,8 @@ class VolumeList(Resource):
     def get():
         """It will return a list of all the volumes
 
-        Returns (tuple): payload, http status code
-
+        Returns:
+             tuple: payload, http status code
         """
         result, errors = VolumeSchema().dump(app.volume_manager.all()[1], many=True)
         return result
@@ -138,8 +138,8 @@ class VolumeList(Resource):
     def post():
         """It will create a volume with the given input as a starting point
 
-        Returns (tuple): payload, http status code, headers
-
+        Returns:
+             tuple: payload, http status code, headers
         """
         manager = app.volume_manager
         request_json = request.get_json(force=True)

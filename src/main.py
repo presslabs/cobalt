@@ -15,7 +15,7 @@
 """Cobalt main file, run it like any other .py file.
 
 It automatically takes the config path passed in as the first parameter
-and injects it into the :class:`cobalt.Cobalt` and then starts the service.
+and injects it into the :class:`cobalt.cobalt.Cobalt` and then starts the service.
 """
 
 

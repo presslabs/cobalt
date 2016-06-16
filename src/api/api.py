@@ -47,7 +47,8 @@ class Api(Service):
     def start(self):
         """Responsible for spawning the coroutines that run the flask server
 
-        Returns ([Greenlet]): A list of greenlets to join in the caller
+        Returns:
+            [Greenlet]: A list of greenlets to join in the caller
 
         """
         if self._started:
@@ -61,8 +62,8 @@ class Api(Service):
     def stop(self):
         """A means of stopping the service gracefully
 
-        Returns (bool): Whether the code needed stopping or not
-
+        Returns:
+            bool: Whether the code needed stopping or not
         """
         if not self._started:
             return False
@@ -80,8 +81,8 @@ class Api(Service):
             volume_manager (VolumeManager): The volume manager to be used withing the API controller
             testing (bool): Whether or not to set the `TESTING` flag on the newly generated Flask application
 
-        Returns (Flask): The application with all the needed dependencies bootstrapped
-
+        Returns:
+            Flask: The application with all the needed dependencies bootstrapped
         """
         unhandled_exception_errors = {
             'EtcdConnectionFailed': {
@@ -116,7 +117,6 @@ class Api(Service):
 
         Args:
             api (flask_restful.API): The API instance that needs to have the resources added.
-
         """
         api.add_resource(VolumeList, '/volumes')
         api.add_resource(Volume, '/volumes/<volume_id>')

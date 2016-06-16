@@ -156,8 +156,8 @@ class Executor:
         Args:
             volume (etcd.Result): The volume it should find place for
 
-        Returns (etcd.Result): The matched machine with expanded value
-
+        Returns:
+            etcd.Result: The matched machine with expanded value
         """
         constraints = volume.value['requested']['constraints']
         machines = self.machine_manager.all()[1]
@@ -186,7 +186,8 @@ class Executor:
         Args:
             volume (etcd.Result): And expanded volume representation
 
-        Returns (str): Next state
+        Returns:
+            str: Next state
         """
         value = volume.value
 

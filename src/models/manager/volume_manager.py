@@ -66,7 +66,9 @@ class VolumeSchema(Schema):
 
 class VolumeManager(BaseManager):
     """Volume repository class"""
+
     KEY = 'volumes'
+    """Directory name in ETCD"""
 
     def by_states(self, states=None):
         """Returns all volumes that have the state provided
@@ -74,8 +76,8 @@ class VolumeManager(BaseManager):
         Args:
             states ([str]): A list of interested states
 
-        Returns [etcd.Result]: A list of expanded results
-
+        Returns:
+            [etcd.Result]: A list of expanded results
         """
         volumes = self.all()[1]
         return VolumeManager.filter_states(volumes, states)
@@ -86,8 +88,8 @@ class VolumeManager(BaseManager):
         Args:
             node (str): The node you are interested in
 
-        Returns [etcd.Result]: A list of expanded results
-
+        Returns:
+             [etcd.Result]: A list of expanded results
         """
         return [volume for volume in self.all() if volume.value['node'] == node]
 
@@ -97,7 +99,7 @@ class VolumeManager(BaseManager):
         volume = super(VolumeManager, self).update(volume)
 
         if not volume:
-            return False
+            return None
 
         return volume
 
@@ -115,8 +117,8 @@ class VolumeManager(BaseManager):
             id (str): The id for which resource it should focus on
             purpose (str): The operation that needs locking
 
-        Returns (etcd.Lock): The respective Lock object unarmed
-
+        Returns:
+            etcd.Lock: The respective Lock object unarmed
         """
         return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
 
@@ -127,7 +129,8 @@ class VolumeManager(BaseManager):
         Args:
             key (str): THe objects key
 
-        Returns (str): The respective id
+        Returns:
+            str: The respective id
         """
         return key[len(VolumeManager.KEY) + 2:]
 
@@ -139,8 +142,8 @@ class VolumeManager(BaseManager):
             volumes ([etcd.Result]): The objects that should get filtered
             states ([str]): A list of interested in states
 
-        Returns ([etcd.Result]): Returns only the matching objects
-
+        Returns:
+            [etcd.Result]: Returns only the matching objects
         """
         states = states or []
         states = [states] if not isinstance(states, list) else states

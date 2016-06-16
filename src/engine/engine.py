@@ -49,8 +49,8 @@ class Engine(Service):
     def start(self):
         """Start the Engine greenlets
 
-        Returns ([Greenlet]): A list of Greenlets to be joined
-
+        Returns:
+             [Greenlet]: A list of Greenlets to be joined
         """
         if self._started:
             return []
@@ -66,8 +66,8 @@ class Engine(Service):
     def stop(self):
         """A means of stopping the service gracefully
 
-        Returns (bool): Whether the code needed stopping or not
-
+        Returns:
+             bool: Whether the code needed stopping or not
         """
         if not self._started:
             return False
@@ -80,9 +80,8 @@ class Engine(Service):
     @property
     def _quit(self):
         """
-
-        Returns (bool): Whether the service should quit or not
-
+        Returns:
+            bool: Whether the service should quit or not
         """
         return not self._started
 
@@ -91,7 +90,6 @@ class Engine(Service):
 
         It is responsible for making sure the Engine should process, reset the Executor and provide a
         Greenlet context switch after each operation.
-
         """
         while not self._quit:
             if not self.lease.is_held:
@@ -107,7 +105,6 @@ class Engine(Service):
 
         If between 2 runs of this method the number of machines changes or they are not the same machines,
         it resets the the Executor to force healing.
-
         """
         machines = None
 
@@ -136,8 +133,8 @@ class Engine(Service):
         Args:
             etcd (etcd.Client): The client for the store to register the lock on
 
-        Returns (etcd.Lock): The lock object unarmed
-
+        Returns:
+            etcd.Lock: The lock object unarmed
         """
         return Lock(etcd, 'leader-election')
 
@@ -150,8 +147,8 @@ class Engine(Service):
             machine_manager (MachineManager): Data source for the machine model
             context (dict): Context for the Executor
 
-        Returns (Executor):
-
+        Returns:
+             Executor:
         """
         return Executor(volume_manager, machine_manager, context)
 
@@ -163,7 +160,7 @@ class Engine(Service):
             lock (etcd.Lock): The lock on which to listen
             context (dict): Context for the leaser
 
-        Returns (Lease): The Leaser object
-
+        Returns:
+             Lease: The Leaser object
         """
         return Lease(lock, context)

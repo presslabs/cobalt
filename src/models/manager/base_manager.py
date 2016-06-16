@@ -19,7 +19,9 @@ from marshmallow import Schema
 
 class BaseManager:
     """Base repository class for objects"""
+
     KEY = ''
+    """Directory name in ETCD"""
 
     def __init__(self, client):
         """Create an instance of the repository with the specified source
@@ -37,8 +39,10 @@ class BaseManager:
     def all(self):
         """Get all objects maintained by this repository
 
-        Returns ((etcd.Result, [etcd.Result])):
-            (The directory object expanded, List of The objects with expanded values)
+        Returns:
+            tuple:
+                0 etcd.Result: The directory object **NOT expanded**
+                1 [etcd.Result] List of The objects with expanded values
         """
         try:
             dir = self.client.read(self.KEY, sorted=True)
@@ -52,7 +56,8 @@ class BaseManager:
     def all_keys(self):
         """Get all object keys maintained by this repository
 
-        Returns ([str]): A list of key strings
+        Returns:
+            [str]: A list of key strings
         """
         return [entry.key for entry in self.all()[1]]
 
@@ -62,7 +67,8 @@ class BaseManager:
         Args:
             entry_id (str): The id to fetch prefixed with the object dir
 
-        Returns (etcd.Result|None): The expanded result or None
+        Returns:
+            etcd.Result: The expanded result if key exists, or None if key not found
         """
         try:
             entry = self.client.read('/{}/{}'.format(self.KEY, entry_id))
@@ -78,8 +84,8 @@ class BaseManager:
             data (dict): Dictionary containing values you want to store
             suffix (str): If given then it will be used as a key while storing
 
-        Returns (etcd.Result): THe created object expanded
-
+        Returns:
+            etcd.Result: THe created object expanded
         """
         append = True if suffix == '' else False
         key = '/{}/{}'.format(self.KEY, suffix)
@@ -94,14 +100,15 @@ class BaseManager:
         Args:
             entity (etcd.Result): An expanded result object that needs to be serialized
 
-        Returns (False|etcd.Result): Either False if couldn't update or the resulting object expanded
+        Returns:
+            etcd.Result: The resulting object expanded, or None if Etcd failed
         """
         entity.value = json.dumps(entity.value)
 
         try:
             entity = self.client.update(entity)
         except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
-            return False
+            return None
 
         return self._load_from_etcd(entity)
 
@@ -111,13 +118,13 @@ class BaseManager:
         Args:
             entity (etcd.Result): The object one wants to be deleted, expanded or not
 
-        Returns (False| etcd.Result): The result of the operation or False if it failed
-
+        Returns:
+            etcd.Result: The result of the operation expanded, or None if etcd failed
         """
         try:
             entity = self.client.delete(entity.key)
         except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
-            return False
+            return None
 
         return self._load_from_etcd(entity)
 
@@ -128,7 +135,8 @@ class BaseManager:
             index (int): The index to start watching from
             timeout (int): The timeout after which we give up
 
-        Returns (None|etcd.Result): None if timeout occurred or the result expanded
+        Returns:
+            etcd.Result: Result expanded or None if timeout occurred
         """
         try:
             entity = self.client.watch(self.KEY, recursive=True, index=index, timeout=timeout)
@@ -143,7 +151,8 @@ class BaseManager:
         Args:
             key (str): THe objects key
 
-        Returns (str): The respective id
+        Returns:
+            str: The respective id
         """
         return key[len(BaseManager.KEY) + 2:]
 
@@ -153,8 +162,8 @@ class BaseManager:
         Args:
             data ([etcd.result] | etcd.result): The iterable or a single result object not expanded
 
-        Returns ([etcd.result] | etcd.result): Return type matches given input, and all result objects are expanded
-
+        Returns:
+             etcd.result: Return type matches given input (if it is a list->list), and all result objects are expanded
         """
         # we trust that etcd data is valid
         try:
