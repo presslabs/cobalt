@@ -16,4 +16,7 @@ from .base_manager import BaseManager
 
 
 class MachineManager(BaseManager):
+    """Machine repository class"""
+
     KEY = 'machines'
+    """Directory name in ETCD"""

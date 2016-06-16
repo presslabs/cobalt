@@ -5,5 +5,5 @@
 .coverage
 
 sample/mnt
-
 .drone.sec.yml
+docs/code/build

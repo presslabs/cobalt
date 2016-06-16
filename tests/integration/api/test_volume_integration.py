@@ -122,7 +122,7 @@ class TestVolumeIntegration:
             parent = etcd_client.write('/volumes', parent_data, append=True)
             parent.value = json.loads(parent.value)
 
-            id = VolumeManager.get_id_from_key(parent.key)
+            id = VolumeManager(etcd_client).get_id_from_key(parent.key)
 
             # create clone
             request = {'id': str(id),
@@ -172,7 +172,7 @@ class TestVolumeIntegration:
             parent = etcd_client.write('/volumes', parent_data, append=True)
             parent.value = json.loads(parent.value)
 
-            id = VolumeManager.get_id_from_key(parent.key)
+            id = VolumeManager(etcd_client).get_id_from_key(parent.key)
             expected_result['control']['parent_id'] = str(id)
 
             # create clone

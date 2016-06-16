@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Cobalt main file, run it like any other .py file.
+
+It automatically takes the config path passed in as the first parameter
+and injects it into the :class:`cobalt.Cobalt` and then starts the service.
+"""
+
+
 from gevent import monkey
 monkey.patch_all()  # noqa
 
@@ -22,6 +29,11 @@ from cobalt import Cobalt
 
 
 def start():
+    """The entrypoint in running the project
+
+    It expects to have as the second argv the path to a json config file,
+    similar to the one in `config.json.sample`
+    """
     if len(argv) != 2:
         print('Config file must be specified. Usage: main.py <config_path>')
 

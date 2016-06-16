@@ -22,7 +22,15 @@ from .volume import VolumeList, Volume
 
 
 class Api(Service):
+    """ API service responsible for processing requests given by the client"""
+
     def __init__(self, volume_manager, context):
+        """
+
+        Args:
+            volume_manager (VolumeManager): The repository object to work with the volumes
+            context (dict): A dict containing `host` and `port`
+        """
         self._api_loop = None
         self._api_server = None
         self._started = False
@@ -37,6 +45,12 @@ class Api(Service):
         self._api_server = WSGIServer(self._connection, self.flask_app)
 
     def start(self):
+        """Responsible for spawning the coroutines that run the flask server
+
+        Returns:
+            [Greenlet]: A list of greenlets to join in the caller
+
+        """
         if self._started:
             return []
 
@@ -46,6 +60,11 @@ class Api(Service):
         return [self._api_loop]
 
     def stop(self):
+        """A means of stopping the service gracefully
+
+        Returns:
+            bool: Whether the code needed stopping or not
+        """
         if not self._started:
             return False
 
@@ -56,6 +75,15 @@ class Api(Service):
 
     @staticmethod
     def _create_app(volume_manager, testing=False):
+        """Factory method to create the Flask app and register all dependencies
+
+        Args:
+            volume_manager (VolumeManager): The volume manager to be used withing the API controller
+            testing (bool): Whether or not to set the `TESTING` flag on the newly generated Flask application
+
+        Returns:
+            Flask: The application with all the needed dependencies bootstrapped
+        """
         unhandled_exception_errors = {
             'EtcdConnectionFailed': {
                 'message': "The ETCD cluster is not responding.",
@@ -85,5 +113,10 @@ class Api(Service):
 
     @staticmethod
     def _register_resources(api):
+        """Utility method to inject the resources and their endpoints
+
+        Args:
+            api (flask_restful.API): The API instance that needs to have the resources added.
+        """
         api.add_resource(VolumeList, '/volumes')
         api.add_resource(Volume, '/volumes/<volume_id>')
