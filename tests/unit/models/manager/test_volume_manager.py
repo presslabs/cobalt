@@ -42,6 +42,22 @@ class TestVolumeManager:
         assert expected_result == result
         assert p_volume_manager_all.called
 
+    @mark.parametrize('query,filter,expected_result', [
+        # all() return value, state to query, result
+        ([], 'a', []),
+        ([], '', []),
+        ([dummy_ready_volume], 'a', [dummy_ready_volume]),
+        ([dummy_ready_volume, dummy_invalid_state_volume], 'a', [dummy_ready_volume]),
+        ([dummy_ready_volume, dummy_invalid_state_volume], '', [])
+    ])
+    def test_volume_by_node(self, query, filter, expected_result, volume_manager, p_volume_manager_all):
+        p_volume_manager_all.return_value = (None, query)
+
+        result = volume_manager.by_node(filter)
+
+        assert expected_result == result
+        assert p_volume_manager_all.called
+
     @mark.parametrize('volumes,filter,expected_result', [
         ([], 'NONE', []),
         ([dummy_ready_volume], 'ready', [dummy_ready_volume]),
