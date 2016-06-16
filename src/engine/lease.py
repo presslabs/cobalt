@@ -16,13 +16,15 @@ import time
 
 
 class Lease(object):
-    """Engine Lease acquisition class
+
+    """Engine Lease acquisition class.
 
     It is responsible for watching the state of the Lock and refresh it so to maintain
     Leader status
     """
+
     def __init__(self, lock, context):
-        """Create a Lease object
+        """Create a Lease object.
 
         Args:
             lock (etcd.Lock): The lock it should monitor
@@ -39,7 +41,7 @@ class Lease(object):
         self.quit = False
 
     def acquire(self):
-        """The acquisition loop that first acquires then refreshes it
+        """The acquisition loop that first acquires then refreshes it.
 
         When the Leaser quits it will automatically release the leader status so others may take action
         """
@@ -52,5 +54,5 @@ class Lease(object):
 
     @property
     def is_held(self):
-        """Helper property so to access the acquired state of the Lock easier"""
+        """Helper property so to access the acquired state of the Lock easier."""
         return self.lock.is_acquired

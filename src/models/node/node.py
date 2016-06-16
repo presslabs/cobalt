@@ -18,6 +18,7 @@ from models.driver import BTRFSDriver
 
 
 class Node:
+
     """
     # Dummy config example
     {

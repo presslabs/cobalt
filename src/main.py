@@ -29,7 +29,7 @@ from cobalt import Cobalt
 
 
 def start():
-    """The entrypoint in running the project
+    """The entrypoint in running the project.
 
     It expects to have as the second argv the path to a json config file,
     similar to the one in `config.json.sample`
@@ -41,8 +41,8 @@ def start():
         with open(argv[1]) as data_file:
             config = json.load(data_file)
             Cobalt(config).start()
-    except Exception as e:
-        print('Error encountered when reading config: {}'.format(e))
+    except Exception as exception:
+        print('Error encountered when reading config: {}'.format(exception))
 
 if __name__ == '__main__':
     start()

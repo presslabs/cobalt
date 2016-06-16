@@ -16,14 +16,15 @@ from abc import ABC, abstractmethod
 
 
 class Service(ABC):
-    """Abstract class for a service"""
+
+    """Abstract class for a service."""
 
     @abstractmethod
     def start(self):
-        """Abstract start method, responsible for starting the service"""
+        """Abstract start method, responsible for starting the service."""
         pass
 
     @abstractmethod
     def stop(self):
-        """Abstract stop method, responsible for gracefully stop the service"""
+        """Abstract stop method, responsible for gracefully stop the service."""
         pass

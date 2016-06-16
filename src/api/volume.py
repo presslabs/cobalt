@@ -19,11 +19,12 @@ from models.manager import VolumeSchema, VolumeAttributeSchema
 
 
 class Volume(Resource):
-    """FlaskRestful API controller and resource handler for one specific volume"""
+
+    """FlaskRestful API controller and resource handler for one specific volume."""
 
     @staticmethod
     def get(volume_id):
-        """Returns a volume dict as a json response or 404 if not found
+        """Returns a volume dict as a json response or 404 if not found.
 
         Args:
             volume_id (str): The id parsed from the URL
@@ -42,7 +43,7 @@ class Volume(Resource):
 
     @staticmethod
     def put(volume_id):
-        """Edits a volume dict based on the given representation
+        """Edits a volume dict based on the given representation.
 
         Expects to receive a json payload with a complete new version of the volume to be edited
 
@@ -80,7 +81,7 @@ class Volume(Resource):
 
     @staticmethod
     def delete(volume_id):
-        """Deletes the volume pointed by the id
+        """Deletes the volume pointed by the id.
 
         Args:
             volume_id (str): The id parsed from the URL
@@ -122,7 +123,8 @@ class Volume(Resource):
 
 
 class VolumeList(Resource):
-    """FlaskRestful API controller and resource handler for the entire volume endpoint"""
+
+    """FlaskRestful API controller and resource handler for the entire volume endpoint."""
 
     @staticmethod
     def get():
@@ -131,12 +133,12 @@ class VolumeList(Resource):
         Returns:
              tuple: payload, http status code
         """
-        result, errors = VolumeSchema().dump(app.volume_manager.all()[1], many=True)
+        result, _ = VolumeSchema().dump(app.volume_manager.all()[1], many=True)
         return result
 
     @staticmethod
     def post():
-        """It will create a volume with the given input as a starting point
+        """It will create a volume with the given input as a starting point.
 
         Returns:
              tuple: payload, http status code, headers
@@ -144,7 +146,7 @@ class VolumeList(Resource):
         manager = app.volume_manager
         request_json = request.get_json(force=True)
 
-        id = request_json.get('id', '')
+        request_id = request_json.get('id', '')
 
         fields = ('name', 'meta', 'requested',)
         data, errors = VolumeSchema(only=fields).load(request_json)
@@ -157,16 +159,16 @@ class VolumeList(Resource):
         data['control'] = {
             'error': '',
             'error_count': 0,
-            'parent_id': id
+            'parent_id': request_id
         }
 
-        lock = manager.get_lock(id, 'clone')
+        lock = manager.get_lock(request_id, 'clone')
 
-        if id:
+        if request_id:
             lock.acquire(timeout=0, lock_ttl=10)
 
             data['state'] = 'pending'
-            parent = manager.by_id(id)
+            parent = manager.by_id(request_id)
             if not parent:
                 lock.release()
                 return {'message': 'Parent does not exist. Clone not created'}, 400
@@ -178,7 +180,7 @@ class VolumeList(Resource):
                                    'in order to clone'.format(parent_state)}, 400
 
         volume = manager.create(data)
-        if id:
+        if request_id:
             lock.release()
 
         result, _ = VolumeSchema().dump(volume)

@@ -10,5 +10,7 @@ requirements:
 ignore-paths:
     - docs
     - sample
+ignore-patterns:
+    - .*__init__.py
 python-targets:
     - 3
