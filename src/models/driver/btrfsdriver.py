@@ -123,12 +123,6 @@ class BTRFSDriver(Driver):
         return ids
 
     def get_usage(self):
-        """
-        Gets info about total disk space and quota groups
-        using the usage command provided by btrfs tools
-
-        Unit of measure is GiB
-        """
         try:
             size, qgroups = None, []
             usage = self._btrfs('filesystem', 'usage', '--gbytes', '-h', self._base_path)
