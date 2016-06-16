@@ -5,6 +5,7 @@
 [![Code Climate](https://codeclimate.com/github/krodyrobi/cobalt/badges/gpa.svg)](https://codeclimate.com/github/krodyrobi/cobalt)
 [![Test Coverage](https://codeclimate.com/github/krodyrobi/cobalt/badges/coverage.svg)](https://codeclimate.com/github/krodyrobi/cobalt/coverage)
 [![Issue Count](https://codeclimate.com/github/krodyrobi/cobalt/badges/issue_count.svg)](https://codeclimate.com/github/krodyrobi/cobalt)
+[![Code Health](https://landscape.io/github/krodyrobi/cobalt/master/landscape.svg?style=flat)](https://landscape.io/github/krodyrobi/cobalt/master)
 [![Documentation Status](https://readthedocs.org/projects/presslabs-cobalt/badge/?version=latest)](http://presslabs-cobalt.readthedocs.io/en/latest/?badge=latest)
 
 ### Testing

@@ -1,0 +1,14 @@
+doc-warnings: yes
+test-warnings: no
+strictness: veryhigh
+max-line-length: 120
+uses:
+    - flask
+autodetect: yes
+requirements:
+    - requirements/development.txt
+ignore-paths:
+    - docs
+    - sample
+python-targets:
+    - 3
