@@ -436,7 +436,7 @@ class TestExecutorIntegration:
 
         volume_data = json.loads(parent_volume.value)
         volume_data['state'] = 'pending'
-        volume_data['control']['parent_id'] = VolumeManager.get_id_from_key(parent_volume.key)
+        volume_data['control']['parent_id'] = VolumeManager(etcd_client).get_id_from_key(parent_volume.key)
 
         volume = self._create_entries('volumes', [json.dumps(volume_data)], etcd_client)[0]
 

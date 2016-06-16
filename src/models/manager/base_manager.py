@@ -144,8 +144,7 @@ class BaseManager:
             return None
         return self._load_from_etcd(entity)
 
-    @staticmethod
-    def get_id_from_key(key):
+    def get_id_from_key(self, key):
         """Utility method for getting the id from an internal key
 
         Args:
@@ -154,7 +153,7 @@ class BaseManager:
         Returns:
             str: The respective id
         """
-        return key[len(BaseManager.KEY) + 2:]
+        return key[len(self.KEY) + 2:]
 
     def _load_from_etcd(self, data):
         """Utility method to expand result objects

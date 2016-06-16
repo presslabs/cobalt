@@ -60,7 +60,7 @@ class VolumeSchema(Schema):
     def get_attribute(self, attr, obj, default):
         """Utility method for getting the id for the representation"""
         if attr == 'id':
-            return VolumeManager.get_id_from_key(obj.key)
+            return obj.key[len(VolumeManager.KEY) + 2:]
         return utils.get_value(attr, obj.value, default)
 
 
@@ -121,12 +121,6 @@ class VolumeManager(BaseManager):
             etcd.Lock: The respective Lock object unarmed
         """
         return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
-
-    @staticmethod
-    def get_id_from_key(key):
-        """Similar to :meth:`models.manager.base_manager.BaseManager`"""
-
-        return key[len(VolumeManager.KEY) + 2:]
 
     @staticmethod
     def filter_states(volumes, states):

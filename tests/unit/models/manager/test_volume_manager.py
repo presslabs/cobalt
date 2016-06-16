@@ -93,12 +93,12 @@ class TestVolumeManager:
 
         p_etcd_lock.assert_called_with(m_etcd_client, 'foobar-1')
 
-    def test_volume_get_id_from_key_invalid_input(self):
+    def test_volume_get_id_from_key_invalid_input(self, mocker):
         key = 'volumes'
 
-        assert VolumeManager.get_id_from_key(key) == ''
+        assert VolumeManager(mocker.MagicMock()).get_id_from_key(key) == ''
 
-    def test_volume_get_id_from_key(self):
+    def test_volume_get_id_from_key(self, mocker):
         key = '/volumes/1'
 
-        assert VolumeManager.get_id_from_key(key) == '1'
+        assert VolumeManager(mocker.MagicMock()).get_id_from_key(key) == '1'
