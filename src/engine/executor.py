@@ -75,7 +75,7 @@ class Executor:
         self._process(volume)
 
     def _process(self, volume):
-        """ Method for processing a volume
+        """Method for processing a volume
 
         It figures out the next state and tries to transition the object based on the
         state machine diagram
@@ -94,6 +94,13 @@ class Executor:
             self._process_pending(volume)
 
     def _process_scheduling(self, volume):
+        """Process scheduling volume
+
+        Apply the scheduling transition or healing.
+
+        Args:
+            volume (etcd.Result): An expanded version
+        """
         value = volume.value
         last_updated = value['control']['updated']
         expired = True if time.time() - last_updated > self.delay else False
@@ -110,15 +117,29 @@ class Executor:
         self.volume_manager.update(volume)
 
     def _process_pending(self, volume):
+        """Process pending volume
+
+        Apply the pending transition.
+
+        Args:
+            volume (etcd.Result): An expanded version
+        """
         value = volume.value
         value['state'] = self._next_state(volume)
 
         if value['state'] == 'cloning':
             self._process_cloning(volume)
-
-        self.volume_manager.update(volume)
+        else:
+            self.volume_manager.update(volume)
 
     def _process_cloning(self, volume):
+        """Process cloning volume
+
+        Apply the cloning transition.
+
+        Args:
+            volume (etcd.Result): An expanded version
+        """
         value = volume.value
         parent = self.volume_manager.by_id(value['control']['parent_id'])
 
@@ -126,6 +147,8 @@ class Executor:
             value['state'] = 'deleting'
         else:
             value['node'] = parent.value['node']
+
+        self.volume_manager.update(volume)
 
     def _find_machine(self, volume):
         """Utility method to get an appropriate machine for a volume, based on required space and constraints

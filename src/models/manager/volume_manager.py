@@ -109,10 +109,26 @@ class VolumeManager(BaseManager):
         return volume
 
     def get_lock(self, id, purpose='clone'):
+        """Utility method to get a Lock instance for a specific purpose and a related object id
+
+        Args:
+            id (str): The id for which resource it should focus on
+            purpose (str): The operation that needs locking
+
+        Returns (etcd.Lock): The respective Lock object unarmed
+
+        """
         return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
 
     @staticmethod
     def get_id_from_key(key):
+        """Utility method for getting the id from an internal key
+
+        Args:
+            key (str): THe objects key
+
+        Returns (str): The respective id
+        """
         return key[len(VolumeManager.KEY) + 2:]
 
     @staticmethod
