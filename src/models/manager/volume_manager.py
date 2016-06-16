@@ -124,14 +124,7 @@ class VolumeManager(BaseManager):
 
     @staticmethod
     def get_id_from_key(key):
-        """Utility method for getting the id from an internal key
-
-        Args:
-            key (str): THe objects key
-
-        Returns:
-            str: The respective id
-        """
+        """Similar to :meth:`models.manager.base_manager.BaseManager`"""
         return key[len(VolumeManager.KEY) + 2:]
 
     @staticmethod

@@ -11,13 +11,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   main
    cobalt
    engine
    api
    agent
    models
    utils
-   main
 
 
 Indices and tables
