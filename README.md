@@ -2,9 +2,9 @@
 
 ## PROJECT UNDER DEVELOPMENT NOT FOR PRODUCTION USE
 
-[![Code Climate](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/gpa.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/feed)
-[![Test Coverage](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/coverage.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/coverage)
-[![Issue Count](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/issue_count.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/feed)
+[![Code Climate](https://codeclimate.com/github/krodyrobi/cobalt/badges/gpa.svg)](https://codeclimate.com/github/krodyrobi/cobalt)
+[![Test Coverage](https://codeclimate.com/github/krodyrobi/cobalt/badges/coverage.svg)](https://codeclimate.com/github/krodyrobi/cobalt/coverage)
+[![Issue Count](https://codeclimate.com/github/krodyrobi/cobalt/badges/issue_count.svg)](https://codeclimate.com/github/krodyrobi/cobalt)
 [![Documentation Status](https://readthedocs.org/projects/presslabs-cobalt/badge/?version=latest)](http://presslabs-cobalt.readthedocs.io/en/latest/?badge=latest)
 
 ### Testing
