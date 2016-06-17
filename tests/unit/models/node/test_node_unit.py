@@ -11,4 +11,4 @@ class TestNode:
         m_driver._btrfs = btrfs
         m_node._driver = m_driver
 
-        assert m_node.get_space() == 4.0
+        assert m_node.get_space() == 21.0
