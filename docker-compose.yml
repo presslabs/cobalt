@@ -7,7 +7,7 @@ services:
       - "80"
     volumes:
       - ./sample/config1:/etc/cobalt
-      - ./../btrfs/root1:/btrfs-volume
+      - ./btrfs/root1:/btrfs-volume
     depends_on:
       - etcd
     links:
@@ -19,7 +19,7 @@ services:
       - "80"
     volumes:
       - ./sample/config2:/etc/cobalt
-      - ./../btrfs/root2:/btrfs-volume
+      - ./btrfs/root2:/btrfs-volume
     depends_on:
       - etcd
     links:
@@ -31,7 +31,7 @@ services:
       - "80"
     volumes:
       - ./sample/config3:/etc/cobalt
-      - ./../btrfs/root3:/btrfs-volume
+      - ./btrfs/root3:/btrfs-volume
     depends_on:
       - etcd
     links:
