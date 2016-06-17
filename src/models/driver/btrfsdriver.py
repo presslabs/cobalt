@@ -15,6 +15,7 @@
 import re
 import sh
 
+from numbers import Number
 from .driver import Driver
 
 
@@ -23,6 +24,7 @@ class BTRFSDriver(Driver):
         self._base_path = base_path
         try:
             self._btrfs = sh.Command('btrfs')
+            self._btrfs('quota', 'enable', self._base_path)
         except sh.CommandNotFound as e:
             print(self._err('driver init', e.stderr, e.full_cmd))
 
@@ -33,13 +35,17 @@ class BTRFSDriver(Driver):
         return '{}G'.format(quota)
 
     def _err(self, operation, stderr, cmd):
-        return 'BTRFS driver failed! \nOPERATION: {} \nCOMMAND: {} \nSTDERR: {}'.format(operation, cmd, stderr)
+        return '''BTRFS driver failed!
+                OPERATION: {}
+                COMMAND: {}
+                STDERR: {}'''.format(operation, cmd, stderr)
 
     def create(self, requirements):
+        if not isinstance(requirements['reserved_size'], Number):
+            return False
         try:
             self._btrfs('subvolume', 'create', self._get_path(requirements['id']))
-            quota = self._get_quota(requirements['reserved_size'])
-            self._set_quota(requirements['id'], quota)
+            self._set_quota(requirements['id'], requirements['reserved_size'])
         except sh.ErrorReturnCode_1 as e:
             print(self._err('create', e.stderr, e.full_cmd))
             return False
@@ -48,7 +54,7 @@ class BTRFSDriver(Driver):
 
     def _set_quota(self, id, quota):
         try:
-            self._btrfs('qgroup', 'limit', quota, self._get_path(id))
+            self._btrfs('qgroup', 'limit', '-e', self._get_quota(quota), self._get_path(id))
         except sh.ErrorReturnCode_1 as e:
             print(self._err('resize', e.stderr, e.full_cmd))
             return False
@@ -56,7 +62,7 @@ class BTRFSDriver(Driver):
         return True
 
     def resize(self, id, quota):
-        self._set_quota(self, id, quota)
+        return self._set_quota(id, quota)
 
     def clone(self, id, parent_id):
         try:
@@ -93,12 +99,23 @@ class BTRFSDriver(Driver):
             subvolumes = subvolumes.strip()
 
             for line in subvolumes.splitlines():
-                line = line.strip()
+                path = line.strip().split()[-1]
+
                 try:
-                    id = line[line.index('{}/'.format(self._base_path)):].replace('{}/'.format(self._base_path), '')
-                    ids.append(int(id))
+                    id = None
+
+                    # Seems like output may vary, the path can be absolute or relative
+                    # so a check is needed
+                    if '/' not in path:
+                        id = path
+                    elif self._base_path in path:
+                        id = path[path.index('{}/'.format(self._base_path)):].replace('{}/'.format(self._base_path), '')
+
+                    if id:
+                        ids.append(id)
                 except ValueError:
                     pass
+
         except sh.ErrorReturnCode_1 as e:
             print(self._err('get_all', e.stderr, e.full_cmd))
             return []
@@ -106,25 +123,35 @@ class BTRFSDriver(Driver):
         return ids
 
     """
-    Gets info about total disk space and used disk space
-    using the df command provided by btrfs tools
+    Gets info about total disk space and quota groups
+    using the usage command provided by btrfs tools
 
     Unit of measure is GiB
     """
-    def df(self):
+    def get_usage(self):
         try:
-            usage = self._btrfs('filesystem', 'df', '-g', self._base_path)
-            total, used = None, None
+            size, qgroups = None, []
+            usage = self._btrfs('filesystem', 'usage', '--gbytes', '-h', self._base_path)
             usage = usage.strip()
 
-            # First line should contain overall usage info
-            total_usage = usage.splitlines()[0]
-            match = re.search(r'total=(.*?)GiB, used=(.*?)GiB', total_usage)
+            match = None
+            for line in usage.splitlines():
+                if 'Device size:' in line:
+                    match = re.search(r'([0-9]+\.[0-9]+)GiB', line)
+                    break
 
             if match:
-                total, used = float(match.group(1)), float(match.group(2))
+                size = float(match.group(1))
+
+            for id in self.get_all():
+                qgroup = self._btrfs('qgroup', 'show', '-e', '-f', '--gbytes', self._get_path(id))
+                qgroup = qgroup.strip()
+                match = re.search(r'[0-9]+\.[0-9]+GiB.*[0-9]+\.[0-9]+GiB.*([0-9]+\.[0-9]+)GiB', qgroup)
+
+                if match:
+                    qgroups.append(float(match.group(1)))
 
         except sh.ErrorReturnCode_1 as e:
             print(self._err('get_all', e.stderr, e.full_cmd))
 
-        return total, used
+        return size, qgroups

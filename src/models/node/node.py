@@ -68,11 +68,11 @@ class Node:
         return self._conf['labels']
 
     def get_space(self):
-        total, used = self._driver.df()
+        size, qgroups = self._driver.get_usage()
 
-        if total and used:
-            total -= total * (1 - self._max_fill)
-            return total - used
+        if size:
+            size -= size * (1 - self._max_fill)
+            return round(size - sum(qgroups), 2)
 
         return None
 

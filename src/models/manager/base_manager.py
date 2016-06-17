@@ -122,11 +122,11 @@ class BaseManager:
             etcd.Result: The result of the operation expanded, or None if etcd failed
         """
         try:
-            entity = self.client.delete(entity.key)
+            self.client.delete(entity.key)
         except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
             return None
 
-        return self._load_from_etcd(entity)
+        return True
 
     def watch(self, index=None, timeout=0):
         """Watch the directory of the repository for changes indefinably starting from an index
