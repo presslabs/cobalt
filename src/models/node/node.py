@@ -76,4 +76,3 @@ class Node:
             return round(size - sum(qgroups), 2)
 
         return None
-
