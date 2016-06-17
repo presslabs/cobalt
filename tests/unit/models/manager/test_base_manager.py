@@ -157,7 +157,7 @@ class TestBaseManager:
 
         result = base_manager.delete(entity)
 
-        assert result == entity
+        assert result
         p_etcd_client_delete.assert_called_with(1)
         p_base_manager_load_from_etcd.assert_called_with(entity)
 

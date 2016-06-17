@@ -119,12 +119,12 @@ class BaseManager:
             entity (etcd.Result): The object one wants to be deleted, expanded or not
 
         Returns:
-            etcd.Result: The result of the operation expanded, or None if etcd failed
+            bool: The state of the operation
         """
         try:
             self.client.delete(entity.key)
         except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
-            return None
+            return False
 
         return True
 
