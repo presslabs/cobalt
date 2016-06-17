@@ -15,7 +15,7 @@
 from pytest import mark
 
 from engine import Executor
-from tests.conftest import Dummy
+from tests.conftest import Dummy, dummy_invalid_state_volume
 
 
 class TestExecutor:
@@ -117,3 +117,22 @@ class TestExecutor:
         assert p_volume_manager_all.called
         assert executor.reset.called
         assert not p_executor_process.called
+
+    @mark.parametrize('watch_action', ['expire', 'delete'])
+    def test_tick_watch_deleting_expire_action(self, mocker, executor, p_executor_process, p_volume_manager_all,
+                                               p_volume_manager_watch, watch_action):
+        p_volume_manager_all.return_value = (None, [])
+        p_volume_manager_watch.return_value = mocker.MagicMock(action=watch_action, modifiedIndex=1)
+
+        executor.tick()
+
+        p_volume_manager_watch.assert_called_with(index=None, timeout=executor.delay)
+        assert p_volume_manager_all.called
+        assert not p_executor_process.called
+
+    def test_process_not_in_state(self, mocker, executor):
+        executor._process_NONE = mocker.MagicMock()
+
+        executor._process(dummy_invalid_state_volume)
+
+        assert not executor._process_NONE.called

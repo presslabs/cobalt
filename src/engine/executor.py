@@ -19,7 +19,7 @@ class Executor:
 
     """Class responsible for all decision making within the cluster."""
 
-    states_interested_in = ['registered', 'scheduling', 'pending']
+    states_interested_in = ['scheduling', 'pending']
 
     def __init__(self, volume_manager, machine_manager, context):
         """Creates an Executor instance.
@@ -89,10 +89,7 @@ class Executor:
             return
 
         state = volume.value['state']
-        if state == 'scheduling':
-            self._process_scheduling(volume)
-        elif state == 'pending':
-            self._process_pending(volume)
+        getattr(self, '_process_{}'.format(state), lambda x: None)(volume)
 
     def _process_scheduling(self, volume):
         """Process scheduling volume.
