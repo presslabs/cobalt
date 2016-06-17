@@ -22,7 +22,7 @@
       "lease_ttl": 60
     },
     "executor": {
-      "timeout": 10
+      "timeout": 20
     }
   },
   "api": {
@@ -32,15 +32,21 @@
   "agent": {
     "node": {
       "conf_path": "/etc/cobalt.conf",
-      "volume_path": "/mnt"
+      "volume_path": "/mnt",
+      "max_fill": 0.8,
+      "conf": {
+        "name": "cobalt1",
+        "labels": []
+      }
     },
     "watch_timeout": 10,
     "max_error_count": 3,
-    "agent_ttl": 60
+    "max_error_timeout": 10,
+    "agent_ttl": 10
   },
   "services": [
+    "agent",
     "api",
-    "engine",
-    "agent"
+    "engine"
   ]
 }

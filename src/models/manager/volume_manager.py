@@ -91,7 +91,7 @@ class VolumeManager(BaseManager):
         Returns:
              [etcd.Result]: A list of expanded results
         """
-        return [volume for volume in self.all() if volume.value['node'] == node]
+        return [volume for volume in self.all()[1] if volume.value['node'] == node]
 
     def update(self, volume):
         """Similar to what the base manager does only that it updates a volumes updated timestamp"""

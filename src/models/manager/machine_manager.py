@@ -20,3 +20,4 @@ class MachineManager(BaseManager):
 
     KEY = 'machines'
     """Directory name in ETCD"""
+
