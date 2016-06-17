@@ -10,11 +10,9 @@ build:
     - apk add --no-cache gcc musl-dev btrfs-progs git
     - pip install -r requirements/development.txt
     - sh drone.sh
-    - py.test --cov=src --color=yes tests
+    - py.test --cov=src --color=yes tests || sh cleanup.sh && exit 1
+    - sh cleanup.sh
     - if [ "$DRONE_BRANCH" == "master" ]; then codeclimate-test-reporter; fi
-    - umount /mnt
-    - rm -r btrfs-drone
-    - umount /etc/cobalt
 
 compose:
   etcd:
