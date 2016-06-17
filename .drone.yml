@@ -12,6 +12,9 @@ build:
     - sh drone.sh
     - py.test --cov=src --color=yes tests
     - if [ "$DRONE_BRANCH" == "master" ]; then codeclimate-test-reporter; fi
+    - umount /mnt
+    - rm -r btrfs-drone
+    - umount /etc/cobalt
 
 compose:
   etcd:
