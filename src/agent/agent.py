@@ -213,4 +213,3 @@ class Agent(Service):
                     self._machine_heartbeat()
 
             time.sleep(0)
-
