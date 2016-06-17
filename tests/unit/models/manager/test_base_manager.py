@@ -150,16 +150,14 @@ class TestBaseManager:
 
         assert base_manager.watch() is None
 
-    def test_delete(self, mocker, base_manager, p_etcd_client_delete, p_base_manager_load_from_etcd):
+    def test_delete(self, mocker, base_manager, p_etcd_client_delete):
         entity = mocker.MagicMock(key=1)
         p_etcd_client_delete.return_value = entity
-        p_base_manager_load_from_etcd.return_value = entity
 
         result = base_manager.delete(entity)
 
         assert result
         p_etcd_client_delete.assert_called_with(1)
-        p_base_manager_load_from_etcd.assert_called_with(entity)
 
     @mark.parametrize('error', [etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound])
     def test_delete_etcd_errors(self, mocker, base_manager, p_etcd_client_delete, error):
