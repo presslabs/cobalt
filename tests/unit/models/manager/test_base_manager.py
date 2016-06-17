@@ -167,5 +167,5 @@ class TestBaseManager:
 
         entity = mocker.MagicMock(key=1)
 
-        assert base_manager.delete(entity) is None
+        assert not base_manager.delete(entity)
         p_etcd_client_delete.assert_called_with(1)
