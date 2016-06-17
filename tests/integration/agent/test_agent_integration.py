@@ -44,7 +44,7 @@ class TestAgentIntegration:
 
         volumes = volume_manager.by_node('test-node')
         for volume in volumes:
-            vol_id = VolumeManager.get_id_from_key(volume.key)
+            vol_id = volume_manager.get_id_from_key(volume.key)
             size = volume.value['requested']['reserved_size']
             driver.create({'id': vol_id, 'reserved_size': size})
 
@@ -92,7 +92,7 @@ class TestAgentIntegration:
 
         volume = volume_manager.by_node('test-node')[0]
         assert volume.value['state'] == 'ready'
-        assert VolumeManager.get_id_from_key(volume.key) == driver.get_all()[0]
+        assert volume_manager.get_id_from_key(volume.key) == driver.get_all()[0]
 
     def test_do_create_failure(self, agent, volume_manager, volume_raw_scheduling_assigned):
         volume = json.loads(volume_raw_scheduling_assigned)
@@ -157,7 +157,7 @@ class TestAgentIntegration:
         agent._volume_heartbeat()
 
         volume = volume_manager.by_node('test-node')[0]
-        parent_id = VolumeManager.get_id_from_key(volume.key)
+        parent_id = volume_manager.get_id_from_key(volume.key)
 
         volume = json.loads(volume_raw_cloning_assigned)
         volume['control']['parent_id'] = parent_id
@@ -167,8 +167,8 @@ class TestAgentIntegration:
         volumes = volume_manager.by_node('test-node')
 
         assert len(driver.get_all()) == len(volumes) == 2
-        assert VolumeManager.get_id_from_key(volumes[0].key) in driver.get_all()
-        assert VolumeManager.get_id_from_key(volumes[1].key) in driver.get_all()
+        assert volume_manager.get_id_from_key(volumes[0].key) in driver.get_all()
+        assert volume_manager.get_id_from_key(volumes[1].key) in driver.get_all()
 
     def test_do_clone_failure(self, agent, driver, volume_manager,
                               volume_raw_scheduling_assigned, volume_raw_cloning_assigned):
@@ -212,7 +212,7 @@ class TestAgentIntegration:
         agent._volume_heartbeat()
 
         volume = volume_manager.by_node('test-node')[0]
-        driver.remove(VolumeManager.get_id_from_key(volume.key))
+        driver.remove(volume_manager.get_id_from_key(volume.key))
 
         volume.value['state'] = 'deleting'
         volume_manager.update(volume)

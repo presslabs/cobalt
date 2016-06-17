@@ -186,12 +186,12 @@ class Agent(Service):
 
     def do_cleanup(self):
         for volume_id in self._node.get_subvolumes():
-            if volume_id not in [VolumeManager.get_id_from_key(volume.key) for volume in self._from_etcd]:
+            if volume_id not in [self._volume_manager.get_id_from_key(volume.key) for volume in self._from_etcd]:
                 self.do_delete(volume_id)
 
     def do_work(self):
         for volume in self._work:
-            volume_id = VolumeManager.get_id_from_key(volume.key)
+            volume_id = self._volume_manager.get_id_from_key(volume.key)
             error_count = volume.value['control']['error_count']
             updated = volume.value['control']['updated']
 
