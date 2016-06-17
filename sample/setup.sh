@@ -8,7 +8,7 @@ cd "$root_path"
 
 for i in {1..3}; do
     # create file
-    dd if=/dev/zero of="root$i" bs=1 count=0 seek=1G
+    dd if=/dev/zero of="root$i" bs=1 count=0 seek=2G
 
     # make filesystem
     sudo mkfs.btrfs "root$i"
@@ -23,7 +23,7 @@ for i in {1..3}; do
     sudo btrfs quota enable "$i"
 
     # attach quota
-    sudo btrfs qgroup limit -e 1G "$i"
+    sudo btrfs qgroup limit -e 2G "$i"
 
     # clean up
     sudo umount "$i"

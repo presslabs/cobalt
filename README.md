@@ -18,7 +18,7 @@ PYTHONPATH=src py.test tests --cov=src
 
 ### Sample
 
-To run the sample cluster you need ~4GB of space
+To run the sample cluster you need ~6GB of space
 
 From the project root folder
 
