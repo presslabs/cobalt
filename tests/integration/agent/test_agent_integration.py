@@ -2,8 +2,6 @@ import json
 import threading
 import time
 
-from models.manager import VolumeManager
-
 
 class TestAgentIntegration:
     def test_reset(self, agent, etcd_client, volume_raw_ready_assigned):

@@ -706,20 +706,11 @@ class TestExecutorIntegration:
         """]
 
         self._create_entries('machines', machine_data, etcd_client)
+        created_volumes = self._create_entries('volumes', volume_data, etcd_client)
 
         executor._should_reset = False
+        executor._watch_index = created_volumes[0].modifiedIndex  # normally this index is gotten from a previous tick
         executor.delay = 3
-
-        def ticker():
-            executor.tick()
-            executor.tick()
-
-        watch = threading.Thread(target=ticker)
-        watch.start()
-
-        time.sleep(0.2)
-
-        created_volumes = self._create_entries('volumes', volume_data, etcd_client)
 
         for created_volume in created_volumes:
             created_volume.value = json.loads(created_volume.value)
@@ -728,6 +719,13 @@ class TestExecutorIntegration:
             created_volume.value['control'].pop('updated')
             created_volume.value.pop('node')
 
+        def ticker():
+            executor.tick()
+            executor.tick()
+
+        watch = threading.Thread(target=ticker)
+        watch.start()
+
         watch.join(5)
         if watch.is_alive():
             assert False, 'Operations still in progress, watcher timed out.'
@@ -735,6 +733,9 @@ class TestExecutorIntegration:
         existing_volumes = volume_manager.all()[1]
 
         assert len(existing_volumes) == len(created_volumes)
+
+        for e in existing_volumes:
+            print(e.modifiedIndex, e.value)
 
         # this is the modified index no need for +1, as this was not health checked by the watch
         assert executor._watch_index == existing_volumes[0].modifiedIndex
@@ -787,8 +788,17 @@ class TestExecutorIntegration:
         """]
 
         self._create_entries('machines', machine_data, etcd_client)
+        created_volumes = self._create_entries('volumes', volume_data, etcd_client)
+
+        for created_volume in created_volumes:
+            created_volume.value = json.loads(created_volume.value)
+
+            # discard data that we know changes to test them separately
+            created_volume.value['control'].pop('updated')
+            created_volume.value.pop('node')
 
         executor._should_reset = False
+        executor._watch_index = created_volumes[0].modifiedIndex # simplify data injection and race conditions
         executor.delay = 3
 
         def ticker():
@@ -807,17 +817,6 @@ class TestExecutorIntegration:
 
         watch = threading.Thread(target=ticker)
         watch.start()
-
-        time.sleep(0.2)
-
-        created_volumes = self._create_entries('volumes', volume_data, etcd_client)
-
-        for created_volume in created_volumes:
-            created_volume.value = json.loads(created_volume.value)
-
-            # discard data that we know changes to test them separately
-            created_volume.value['control'].pop('updated')
-            created_volume.value.pop('node')
 
         watch.join(5)
         if watch.is_alive():
