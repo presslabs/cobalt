@@ -174,17 +174,63 @@ def flask_app(volume_manager):
 
 @fixture
 def m_driver():
-    return BTRFSDriver('/volumes')
+    return BTRFSDriver('/mnt')
 
 
 @fixture
-def p_driver_df(mocker, m_driver):
-    return mocker.patch.object(m_driver, 'df')
+def s_btrfs_cmd_side_effect():
+    def inner(*args):
+        if set('filesystem usage --gbytes -h'.split()).issubset(args):
+            return """Overall:
+                Device size:		  97.51GiB
+                Device allocated:		  97.51GiB
+                Device unallocated:		     0.00B
+                Device missing:		     0.00B
+                Used:			   5.34GiB
+                Free (estimated):		  90.27GiB	(min: 90.27GiB)
+                Data ratio:			      1.00
+                Metadata ratio:		      1.99
+                Global reserve:		  32.00MiB	(used: 0.00B)
+
+                Data,single: Size:95.48GiB, Used:5.21GiB
+                   /dev/sda3	  95.48GiB
+
+                Metadata,single: Size:8.00MiB, Used:0.00B
+                   /dev/sda3	   8.00MiB
+
+                Metadata,DUP: Size:1.00GiB, Used:66.53MiB
+                   /dev/sda3	   2.00GiB
+
+                System,single: Size:4.00MiB, Used:0.00B
+                   /dev/sda3	   4.00MiB
+
+                System,DUP: Size:8.00MiB, Used:16.00KiB
+                   /dev/sda3	  16.00MiB
+
+                Unallocated:
+                   /dev/sda3	     0.00B
+                """
+        elif set('qgroup show -e -f --gbytes'.split()).issubset(args):
+            return """qgroupid         rfer         excl     max_excl
+                    --------         ----         ----     --------
+                    0/364         0.00GiB      0.00GiB      1.00GiB
+                    """
+    return inner
 
 
 @fixture
-def m_node(m_driver, p_driver_df):
-    p_driver_df.return_value = 30, 20
+def p_driver_get_usage(mocker, m_driver):
+    return mocker.patch.object(m_driver, 'get_usage')
+
+
+@fixture
+def p_driver_get_all(mocker, m_driver):
+    return mocker.patch.object(m_driver, 'get_all')
+
+
+@fixture
+def m_node(m_driver, p_driver_get_usage):
+    p_driver_get_usage.return_value = 30.0, [1.0, 1.0, 1.0]
     return Node({
         'volume_path': '/volumes',
         'conf_path': '/etc/cobalt.conf',
@@ -197,17 +243,17 @@ def m_node(m_driver, p_driver_df):
 
 
 @fixture
-def agent_service(volume_manager, machine_manager, m_driver, m_node):
+def m_agent_service(volume_manager, machine_manager, m_driver, m_node):
     agent = Agent(volume_manager, machine_manager, {
         'agent_ttl': 60,
         'max_error_count': 3,
         'max_error_timeout': 10,
         'node': {
-            'volume_path': '/volumes',
+            'volume_path': '/mnt',
             'conf_path': '/etc/cobalt.conf',
             'max_fill': 0.8,
             'conf': {
-                'name': 'test',
+                'name': 'test-node',
                 'labels': ['ssd']
             }
         },

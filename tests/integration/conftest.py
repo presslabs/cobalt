@@ -16,9 +16,12 @@ import etcd
 
 from pytest import fixture
 
+from agent import Agent
 from api import Api
 from engine import Executor, Engine
 from models.manager import VolumeManager, MachineManager
+from models.driver import BTRFSDriver
+from models.node import Node
 
 
 @fixture
@@ -195,3 +198,145 @@ def volume_raw_read_only_extra():
             "error_count": 1
         }
     }'''
+
+
+@fixture
+def volume_raw_ready_assigned():
+    return '''{
+        "node": "test-node",
+        "state": "ready",
+        "requested": {
+            "reserved_size": 1,
+            "constraints": ["ssd"]
+        },
+        "actual": {
+            "reserved_size": 1,
+            "constraints": ["ssd"]
+        },
+        "control": {
+            "error": "",
+            "error_count": 0,
+            "parent_id": ""
+        }
+    }'''
+
+
+@fixture
+def volume_raw_scheduling_assigned():
+    return '''{
+        "node": "test-node",
+        "state": "scheduling",
+        "requested": {"constraints": ["ssd"], "reserved_size": 1},
+        "actual": {},
+        "control": {
+            "error": "",
+            "error_count": 0,
+            "parent_id": ""
+        }
+    }'''
+
+
+@fixture
+def volume_raw_resizing_assigned():
+    return '''{
+        "node": "test-node",
+        "state": "resizing",
+        "requested": {
+            "reserved_size": 2,
+            "constraints": ["ssd"]
+        },
+        "actual": {
+            "reserved_size": 1,
+            "constraints": ["ssd"]
+        },
+        "control": {
+            "error": "",
+            "error_count": 0,
+            "parent_id": ""
+        }
+    }'''
+
+
+@fixture
+def volume_raw_cloning_assigned():
+    return '''{
+        "node": "test-node",
+        "state": "cloning",
+        "requested": {
+            "reserved_size": 1,
+            "constraints": ["ssd"]
+        },
+        "control": {
+            "error": "",
+            "error_count": 0,
+            "parent_id": ""
+        }
+    }'''
+
+
+@fixture
+def volume_raw_deleting_assigned():
+    return '''{
+        "node": "test-node",
+        "state": "deleting",
+        "actual": {
+            "reserved_size": 1,
+            "constraints": ["ssd"]
+        },
+        "requested": {
+            "reserved_size": 1,
+            "constraints": ["ssd"]
+        },
+        "control": {
+            "error": "",
+            "error_count": 0,
+            "parent_id": ""
+        }
+    }'''
+
+
+@fixture
+def driver(request):
+    i_driver = BTRFSDriver('/mnt')
+
+    def fin():
+        ids = i_driver.get_all()
+        for id in ids:
+            i_driver.remove(id)
+
+    request.addfinalizer(fin)
+    return i_driver
+
+
+@fixture
+def node(driver):
+    node_conf = {
+        'conf_path': '/etc/cobalt.conf',
+        'volume_path': '/mnt',
+        'max_fill': 0.8,
+        'conf': {
+            'name': 'test-node',
+            'labels': ['ssd']
+        }
+    }
+
+    return Node(node_conf, driver)
+
+
+@fixture
+def agent(machine_manager, volume_manager):
+    return Agent(machine_manager, volume_manager, {
+        'agent_ttl': 60,
+        'max_error_count': 3,
+        'max_error_timeout': 10,
+        'node': {
+            'volume_path': '/mnt',
+            'conf_path': '/etc/cobalt.conf',
+            'max_fill': 0.8,
+            'conf': {
+                'name': 'test-node',
+                'labels': ['ssd']
+            }
+        },
+        'watch_timeout': 10
+    })

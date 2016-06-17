@@ -1,4 +1,4 @@
-class TestNode:
+class TestNodeUnit:
     def test_name(self, m_node):
         assert m_node.name == 'test-node'
 
