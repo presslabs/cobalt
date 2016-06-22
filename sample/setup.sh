@@ -27,7 +27,6 @@ for i in {1..3}; do
 
     # clean up
     sudo umount "$i"
-    sudo rm -r "$i"
 done
 
 # restore current dir
