@@ -48,7 +48,7 @@ def etcd_client(request):
             VolumeManager.KEY,
             MachineManager.KEY,
             '_locks',
-            'version']
+            'cobalt/version']
 
         for entry in entrypoints:
             try:

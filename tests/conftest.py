@@ -290,16 +290,16 @@ class Dummy:
 dummy_ready_volume = Dummy(
     value={'name': 'test', 'node': 'a', 'state': 'ready', 'control': {'parent_id': ''}},
     value_json='{"name": "test", node: "a", "state": "ready", "control": {"parent_id": ""}}',
-    key='/volumes/1')
+    key='/cobalt/volumes/1')
 
 dummy_invalid_state_volume = Dummy(
     value={'name': 'test', 'node': 'b', 'state': 'NONE', 'control': {'parent_id': ''}},
     value_json='{"name": "test", node: "b", "state": "NONE", "control": {"parent_id": ""}}',
-    key='/volumes/2')
+    key='/cobalt/volumes/2')
 
 dummy_machines = [Dummy(value={},
                         value_json='{}',
-                        key='/machines/1'),
+                        key='/cobalt/machines/1'),
                   Dummy(value={},
                         value_json='{}',
-                        key='/machines/2')]
+                        key='/cobalt/machines/2')]

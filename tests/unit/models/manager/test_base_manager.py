@@ -23,7 +23,7 @@ from tests.conftest import dummy_ready_volume
 
 class TestBaseManager:
     def test_default_class_vars(self):
-        assert BaseManager.KEY == ''
+        assert BaseManager.KEY == 'cobalt'
 
     def test_all_key_not_found(self, p_etcd_client_read, base_manager):
         p_etcd_client_read.side_effect = etcd.EtcdKeyNotFound

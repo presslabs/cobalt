@@ -20,7 +20,7 @@ class BaseManager:
 
     """Base repository class for objects."""
 
-    KEY = ''
+    KEY = 'cobalt'
     """Directory name in ETCD."""
 
     def __init__(self, client):

@@ -103,7 +103,7 @@ class Cobalt(Service):
         """
         while True:
             try:
-                etcd_version = self.etcd.read('version')
+                etcd_version = self.etcd.read('cobalt/version')
                 if etcd_version.value == self.VERSION:
                     return True
 
@@ -131,7 +131,7 @@ class Cobalt(Service):
             bool: If the write operation was successful or not
         """
         try:
-            update_version = self.etcd.write('version', self.VERSION,
+            update_version = self.etcd.write('cobalt/version', self.VERSION,
                                              prevExists=False)
 
             return update_version.value

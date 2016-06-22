@@ -2,10 +2,12 @@ import json
 import threading
 import time
 
+from models.manager import VolumeManager
+
 
 class TestAgentIntegration:
     def test_reset(self, agent, etcd_client, volume_raw_ready_assigned):
-        etcd_client.write('volumes', volume_raw_ready_assigned, append=True)
+        etcd_client.write(VolumeManager.KEY, volume_raw_ready_assigned, append=True)
         agent.reset()
 
         assert len(agent._from_etcd) == 1

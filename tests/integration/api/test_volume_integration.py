@@ -26,7 +26,7 @@ class TestVolumeIntegration:
         volume_writes = []
         for generator in generators:
             volume_writes.append(
-                etcd_client.write('volumes', generator, append=True))
+                etcd_client.write(VolumeManager.KEY, generator, append=True))
         volume_writes = flask_app.volume_manager._load_from_etcd(volume_writes)
 
         expected, errors = VolumeSchema().dump(volume_writes, many=True)
@@ -119,7 +119,7 @@ class TestVolumeIntegration:
             }""" + ', "state": "{}"'.format(parent_state) + '}'
 
         with flask_app.test_client() as c:
-            parent = etcd_client.write('/volumes', parent_data, append=True)
+            parent = etcd_client.write('/cobalt/volumes', parent_data, append=True)
             parent.value = json.loads(parent.value)
 
             id = VolumeManager(etcd_client).get_id_from_key(parent.key)
@@ -169,7 +169,7 @@ class TestVolumeIntegration:
         }"""
 
         with flask_app.test_client() as c:
-            parent = etcd_client.write('/volumes', parent_data, append=True)
+            parent = etcd_client.write('/cobalt/volumes', parent_data, append=True)
             parent.value = json.loads(parent.value)
 
             id = VolumeManager(etcd_client).get_id_from_key(parent.key)
@@ -224,7 +224,7 @@ class TestVolumeIntegration:
                        'Location'] == 'http://localhost/volumes/{}'.format(id)
 
     def test_volume_delete(self, etcd_client, volume_raw_ok_ready, flask_app):
-        to_delete = etcd_client.write('volumes', volume_raw_ok_ready,
+        to_delete = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready,
                                       append=True)
         id = flask_app.volume_manager.get_id_from_key(to_delete.key)
 
@@ -240,7 +240,7 @@ class TestVolumeIntegration:
                        'Location'] == 'http://localhost/volumes/{}'.format(id)
 
     def test_volume_get(self, etcd_client, volume_raw_ok_ready, flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         volume = flask_app.volume_manager._load_from_etcd([volume])[0]
@@ -272,7 +272,7 @@ class TestVolumeIntegration:
     ])
     def test_volume_invalid_state(self, method, expected_message, etcd_client,
                                   volume_raw_ok_deleting, flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_deleting,
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_deleting,
                                    append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
@@ -288,7 +288,7 @@ class TestVolumeIntegration:
     def test_volume_put_empty_body_no_json(self, etcd_client,
                                            volume_raw_ok_ready,
                                            volume_raw_empty, flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         with flask_app.test_client() as c:
@@ -297,7 +297,7 @@ class TestVolumeIntegration:
 
     def test_volume_put_empty_body(self, etcd_client, volume_raw_ok_ready,
                                    flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         expected_result = {
@@ -317,7 +317,7 @@ class TestVolumeIntegration:
 
     def test_volume_put_not_modified(self, etcd_client, volume_raw_ok_ready,
                                      flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         data = json.loads(volume_raw_ok_ready)
@@ -331,7 +331,7 @@ class TestVolumeIntegration:
 
     def test_volume_put_minimal_body(self, etcd_client, volume_raw_ok_ready,
                                      volume_raw_requested_ok, flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         volume = flask_app.volume_manager._load_from_etcd([volume])[0]
@@ -359,7 +359,7 @@ class TestVolumeIntegration:
 
     def test_volume_put_extra_body(self, etcd_client, volume_raw_ok_ready,
                                    volume_raw_requested_extra, flask_app):
-        volume = etcd_client.write('volumes', volume_raw_ok_ready, append=True)
+        volume = etcd_client.write(VolumeManager.KEY, volume_raw_ok_ready, append=True)
         id = flask_app.volume_manager.get_id_from_key(volume.key)
 
         volume = flask_app.volume_manager._load_from_etcd([volume])[0]
@@ -377,6 +377,7 @@ class TestVolumeIntegration:
                              content_type='application/json')
 
             result = json.loads(response.data.decode())
+            print(result)
 
             assert result['id'] == id
             assert response.status_code == 202

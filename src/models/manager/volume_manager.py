@@ -71,7 +71,7 @@ class VolumeManager(BaseManager):
 
     """Volume repository class."""
 
-    KEY = 'volumes'
+    KEY = 'cobalt/volumes'
     """Directory name in ETCD"""
 
     def by_states(self, states=None):

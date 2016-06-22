@@ -19,5 +19,5 @@ class MachineManager(BaseManager):
 
     """Machine repository class."""
 
-    KEY = 'machines'
+    KEY = 'cobalt/machines'
     """Directory name in ETCD."""

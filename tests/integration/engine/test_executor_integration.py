@@ -838,6 +838,6 @@ class TestExecutorIntegration:
     def _create_entries(self, key, entry_data, etcd_client):
         entries = []
         for data in entry_data:
-            entries.append(etcd_client.write(key, data, append=True))
+            entries.append(etcd_client.write('/cobalt/{}'.format(key), data, append=True))
 
         return entries
