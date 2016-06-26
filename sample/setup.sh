@@ -8,7 +8,7 @@ cd "$root_path"
 
 for i in {1..3}; do
     # create file
-    dd if=/dev/zero of="root$i" bs=1 count=0 seek=2G
+    dd if=/dev/zero of="root$i" bs=1 count=0 seek=3G
 
     # make filesystem
     sudo mkfs.btrfs "root$i"

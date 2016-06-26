@@ -18,7 +18,7 @@ drone exec --trusted
 
 ### Sample
 
-To run the sample cluster you need ~6GB of space
+To run the sample cluster you need ~9GB of space
 
 From the project root folder
 
