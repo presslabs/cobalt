@@ -64,9 +64,10 @@ class BTRFSDriver(Driver):
     def resize(self, id, quota):
         return self._set_quota(id, quota)
 
-    def clone(self, id, parent_id):
+    def clone(self, id, parent_id, quota):
         try:
             self._btrfs('subvolume', 'snapshot', self._get_path(parent_id), self._get_path(id))
+            self._set_quota(id, quota)
         except sh.ErrorReturnCode_1 as e:
             print(self._err('clone', e.stderr, e.full_cmd))
             return False
