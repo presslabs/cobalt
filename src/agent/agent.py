@@ -15,8 +15,9 @@
 import gevent
 import time
 
+from copy import deepcopy
+
 from models.driver import BTRFSDriver
-from models.manager import VolumeManager
 from models.node import Node
 from utils.service import Service
 
@@ -160,7 +161,7 @@ class Agent(Service):
         if self._node.get_space() < quota:
             quota = self._node.get_space()
         if self._driver.clone(volume_id, volume.value['control']['parent_id'], quota):
-            volume.value['actual'] = volume.value['requested']
+            volume.value['actual'] = deepcopy(volume.value['requested'])
             volume.value['actual']['reserved_size'] = quota
             volume.value['control']['parent_id'] = ''
             volume.value['control']['error_count'] = 0
