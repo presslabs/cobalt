@@ -133,8 +133,9 @@ class TestBaseManager:
         [0, 1],
         [None, 0]
     ])
-    def test_watch(self, base_manager, p_etcd_client_watch, p_base_manager_load_from_etcd, watch_index, watch_timeout):
-        entry = object()
+    def test_watch(self, mocker, base_manager, p_etcd_client_watch, p_base_manager_load_from_etcd, watch_index,
+                   watch_timeout):
+        entry = mocker.MagicMock(action='')
         p_etcd_client_watch.return_value = entry
         p_base_manager_load_from_etcd.return_value = entry
 
@@ -143,6 +144,18 @@ class TestBaseManager:
         p_base_manager_load_from_etcd.assert_called_with(entry)
         p_etcd_client_watch.assert_called_with(BaseManager.KEY, index=watch_index, timeout=watch_timeout,
                                                recursive=True)
+        assert result == entry
+
+    def test_watch_delete(self, mocker, base_manager, p_etcd_client_watch, p_base_manager_load_from_etcd):
+        entry = mocker.MagicMock()
+        type(entry).action = mocker.PropertyMock(return_value='delete')
+
+        p_etcd_client_watch.return_value = entry
+
+        result = base_manager.watch()
+
+        assert not p_base_manager_load_from_etcd.called
+        p_etcd_client_watch.assert_called_with(BaseManager.KEY, timeout=0, index=None, recursive=True)
         assert result == entry
 
     def test_watch_timeout(self, base_manager, p_etcd_client_watch):

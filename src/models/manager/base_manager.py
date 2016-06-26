@@ -142,6 +142,10 @@ class BaseManager:
             entity = self.client.watch(self.KEY, recursive=True, index=index, timeout=timeout)
         except etcd.EtcdWatchTimedOut:
             return None
+
+        if entity.action == 'delete':
+            return entity
+
         return self._load_from_etcd(entity)
 
     def get_id_from_key(self, key):
