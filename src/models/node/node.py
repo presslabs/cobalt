@@ -73,6 +73,6 @@ class Node:
 
         if size:
             size -= size * (1 - self._max_fill)
-            return round(size - sum(qgroups), 2)
+            return int(size - sum(qgroups))
 
-        return None
+        return 0

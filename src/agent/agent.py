@@ -99,10 +99,9 @@ class Agent(Service):
         else:
             volume = self._volume_manager.watch(timeout=self._watch_timeout)
 
-            if volume:
-                volume_conditions = (volume.value['node'] == self._node.name and
-                                     volume.action not in ['expire', 'delete'] and
-                                     volume.value['state'] in Agent._interested_states)
+            if volume and volume.action not in ['expire', 'delete']:
+                volume_conditions = (volume.value['state'] in Agent._interested_states and
+                                     volume.value['node'] == self._node.name)
 
                 if volume_conditions:
                     self._work.append(volume)
