@@ -160,7 +160,8 @@ class Agent(Service):
         if self._node.get_space() < quota:
             quota = self._node.get_space()
         if self._driver.clone(volume_id, volume.value['control']['parent_id'], quota):
-            volume.value['actual'] = {'reserved_size': quota}
+            volume.value['actual'] = volume.value['requested']
+            volume.value['actual']['reserved_size'] = quota
             volume.value['control']['parent_id'] = ''
             volume.value['control']['error_count'] = 0
             volume.value['state'] = 'ready'
