@@ -22,7 +22,8 @@ from .volume import VolumeList, Volume
 
 
 class Api(Service):
-    """ API service responsible for processing requests given by the client"""
+
+    """API service responsible for processing requests given by the client."""
 
     def __init__(self, volume_manager, context):
         """
@@ -38,14 +39,14 @@ class Api(Service):
         self._connection = ('', 5000)
         try:
             self._connection = (context['host'], int(context['port']))
-        except (KeyError, ValueError) as e:
-            print('Context provided to api erroneous: {}, defaulting: {}\n{}'.format(context, self._connection, e))
+        except (KeyError, ValueError) as error:
+            print('Context provided to api erroneous: {}, defaulting: {}\n{}'.format(context, self._connection, error))
 
         self.flask_app = Api._create_app(volume_manager)
         self._api_server = WSGIServer(self._connection, self.flask_app)
 
     def start(self):
-        """Responsible for spawning the coroutines that run the flask server
+        """Responsible for spawning the coroutines that run the flask server.
 
         Returns:
             [Greenlet]: A list of greenlets to join in the caller
@@ -60,7 +61,7 @@ class Api(Service):
         return [self._api_loop]
 
     def stop(self):
-        """A means of stopping the service gracefully
+        """A means of stopping the service gracefully.
 
         Returns:
             bool: Whether the code needed stopping or not
@@ -75,7 +76,7 @@ class Api(Service):
 
     @staticmethod
     def _create_app(volume_manager, testing=False):
-        """Factory method to create the Flask app and register all dependencies
+        """Factory method to create the Flask app and register all dependencies.
 
         Args:
             volume_manager (VolumeManager): The volume manager to be used withing the API controller
@@ -113,7 +114,7 @@ class Api(Service):
 
     @staticmethod
     def _register_resources(api):
-        """Utility method to inject the resources and their endpoints
+        """Utility method to inject the resources and their endpoints.
 
         Args:
             api (flask_restful.API): The API instance that needs to have the resources added.

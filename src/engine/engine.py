@@ -23,10 +23,11 @@ from .lease import Lease
 
 
 class Engine(Service):
-    """Service responsible for the decision making inside the cobalt cluster"""
+
+    """Service responsible for the decision making inside the cobalt cluster."""
 
     def __init__(self, etcd, volume_manager, machine_manager, context):
-        """Creates and Engine instance
+        """Creates and Engine instance.
 
         Args:
             etcd (etcd.Client): The connection with the key value store
@@ -47,7 +48,7 @@ class Engine(Service):
         self._started = False
 
     def start(self):
-        """Start the Engine greenlets
+        """Start the Engine greenlets.
 
         Returns:
              [Greenlet]: A list of Greenlets to be joined
@@ -64,7 +65,7 @@ class Engine(Service):
         return [self._machine_loop, self._runner_loop, self._leaser_loop]
 
     def stop(self):
-        """A means of stopping the service gracefully
+        """A means of stopping the service gracefully.
 
         Returns:
              bool: Whether the code needed stopping or not
@@ -80,13 +81,14 @@ class Engine(Service):
     @property
     def _quit(self):
         """
+
         Returns:
             bool: Whether the service should quit or not
         """
         return not self._started
 
     def _run(self):
-        """Main decision making loop
+        """Main decision making loop.
 
         It is responsible for making sure the Engine should process, reset the Executor and provide a
         Greenlet context switch after each operation.
@@ -101,7 +103,7 @@ class Engine(Service):
             time.sleep(0)
 
     def _machine_heartbeat(self):
-        """Main machine status change listener
+        """Main machine status change listener.
 
         If between 2 runs of this method the number of machines changes or they are not the same machines,
         it resets the the Executor to force healing.
@@ -128,7 +130,7 @@ class Engine(Service):
 
     @staticmethod
     def _create_lock(etcd):
-        """Factory method for creating the Engines leader lock
+        """Factory method for creating the Engines leader lock.
 
         Args:
             etcd (etcd.Client): The client for the store to register the lock on
@@ -140,7 +142,7 @@ class Engine(Service):
 
     @staticmethod
     def _create_executor(volume_manager, machine_manager, context):
-        """Factory method for creating the Executor
+        """Factory method for creating the Executor.
 
         Args:
             volume_manager (VolumeManager): Data source for the volume model
@@ -154,7 +156,7 @@ class Engine(Service):
 
     @staticmethod
     def _create_leaser(lock, context):
-        """Factory method for creating the Leaser responsible for leader election
+        """Factory method for creating the Leaser responsible for leader election.
 
         Args:
             lock (etcd.Lock): The lock on which to listen

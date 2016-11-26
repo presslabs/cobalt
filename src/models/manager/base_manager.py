@@ -14,17 +14,17 @@
 
 import etcd
 from flask import json
-from marshmallow import Schema
 
 
 class BaseManager:
-    """Base repository class for objects"""
 
-    KEY = ''
-    """Directory name in ETCD"""
+    """Base repository class for objects."""
+
+    KEY = 'cobalt'
+    """Directory name in ETCD."""
 
     def __init__(self, client):
-        """Create an instance of the repository with the specified source
+        """Create an instance of the repository with the specified source.
 
         Args:
             client (etcd.Client): The data source for the repository
@@ -37,7 +37,7 @@ class BaseManager:
             pass
 
     def all(self):
-        """Get all objects maintained by this repository
+        """Get all objects maintained by this repository.
 
         Returns:
             tuple:
@@ -45,16 +45,16 @@ class BaseManager:
                 1 [etcd.Result] List of The objects with expanded values
         """
         try:
-            dir = self.client.read(self.KEY, sorted=True)
-            entries = [entry for entry in dir.leaves if not entry.dir]
+            directory = self.client.read(self.KEY, sorted=True)
+            entries = [entry for entry in directory.leaves if not entry.dir]
         except etcd.EtcdKeyNotFound:
-            dir = None
+            directory = None
             entries = []
 
-        return dir, self._load_from_etcd(entries)
+        return directory, self._load_from_etcd(entries)
 
     def all_keys(self):
-        """Get all object keys maintained by this repository
+        """Get all object keys maintained by this repository.
 
         Returns:
             [str]: A list of key strings
@@ -62,7 +62,7 @@ class BaseManager:
         return [entry.key for entry in self.all()[1]]
 
     def by_id(self, entry_id):
-        """Get the object referenced by id
+        """Get the object referenced by id.
 
         Args:
             entry_id (str): The id to fetch prefixed with the object dir
@@ -78,7 +78,7 @@ class BaseManager:
         return self._load_from_etcd(entry)
 
     def create(self, data, suffix=''):
-        """Create a new object inside the data store
+        """Create a new object inside the data store.
 
         Args:
             data (dict): Dictionary containing values you want to store
@@ -95,7 +95,7 @@ class BaseManager:
         return self._load_from_etcd(entry)
 
     def update(self, entity):
-        """Update an existing object from the data store
+        """Update an existing object from the data store.
 
         Args:
             entity (etcd.Result): An expanded result object that needs to be serialized
@@ -113,23 +113,23 @@ class BaseManager:
         return self._load_from_etcd(entity)
 
     def delete(self, entity):
-        """Delete an object from the data store
+        """Delete an object from the data store.
 
         Args:
             entity (etcd.Result): The object one wants to be deleted, expanded or not
 
         Returns:
-            etcd.Result: The result of the operation expanded, or None if etcd failed
+            bool: The state of the operation
         """
         try:
             self.client.delete(entity.key)
         except (etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound):
-            return None
+            return False
 
         return True
 
     def watch(self, index=None, timeout=0):
-        """Watch the directory of the repository for changes indefinably starting from an index
+        """Watch the directory of the repository for changes indefinably starting from an index.
 
         Args:
             index (int): The index to start watching from
@@ -142,10 +142,14 @@ class BaseManager:
             entity = self.client.watch(self.KEY, recursive=True, index=index, timeout=timeout)
         except etcd.EtcdWatchTimedOut:
             return None
+
+        if entity.action == 'delete':
+            return entity
+
         return self._load_from_etcd(entity)
 
     def get_id_from_key(self, key):
-        """Utility method for getting the id from an internal key
+        """Utility method for getting the id from an internal key.
 
         Args:
             key (str): THe objects key
@@ -156,7 +160,7 @@ class BaseManager:
         return key[len(self.KEY) + 2:]
 
     def _load_from_etcd(self, data):
-        """Utility method to expand result objects
+        """Utility method to expand result objects.
 
         Args:
             data ([etcd.result] | etcd.result): The iterable or a single result object not expanded
@@ -171,7 +175,7 @@ class BaseManager:
             data.value = json.loads(data.value)
             return data
         else:
-            for e in data:
-                e.value = json.loads(e.value)
+            for entry in data:
+                entry.value = json.loads(entry.value)
 
         return data

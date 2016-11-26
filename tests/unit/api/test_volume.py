@@ -45,7 +45,7 @@ class TestVolume:
         parent_volume = deepcopy(dummy_ready_volume)
         clone_volume = deepcopy(dummy_ready_volume)
         clone_volume.value['control']['parent_id'] = '1'
-        clone_volume.key = '/volumes/clone-1'
+        clone_volume.key = '/cobalt/volumes/clone-1'
 
         flask_app.volume_manager = volume_manager
 

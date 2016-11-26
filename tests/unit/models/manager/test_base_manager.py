@@ -23,7 +23,7 @@ from tests.conftest import dummy_ready_volume
 
 class TestBaseManager:
     def test_default_class_vars(self):
-        assert BaseManager.KEY == ''
+        assert BaseManager.KEY == 'cobalt'
 
     def test_all_key_not_found(self, p_etcd_client_read, base_manager):
         p_etcd_client_read.side_effect = etcd.EtcdKeyNotFound
@@ -128,3 +128,55 @@ class TestBaseManager:
 
         assert output_volume
         assert output_volume.value == volume.value
+
+    @mark.parametrize('watch_index,watch_timeout', [
+        [0, 1],
+        [None, 0]
+    ])
+    def test_watch(self, mocker, base_manager, p_etcd_client_watch, p_base_manager_load_from_etcd, watch_index,
+                   watch_timeout):
+        entry = mocker.MagicMock(action='')
+        p_etcd_client_watch.return_value = entry
+        p_base_manager_load_from_etcd.return_value = entry
+
+        result = base_manager.watch(index=watch_index, timeout=watch_timeout)
+
+        p_base_manager_load_from_etcd.assert_called_with(entry)
+        p_etcd_client_watch.assert_called_with(BaseManager.KEY, index=watch_index, timeout=watch_timeout,
+                                               recursive=True)
+        assert result == entry
+
+    def test_watch_delete(self, mocker, base_manager, p_etcd_client_watch, p_base_manager_load_from_etcd):
+        entry = mocker.MagicMock()
+        type(entry).action = mocker.PropertyMock(return_value='delete')
+
+        p_etcd_client_watch.return_value = entry
+
+        result = base_manager.watch()
+
+        assert not p_base_manager_load_from_etcd.called
+        p_etcd_client_watch.assert_called_with(BaseManager.KEY, timeout=0, index=None, recursive=True)
+        assert result == entry
+
+    def test_watch_timeout(self, base_manager, p_etcd_client_watch):
+        p_etcd_client_watch.side_effect = etcd.EtcdWatchTimedOut
+
+        assert base_manager.watch() is None
+
+    def test_delete(self, mocker, base_manager, p_etcd_client_delete):
+        entity = mocker.MagicMock(key=1)
+        p_etcd_client_delete.return_value = entity
+
+        result = base_manager.delete(entity)
+
+        assert result
+        p_etcd_client_delete.assert_called_with(1)
+
+    @mark.parametrize('error', [etcd.EtcdCompareFailed, etcd.EtcdKeyNotFound])
+    def test_delete_etcd_errors(self, mocker, base_manager, p_etcd_client_delete, error):
+        p_etcd_client_delete.side_effect = error
+
+        entity = mocker.MagicMock(key=1)
+
+        assert not base_manager.delete(entity)
+        p_etcd_client_delete.assert_called_with(1)

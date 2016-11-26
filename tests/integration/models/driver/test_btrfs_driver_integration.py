@@ -11,7 +11,7 @@ class TestBRTFSDriverIntegration:
 
     def test_clone_volume(self, driver):
         driver.create({'id': '32', 'reserved_size': 1})
-        assert driver.clone('33', '32')
+        assert driver.clone('33', '32', 1)
         assert '33' in driver.get_all()
 
     def test_get_usage(self, driver):

@@ -20,7 +20,8 @@ from time import time
 
 
 class VolumeAttributeSchema(Schema):
-    """Marshmallow schema for the requested subsection"""
+
+    """Marshmallow schema for the requested subsection."""
 
     class Meta:
         ordered = True
@@ -30,7 +31,8 @@ class VolumeAttributeSchema(Schema):
 
 
 class VolumeControlSchema(Schema):
-    """Marshmallow schema for the control subsection"""
+
+    """Marshmallow schema for the control subsection."""
 
     class Meta:
         ordered = True
@@ -41,7 +43,8 @@ class VolumeControlSchema(Schema):
 
 
 class VolumeSchema(Schema):
-    """marshmallow schema for the entire object"""
+
+    """marshmallow schema for the entire object."""
 
     class Meta:
         ordered = True
@@ -58,20 +61,21 @@ class VolumeSchema(Schema):
     control = fields.Nested(VolumeControlSchema, required=True)
 
     def get_attribute(self, attr, obj, default):
-        """Utility method for getting the id for the representation"""
+        """Utility method for getting the id for the representation."""
         if attr == 'id':
             return obj.key[len(VolumeManager.KEY) + 2:]
         return utils.get_value(attr, obj.value, default)
 
 
 class VolumeManager(BaseManager):
-    """Volume repository class"""
 
-    KEY = 'volumes'
+    """Volume repository class."""
+
+    KEY = 'cobalt/volumes'
     """Directory name in ETCD"""
 
     def by_states(self, states=None):
-        """Returns all volumes that have the state provided
+        """Returns all volumes that have the state provided.
 
         Args:
             states ([str]): A list of interested states
@@ -83,7 +87,7 @@ class VolumeManager(BaseManager):
         return VolumeManager.filter_states(volumes, states)
 
     def by_node(self, node):
-        """Returns all volumes that have the node provided
+        """Returns all volumes that have the node provided.
 
         Args:
             node (str): The node you are interested in
@@ -94,7 +98,7 @@ class VolumeManager(BaseManager):
         return [volume for volume in self.all()[1] if volume.value['node'] == node]
 
     def update(self, volume):
-        """Similar to what the base manager does only that it updates a volumes updated timestamp"""
+        """Similar to what the base manager does only that it updates a volumes updated timestamp."""
         volume.value['control']['updated'] = time()
         volume = super(VolumeManager, self).update(volume)
 
@@ -103,28 +107,28 @@ class VolumeManager(BaseManager):
 
         return volume
 
-    def create(self, data, *unused):
-        """Similar to what the base manager does only that it adds the updated timestamp"""
+    def create(self, data, *_):
+        """Similar to what the base manager does only that it adds the updated timestamp."""
         data['control']['updated'] = time()
         volume = super(VolumeManager, self).create(data, '')
 
         return volume
 
-    def get_lock(self, id, purpose='clone'):
-        """Utility method to get a Lock instance for a specific purpose and a related object id
+    def get_lock(self, volume_id, purpose='clone'):
+        """Utility method to get a Lock instance for a specific purpose and a related object id.
 
         Args:
-            id (str): The id for which resource it should focus on
+            volume_id (str): The id for which resource it should focus on
             purpose (str): The operation that needs locking
 
         Returns:
             etcd.Lock: The respective Lock object unarmed
         """
-        return etcd.Lock(self.client, '{}-{}'.format(purpose, id))
+        return etcd.Lock(self.client, '{}-{}'.format(purpose, volume_id))
 
     @staticmethod
     def filter_states(volumes, states):
-        """Utility method for filtering a list of volume results by state
+        """Utility method for filtering a list of volume results by state.
 
         Args:
             volumes ([etcd.Result]): The objects that should get filtered

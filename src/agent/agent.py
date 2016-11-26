@@ -15,8 +15,9 @@
 import gevent
 import time
 
+from copy import deepcopy
+
 from models.driver import BTRFSDriver
-from models.manager import VolumeManager
 from models.node import Node
 from utils.service import Service
 
@@ -98,10 +99,9 @@ class Agent(Service):
         else:
             volume = self._volume_manager.watch(timeout=self._watch_timeout)
 
-            if volume:
-                volume_conditions = (volume.value['node'] == self._node.name and
-                                     volume.action not in ['expire', 'delete'] and
-                                     volume.value['state'] in Agent._interested_states)
+            if volume and volume.action not in ['expire', 'delete']:
+                volume_conditions = (volume.value['state'] in Agent._interested_states and
+                                     volume.value['node'] == self._node.name)
 
                 if volume_conditions:
                     self._work.append(volume)
@@ -156,7 +156,12 @@ class Agent(Service):
 
     def do_clone(self, volume_id, volume):
         success = False
-        if self._driver.clone(volume_id, volume.value['control']['parent_id']):
+        quota = volume.value['requested']['reserved_size']
+        if self._node.get_space() < quota:
+            quota = self._node.get_space()
+        if self._driver.clone(volume_id, volume.value['control']['parent_id'], quota):
+            volume.value['actual'] = deepcopy(volume.value['requested'])
+            volume.value['actual']['reserved_size'] = quota
             volume.value['control']['parent_id'] = ''
             volume.value['control']['error_count'] = 0
             volume.value['state'] = 'ready'
@@ -186,12 +191,12 @@ class Agent(Service):
 
     def do_cleanup(self):
         for volume_id in self._node.get_subvolumes():
-            if volume_id not in [VolumeManager.get_id_from_key(volume.key) for volume in self._from_etcd]:
+            if volume_id not in [self._volume_manager.get_id_from_key(volume.key) for volume in self._from_etcd]:
                 self.do_delete(volume_id)
 
     def do_work(self):
         for volume in self._work:
-            volume_id = VolumeManager.get_id_from_key(volume.key)
+            volume_id = self._volume_manager.get_id_from_key(volume.key)
             error_count = volume.value['control']['error_count']
             updated = volume.value['control']['updated']
 
@@ -213,4 +218,3 @@ class Agent(Service):
                     self._machine_heartbeat()
 
             time.sleep(0)
-

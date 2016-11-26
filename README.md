@@ -2,23 +2,23 @@
 
 ## PROJECT UNDER DEVELOPMENT NOT FOR PRODUCTION USE
 
-[![Code Climate](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/gpa.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/feed)
-[![Test Coverage](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/coverage.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/coverage)
-[![Issue Count](https://codeclimate.com/repos/575fcf4f35379340730025a4/badges/1c72b01b55f804a4de4e/issue_count.svg)](https://codeclimate.com/repos/575fcf4f35379340730025a4/feed)
+[![Code Climate](https://codeclimate.com/github/krodyrobi/cobalt/badges/gpa.svg)](https://codeclimate.com/github/krodyrobi/cobalt)
+[![Test Coverage](https://codeclimate.com/github/krodyrobi/cobalt/badges/coverage.svg)](https://codeclimate.com/github/krodyrobi/cobalt/coverage)
+[![Issue Count](https://codeclimate.com/github/krodyrobi/cobalt/badges/issue_count.svg)](https://codeclimate.com/github/krodyrobi/cobalt)
+[![Code Health](https://landscape.io/github/krodyrobi/cobalt/master/landscape.svg?style=flat)](https://landscape.io/github/krodyrobi/cobalt/master)
+[![Documentation Status](https://readthedocs.org/projects/presslabs-cobalt/badge/?version=latest)](http://presslabs-cobalt.readthedocs.io/en/latest/?badge=latest)
 
 ### Testing
 
 ```bash
 git clone git@github.com:Presslabs/cobalt
 cd cobalt
-mkvirtualenv -p python3 cobalt
-pip install -r requirements/development.txt
-PYTHONPATH=src py.test tests --cov=src
+drone exec --trusted
 ```
 
 ### Sample
 
-To run the sample cluster you need ~6GB of space
+To run the sample cluster you need ~9GB of space
 
 From the project root folder
 

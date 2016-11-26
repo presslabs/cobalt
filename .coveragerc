@@ -1,9 +1,12 @@
 [run]
 source=src
+omit=*__init__.py
 branch=True
 concurrency=gevent
 
 [report]
 show_missing=True
+skip_covered=True
+precision=2
 exclude_lines=
     pass

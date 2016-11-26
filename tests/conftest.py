@@ -47,6 +47,16 @@ def p_etcd_client_write(mocker, m_etcd_client):
 
 
 @fixture
+def p_etcd_client_delete(mocker, m_etcd_client):
+    return mocker.patch.object(m_etcd_client, 'delete')
+
+
+@fixture
+def p_etcd_client_watch(mocker, m_etcd_client):
+    return mocker.patch.object(m_etcd_client, 'watch')
+
+
+@fixture
 def volume_manager(m_etcd_client):
     return VolumeManager(m_etcd_client)
 
@@ -278,18 +288,18 @@ class Dummy:
 
 
 dummy_ready_volume = Dummy(
-    value={'name': 'test', 'state': 'ready', 'control': {'parent_id': ''}},
-    value_json='{"name": "test", "state": "ready", "control": {"parent_id": ""}}',
-    key='/volumes/1')
+    value={'name': 'test', 'node': 'a', 'state': 'ready', 'control': {'parent_id': ''}},
+    value_json='{"name": "test", node: "a", "state": "ready", "control": {"parent_id": ""}}',
+    key='/cobalt/volumes/1')
 
 dummy_invalid_state_volume = Dummy(
-    value={'name': 'test', 'state': 'NONE', 'control': {'parent_id': ''}},
-    value_json='{"name": "test", "state": "NONE", "control": {"parent_id": ""}}',
-    key='/volumes/2')
+    value={'name': 'test', 'node': 'b', 'state': 'NONE', 'control': {'parent_id': ''}},
+    value_json='{"name": "test", node: "b", "state": "NONE", "control": {"parent_id": ""}}',
+    key='/cobalt/volumes/2')
 
 dummy_machines = [Dummy(value={},
                         value_json='{}',
-                        key='/machines/1'),
+                        key='/cobalt/machines/1'),
                   Dummy(value={},
                         value_json='{}',
-                        key='/machines/2')]
+                        key='/cobalt/machines/2')]

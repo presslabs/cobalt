@@ -22,7 +22,7 @@ from tests.conftest import dummy_invalid_state_volume, dummy_ready_volume
 
 class TestVolumeManager:
     def test_volume_manager_class_vars(self):
-        assert VolumeManager.KEY == 'volumes'
+        assert VolumeManager.KEY == 'cobalt/volumes'
 
     @mark.parametrize('query,filter,expected_result', [
         # all() return value, state to query, result
@@ -38,6 +38,22 @@ class TestVolumeManager:
         p_volume_manager_all.return_value = (None, query)
 
         result = volume_manager.by_states(filter)
+
+        assert expected_result == result
+        assert p_volume_manager_all.called
+
+    @mark.parametrize('query,filter,expected_result', [
+        # all() return value, state to query, result
+        ([], 'a', []),
+        ([], '', []),
+        ([dummy_ready_volume], 'a', [dummy_ready_volume]),
+        ([dummy_ready_volume, dummy_invalid_state_volume], 'a', [dummy_ready_volume]),
+        ([dummy_ready_volume, dummy_invalid_state_volume], '', [])
+    ])
+    def test_volume_by_node(self, query, filter, expected_result, volume_manager, p_volume_manager_all):
+        p_volume_manager_all.return_value = (None, query)
+
+        result = volume_manager.by_node(filter)
 
         assert expected_result == result
         assert p_volume_manager_all.called
@@ -94,11 +110,11 @@ class TestVolumeManager:
         p_etcd_lock.assert_called_with(m_etcd_client, 'foobar-1')
 
     def test_volume_get_id_from_key_invalid_input(self, mocker):
-        key = 'volumes'
+        key = 'cobalt/volumes'
 
         assert VolumeManager(mocker.MagicMock()).get_id_from_key(key) == ''
 
     def test_volume_get_id_from_key(self, mocker):
-        key = '/volumes/1'
+        key = '/cobalt/volumes/1'
 
         assert VolumeManager(mocker.MagicMock()).get_id_from_key(key) == '1'
